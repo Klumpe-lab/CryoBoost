@@ -119,6 +119,16 @@ def mrcFilesToPilImageStackParallel(mrcFiles, sz, max_workers=20):
 
 
 def predictPilImageStack(pilImageStack,learn):
+    """
+    Predict the class of a PIL image stack using a fastai learner.
+
+    Parameters:
+    - pilImageStack (PIL Image): The PIL image stack to predict.
+    - learn (fastai learner): The fastai learner to use for prediction.
+    
+    Returns:
+    - tuple: A tuple containing the predicted labels and probabilities.
+    """
     test_dl = learn.dls.test_dl(pilImageStack, with_labels=False,batch_tfms=Normalize.from_stats(*imagenet_stats))
     preds, _ = learn.get_preds(dl=test_dl)
     decoded_preds = preds.argmax(dim=-1)
@@ -128,7 +138,16 @@ def predictPilImageStack(pilImageStack,learn):
     
 
 def predict_tilts(tilseriesStar,relionProj,model,sz=384,batchSize=50,gpu=3,max_workers=20):
-    
+    """
+    Predict the class of a PIL image stack using a fastai learner.
+
+    Parameters:
+    pilImageStack (PIL Image): The PIL image stack to predict.
+    learn (fastai learner): The fastai learner to use for prediction.
+
+    Returns:
+    tuple: A tuple containing the predicted labels and probabilities.
+    """
     torch.cuda.set_device(gpu) 
     print("loading model:",model)
     learn =load_learner(model)
@@ -139,7 +158,11 @@ def predict_tilts(tilseriesStar,relionProj,model,sz=384,batchSize=50,gpu=3,max_w
     
     #Custom dataloader refused to work in fastAI switched to direct prediction
     #Images get transformed to pilImages and the batch wise predicted
-    batches = np.array_split(tiltspath, round(len(tiltspath)/batchSize))
+    nrBatch=round(len(tiltspath)/batchSize)
+    if nrBatch<1:
+        nrBatch=1
+    
+    batches = np.array_split(tiltspath,nrBatch )
     all_pLabels = []
     all_pProb = []
     for i, batch in enumerate(tqdm(batches, desc="Predicting Tilts"), 1):
