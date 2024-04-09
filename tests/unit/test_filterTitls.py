@@ -1,4 +1,5 @@
 from src.filterTilts.filterTiltsDL import filterTiltsDL
+from src.filterTilts.filterTiltsRule import filterTiltsRule
 from starfile import read as starread
 import pandas as pd
 import os
@@ -24,7 +25,21 @@ def test_fitlerTiltsDL_TiltseriesStar():
     lablesTrue_list = lablesTrue.tolist()
     
     assert (lablesTrue_list==lablesPred)
- 
+
+def test_fitlerTiltsRule_TiltseriesStar():
+    
+    
+    tilseriesStar="data/tilts/tilt_series_ctf.star"
+    res = "5-12"
+    out_dir="tests/tmpOutput"
+    
+    filterTiltsRule(tilseriesStar,out_dir,shift_init=None,defocus_init=None,res_init=res)
+    st = starread(tilseriesStar)
+    
+    
+    
+    assert (lablesTrue_list==lablesPred)
+  
     
 
 
