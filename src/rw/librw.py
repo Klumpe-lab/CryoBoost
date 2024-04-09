@@ -315,8 +315,9 @@ class tiltSeriesMeta:
     all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
     all_tilts_df.dropna(inplace=True) #check !!
     self.all_tilts_df=all_tilts_df
-  
+    self.tilt_series_df=tilt_series_df
     
+
 
 # %%
 ts=tiltSeriesMeta("../../data/tilts/tilt_series_ctf.star","../../")
