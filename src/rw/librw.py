@@ -288,7 +288,9 @@ def write_star(scheme_name, path_and_name):
 
 # %%
 import pandas as pd
+from pathlib import Path
 from starfile import read as starread
+from starfile import write as starwrite
 
 class tiltSeriesMeta:
   def __init__(self,tiltseriesStarFile,relProjPath):
@@ -308,7 +310,7 @@ class tiltSeriesMeta:
     for tilt_series in tilt_series_df["rlnTomoTiltSeriesStarFile"]:
         tilt_star_df = read_star(self.relProjPath + tilt_series)
         all_tilts_df=pd.concat([all_tilts_df, tilt_star_df],ignore_index=True)
-        tmp_df=pd.concat([tilt_series_df.iloc[[i]] ]*tilt_star_df.shape[0],ignore_index=True)
+        tmp_df=pd.concat([tilt_series_df.iloc[[i]]]*tilt_star_df.shape[0],ignore_index=True)
         tilt_series_tmp=pd.concat([tilt_series_tmp, tmp_df],ignore_index=True)
         i += 1
     
@@ -317,10 +319,25 @@ class tiltSeriesMeta:
     self.all_tilts_df=all_tilts_df
     self.tilt_series_df=tilt_series_df
     
+  def writeTiltSeries(self,tiltseriesStarFile,tiltSeriesStarFolder='tilt_series'):  
+    
+    print("Writing: " + tiltseriesStarFile)
+    #generate tiltseries star from all dataframe ...more generic if filter removes all tilts of one series
+    ts_df=self.all_tilts_df[self.tilt_series_df.columns].copy()
+    ts_df.drop_duplicates(inplace=True)
+    
+    starwrite(ts_df,tiltseriesStarFile)
+    fold=os.path.dirname(tiltseriesStarFile)
+    Path(fold+os.sep+tiltSeriesStarFolder).mkdir(exist_ok=True)
+    for tilt_series in self.tilt_series_df["rlnTomoTiltSeriesStarFile"]:
+      oneTs_df = self.all_tilts_df[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series].copy()
+      oneTs_df.drop(self.tilt_series_df.columns,axis=1,inplace=True)
+      starwrite(oneTs_df,fold + os.sep + tiltSeriesStarFolder + os.sep + os.path.basename(tilt_series))
 
 
 # %%
 ts=tiltSeriesMeta("../../data/tilts/tilt_series_ctf.star","../../")
+ts.writeTiltSeries("/tmp/fbeck/tiltseries.star")
 
 # %%
 ts=tiltSeriesMeta("/fs/pool/pool-plitzko3/Michael/01-Data/relion/231117_Ribo_Vfischeri_Oda/CtfFind/job007/tilt_series_ctf.star","/fs/pool/pool-plitzko3/Michael/01-Data/relion/231117_Ribo_Vfischeri_Oda/")
