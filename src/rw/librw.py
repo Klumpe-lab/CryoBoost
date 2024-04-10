@@ -293,51 +293,160 @@ from starfile import read as starread
 from starfile import write as starwrite
 
 class tiltSeriesMeta:
-  def __init__(self,tiltseriesStarFile,relProjPath):
-    self.tiltseriesStarFile = tiltseriesStarFile
-    self.relProjPath = relProjPath
-    self.readTiltSeries()
-    
+    """
+    Class for handling tilt series metadata.
 
-  def readTiltSeries(self):
-    
-    print("Reading: " + self.tiltseriesStarFile)
-    tilt_series_df=starread(self.tiltseriesStarFile)
-    all_tilts_df = pd.DataFrame()
-    tilt_series_tmp = pd.DataFrame()
-    
-    i = 0
-    for tilt_series in tilt_series_df["rlnTomoTiltSeriesStarFile"]:
-        tilt_star_df = read_star(self.relProjPath + tilt_series)
-        all_tilts_df=pd.concat([all_tilts_df, tilt_star_df],ignore_index=True)
-        tmp_df=pd.concat([tilt_series_df.iloc[[i]]]*tilt_star_df.shape[0],ignore_index=True)
-        tilt_series_tmp=pd.concat([tilt_series_tmp, tmp_df],ignore_index=True)
-        i += 1
-    
-    all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
-    all_tilts_df.dropna(inplace=True) #check !!
-    self.all_tilts_df=all_tilts_df
-    self.tilt_series_df=tilt_series_df
-    
-  def writeTiltSeries(self,tiltseriesStarFile,tiltSeriesStarFolder='tilt_series'):  
-    
-    print("Writing: " + tiltseriesStarFile)
-    #generate tiltseries star from all dataframe ...more generic if filter removes all tilts of one series
-    ts_df=self.all_tilts_df[self.tilt_series_df.columns].copy()
-    ts_df.drop_duplicates(inplace=True)
-    
-    starwrite(ts_df,tiltseriesStarFile)
-    fold=os.path.dirname(tiltseriesStarFile)
-    Path(fold+os.sep+tiltSeriesStarFolder).mkdir(exist_ok=True)
-    for tilt_series in self.tilt_series_df["rlnTomoTiltSeriesStarFile"]:
-      oneTs_df = self.all_tilts_df[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series].copy()
-      oneTs_df.drop(self.tilt_series_df.columns,axis=1,inplace=True)
-      starwrite(oneTs_df,fold + os.sep + tiltSeriesStarFolder + os.sep + os.path.basename(tilt_series))
+    Args:
+        tiltseriesStarFile (str): Path to the tilt series star file.
+        relProjPath (str): Path to the relative project directory.
+
+    Attributes:
+        tilt_series_df (pd.DataFrame): DataFrame containing the tilt series information.
+        tiltseriesStarFile (str): Path to the tilt series star file.
+        relProjPath (str): Path to the relative project directory.
+
+    Methods:
+        __init__(self, tiltseriesStarFile, relProjPath): Initializes the tiltSeriesMeta class.
+        readTiltSeries(self): Reads the tilt series star file and its associated tilt series files.
+        filterTilts(self, fitlterParams): Filters the tilt series based on the provided parameters.
+        filterTiltSeries(self, fitlterParams): Filters the tilt series based on the provided parameters.
+        writeTiltSeries(self, tiltseriesStarFile, tiltSeriesStarFolder='tilt_series'): Writes the tilt series star file and its associated tilt series files.
+    """
+
+    def __init__(self, tiltseriesStarFile, relProjPath):
+        """
+        Initializes the tiltSeriesMeta class.
+
+        Args:
+            tiltseriesStarFile (str): Path to the tilt series star file.
+            relProjPath (str): Path to the relative project directory.
+
+        Attributes:
+            tilt_series_df (pd.DataFrame): DataFrame containing the tilt series information.
+            tiltseriesStarFile (str): Path to the tilt series star file.
+            relProjPath (str): Path to the relative project directory.
+        """
+        self.tilt_series_df = None
+        self.tiltseriesStarFile = tiltseriesStarFile
+        self.relProjPath = relProjPath
+        self.readTiltSeries()
+
+    def readTiltSeries(self):
+        """
+        Reads the tilt series star file and its associated tilt series files.
+
+        Args:
+            self (tiltSeriesMeta): An instance of the tiltSeriesMeta class.
+
+        Returns:
+            pd.DataFrame: A pandas DataFrame containing the tilt series information.
+
+        Raises:
+            FileNotFoundError: If any of the required star files are not found.
+
+        Example:
+            >>> ts = tiltSeriesMeta("/path/to/tilt_series_star_file", "/path/to/rel_proj_path")
+            >>> tilt_series_df = ts.readTiltSeries()
+        """
+        print("Reading: " + self.tiltseriesStarFile)
+        tilt_series_df = starread(self.tiltseriesStarFile)
+        all_tilts_df = pd.DataFrame()
+        tilt_series_tmp = pd.DataFrame()
+
+        i = 0
+        for tilt_series in tilt_series_df["rlnTomoTiltSeriesStarFile"]:
+            tilt_star_df = read_star(self.relProjPath + tilt_series)
+            all_tilts_df = pd.concat([all_tilts_df, tilt_star_df], ignore_index=True)
+            tmp_df = pd.concat([tilt_series_df.iloc[[i]]] * tilt_star_df.shape[0], ignore_index=True)
+            tilt_series_tmp = pd.concat([tilt_series_tmp, tmp_df], ignore_index=True)
+            i += 1
+
+        all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
+        all_tilts_df.dropna(inplace=True)  # check !!
+        self.all_tilts_df = all_tilts_df
+        self.tilt_series_df = tilt_series_df
+
+    def writeTiltSeries(self, tiltseriesStarFile, tiltSeriesStarFolder='tilt_series'):
+        """
+        Writes the tilt series star file and its associated tilt series files.
+
+        Args:
+            self (tiltSeriesMeta): An instance of the tiltSeriesMeta class.
+            tiltseriesStarFile (str): Path to the tilt series star file.
+            tiltSeriesStarFolder (str): Folder name for the tilt series star files.
+
+        Example:
+            >>> ts = tiltSeriesMeta("/path/to/tilt_series_star_file", "/path/to/rel_proj_path")
+            >>> ts.writeTiltSeries("/tmp/fbeck/test8/tiltseries.star")
+        """
+        print("Writing: " + tiltseriesStarFile)
+        #generate tiltseries star from all dataframe ...more generic if filter removes all tilts of one series
+        ts_df = self.all_tilts_df[self.tilt_series_df.columns].copy()
+        ts_df.drop_duplicates(inplace=True)
+        tsFold = os.path.dirname(tiltseriesStarFile) + os.path.sep + tiltSeriesStarFolder + os.path.sep
+        ts_df['rlnTomoTiltSeriesStarFile'] = tsFold + os.path.basename(tiltseriesStarFile)
+
+        starwrite(ts_df, tiltseriesStarFile)
+
+        fold = os.path.dirname(tiltseriesStarFile)
+        Path(fold + os.sep + tiltSeriesStarFolder).mkdir(exist_ok=True)
+        for tilt_series in self.tilt_series_df["rlnTomoTiltSeriesStarFile"]:
+            oneTs_df = self.all_tilts_df[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series].copy()
+            oneTs_df.drop(self.tilt_series_df.columns, axis=1, inplace=True)
+            starwrite(oneTs_df, fold + os.sep + tiltSeriesStarFolder + os.sep + os.path.basename(tilt_series))
+    def filterTilts(self, fitlterParams):
+      """
+      Filters the tilt series based on the provided parameters.
+
+      Args:
+          self (tiltSeriesMeta): An instance of the tiltSeriesMeta class.
+          fitlterParams (dict): A dictionary containing the parameters and their respective thresholds for filtering the tilt series.
+
+      Raises:
+          ValueError: If any of the required star files are not found.
+
+      Returns:
+          None: This method modifies the tiltSeriesMeta object in-place.
+
+      Example:
+          >>> ts = tiltSeriesMeta("/path/to/tilt_series_star_file", "/path/to/rel_proj_path")
+          >>> ts.filterTilts({"rlnCtfMaxResolution": (7.5, 100), "rlnDefocusU": (1, 80000)})
+      """
+      pTilt = "rlnTomoNominalStageTiltAngle"  # fieldName for tiltRange
+      dfTmp = self.all_tilts_df
+
+      for param, thresholds in fitlterParams.items():
+          if isinstance(thresholds[0], str):
+              v = dfTmp[param] == thresholds
+          else:
+              vParamRange = (dfTmp[param] > thresholds[0]) & (dfTmp[param] < thresholds[1])
+              vTiltRange = (dfTmp[pTilt] > thresholds[2]) & (dfTmp[pTilt] < thresholds[3])
+              # Tiltrange defines for which tilts the filter gets applied
+              v = vParamRange | (vTiltRange == False)
+
+          dfTmp = dfTmp[v]
+
+      dfTmp.reset_index(drop=True, inplace=True)
+      self.all_tilts_df = dfTmp
+
 
 
 # %%
 ts=tiltSeriesMeta("../../data/tilts/tilt_series_ctf.star","../../")
-ts.writeTiltSeries("/tmp/fbeck/tiltseries.star")
+#ts=tiltSeriesMeta("/fs/pool/pool-plitzko3/Michael/01-Data/relion/231117_Ribo_Vfischeri_Oda/CtfFind/job007/tilt_series_ctf.star","/fs/pool/pool-plitzko3/Michael/01-Data/relion/231117_Ribo_Vfischeri_Oda/")
+
+filterParams = {
+  "rlnCtfMaxResolution": (7.5, 100,-70,70), 
+  "rlnDefocusU": (1,50000 ,-70,70),
+  "cryoBoostLabel": ("bad")
+  }
+ts.filterTilts(filterParams)
+ts.writeTiltSeries("/tmp/fbeck/test8/tiltseries.star")
+ts.all_tilts_df.rlnDefocusU.plot(kind='hist')
+
+# %%
+tsF=tiltSeriesMeta("/tmp/fbeck/test6/tiltseries.star","")
+tsF.all_tilts_df.rlnCtfMaxResolution.plot(kind='hist')
 
 # %%
 ts=tiltSeriesMeta("/fs/pool/pool-plitzko3/Michael/01-Data/relion/231117_Ribo_Vfischeri_Oda/CtfFind/job007/tilt_series_ctf.star","/fs/pool/pool-plitzko3/Michael/01-Data/relion/231117_Ribo_Vfischeri_Oda/")
@@ -349,3 +458,63 @@ relP="/fs/pool/pool-plitzko3/fbeck/cElegans/full1kTomosAreAlg/relion5/"
 ts=relP+"CtfFind/job004/tilt_series_ctf.star"
 ts=tiltSeriesMeta(ts,relP)
 # %%
+
+
+
+
+  # def filterTiltSeries(self,fitlterParams):
+  #   pass
+  
+  # def readTiltSeries(self):
+  #   """
+  #   Reads the tilt series star file and its associated tilt series files.
+   
+  #   Args:
+  #       self (tiltSeriesMeta): An instance of the tiltSeriesMeta class.
+        
+  #   Returns:
+  #       pd.DataFrame: A pandas DataFrame containing the tilt series information.
+        
+  #   Raises:
+  #       FileNotFoundError: If any of the required star files are not found.
+        
+  #   Example:
+  #       >>> ts = tiltSeriesMeta("/path/to/tilt_series_star_file", "/path/to/rel_proj_path")
+  #       >>> tilt_series_df = ts.readTiltSeries()
+  #   """
+  #   print("Reading: " + self.tiltseriesStarFile)
+  #   tilt_series_df = starread(self.tiltseriesStarFile)
+  #   all_tilts_df = pd.DataFrame()
+  #   tilt_series_tmp = pd.DataFrame()
+
+  #   i = 0
+  #   for tilt_series in tilt_series_df["rlnTomoTiltSeriesStarFile"]:
+  #       tilt_star_df = read_star(self.relProjPath + tilt_series)
+  #       all_tilts_df = pd.concat([all_tilts_df, tilt_star_df], ignore_index=True)
+  #       tmp_df = pd.concat([tilt_series_df.iloc[[i]]] * tilt_star_df.shape[0], ignore_index=True)
+  #       tilt_series_tmp = pd.concat([tilt_series_tmp, tmp_df], ignore_index=True)
+  #       i += 1
+
+  #   all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
+  #   all_tilts_df.dropna(inplace=True)  # check !!
+  #   self.all_tilts_df = all_tilts_df
+  #   self.tilt_series_df = tilt_series_df
+    
+  # def writeTiltSeries(self,tiltseriesStarFile,tiltSeriesStarFolder='tilt_series'):  
+    
+  #   print("Writing: " + tiltseriesStarFile)
+  #   #generate tiltseries star from all dataframe ...more generic if filter removes all tilts of one series
+  #   ts_df=self.all_tilts_df[self.tilt_series_df.columns].copy()
+  #   ts_df.drop_duplicates(inplace=True)
+  #   #adapt the TiltSeriesStarFile path to point to the new location
+  #   tsFold=os.path.dirname(tiltseriesStarFile)+os.path.sep+tiltSeriesStarFolder+os.path.sep
+  #   ts_df['rlnTomoTiltSeriesStarFile']=tsFold+ts_df['rlnTomoTiltSeriesStarFile'].apply(os.path.basename)
+    
+  #   starwrite(ts_df,tiltseriesStarFile)
+    
+  #   fold=os.path.dirname(tiltseriesStarFile)
+  #   Path(fold+os.sep+tiltSeriesStarFolder).mkdir(exist_ok=True)
+  #   for tilt_series in self.tilt_series_df["rlnTomoTiltSeriesStarFile"]:
+  #     oneTs_df = self.all_tilts_df[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series].copy()
+  #     oneTs_df.drop(self.tilt_series_df.columns,axis=1,inplace=True)
+  #     starwrite(oneTs_df,fold + os.sep + tiltSeriesStarFolder + os.sep + os.path.basename(tilt_series))
