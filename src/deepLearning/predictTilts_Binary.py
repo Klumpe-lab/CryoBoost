@@ -173,11 +173,10 @@ def predict_tilts(ts,model,sz=384,batchSize=50,gpu=3,max_workers=20):
         all_pProb.extend(pProb)
         
     df = pd.DataFrame({
-    'cryoBoostDlLables': all_pLabels,
-    'cryoBoostDlProbabilities': all_pProb,
+    'cryoBoostDlLabel': all_pLabels,
+    'cryoBoostDlProbability': all_pProb,
     'cryoBoostKey': tiltspath
     })
-    
     
     ts.addColumns(df)
         

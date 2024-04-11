@@ -1,18 +1,27 @@
-
 from src.rw.librw import tiltSeriesMeta
 
 def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None):
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
+    
+    if (pramRuleFilter!=None):
+        from src.filterTilts.filterTiltsRule import filterTiltsRule
+        ts=filterTiltsRule(ts,pramRuleFilter,plot)
+
     if (model!=None):
         from src.filterTilts.filterTiltsDL import filterTiltsDL
-        ts=filterTiltsDL(ts,model,'binary')
-        #plotFilterTiltsResults(ts,outputFolder)
-    if (pramRuleFilter!=None):
-        pass
+        ts=filterTiltsDL(ts,model,'binary',plot)
+   
+    ts.writeTiltSeries(outputFolder)
 
-def plotFilterTiltsResults(pred_lables,pred_probs,titlspath,outputFolder):
-
+def plotFilterTiltsResults(ts,outputFolder,plot):
+    if (plot==None):
+        return
+    
     from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageStackParallel
+    
+    pred_lables=ts.all_tilts_df.cryoBoostDlLabel
+    pred_probs=ts.all_tilts_df.cryoBoostDlProbability
+    titlspath=ts.getMicrographMovieNameFull
     pil_images=mrcFilesToPilImageStackParallel(titlspath,384)
     
     from matplotlib import pyplot as plt
