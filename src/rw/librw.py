@@ -363,6 +363,13 @@ class tiltSeriesMeta:
 
         all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
         all_tilts_df.dropna(inplace=True)  # check !!
+        #generte key to merge later on
+        k=all_tilts_df['rlnMicrographMovieName'].apply(os.path.basename)
+        if (k.is_unique):
+          all_tilts_df['cryoBoostKey']=k
+        else:
+          raise Exception("rlnMicrographMovieName is not unique !!")        
+
         self.all_tilts_df = all_tilts_df
         self.tilt_series_df = tilt_series_df
 
@@ -429,7 +436,32 @@ class tiltSeriesMeta:
       dfTmp.reset_index(drop=True, inplace=True)
       self.all_tilts_df = dfTmp
 
+    def filterTiltSeries(self,minNumTilts,fitlterParams):
+      pass 
+    
+    def getMicrographMovieNameFull(self):
+      return self.relProjPath+ts.all_tilts_df['rlnMicrographMovieName'] 
+    
+    def addColumns(self,colums_df):  
+      """
+      Adds new columns to the DataFrame stored in the instance variable `all_tilts_df`.
 
+      This method takes a DataFrame `columns_df` containing new columns to be added to `all_tilts_df`. 
+      The merge is performed on the 'rlnMicrographMovieName' column, using a left join. This means that all 
+      entries in `all_tilts_df` will be retained, and matching entries from `columns_df` will be added based 
+      on the 'cryoBoostKey' column. If there are no matching entries in `columns_df`, the new 
+      columns will contain NaN values for those rows.
+
+      Args:
+      - columns_df (DataFrame): A pandas DataFrame containing the columns to be added to `all_tilts_df`. 
+        It must include a 'cryoBoostKey' column for the merge operation.
+
+      Returns:
+      - None. The method updates `all_tilts_df` in place by adding the new columns from `columns_df`.
+
+      """ 
+      self.all_tilts_df=self.all_tilts_df.merge(colums_df,on='cryoBoostKey',how='left') 
+        
 
 # %%
 ts=tiltSeriesMeta("../../data/tilts/tilt_series_ctf.star","../../")
