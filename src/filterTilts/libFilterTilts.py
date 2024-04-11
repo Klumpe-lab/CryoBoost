@@ -1,11 +1,14 @@
 
+from src.rw.librw import tiltSeriesMeta
 
-def filterTitls(tilseriesStar,relionProj,model,plot,outputFolder):
+def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None):
+    ts=tiltSeriesMeta(tilseriesStar,relionProj)
     if (model!=None):
         from src.filterTilts.filterTiltsDL import filterTiltsDL
-        lables,probs,titlspath=filterTiltsDL(tilseriesStar,relionProj,model,'binary')
-        plotFilterTiltsResults(lables,probs,titlspath,outputFolder)
-
+        ts=filterTiltsDL(ts,model,'binary')
+        #plotFilterTiltsResults(ts,outputFolder)
+    if (pramRuleFilter!=None):
+        pass
 
 def plotFilterTiltsResults(pred_lables,pred_probs,titlspath,outputFolder):
 

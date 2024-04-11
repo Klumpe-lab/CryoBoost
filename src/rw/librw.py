@@ -350,9 +350,10 @@ class tiltSeriesMeta:
         """
         print("Reading: " + self.tiltseriesStarFile)
         tilt_series_df = starread(self.tiltseriesStarFile)
+        self.nrTomo=tilt_series_df.shape[0]
         all_tilts_df = pd.DataFrame()
         tilt_series_tmp = pd.DataFrame()
-
+        
         i = 0
         for tilt_series in tilt_series_df["rlnTomoTiltSeriesStarFile"]:
             tilt_star_df = read_star(self.relProjPath + tilt_series)
@@ -364,11 +365,11 @@ class tiltSeriesMeta:
         all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
         all_tilts_df.dropna(inplace=True)  # check !!
         #generte key to merge later on
-        k=all_tilts_df['rlnMicrographMovieName'].apply(os.path.basename)
+        k=all_tilts_df['rlnMicrographName'].apply(os.path.basename)
         if (k.is_unique):
           all_tilts_df['cryoBoostKey']=k
         else:
-          raise Exception("rlnMicrographMovieName is not unique !!")        
+          raise Exception("rlnMicrographName is not unique !!")        
 
         self.all_tilts_df = all_tilts_df
         self.tilt_series_df = tilt_series_df
@@ -417,7 +418,7 @@ class tiltSeriesMeta:
 
       Example:
           >>> ts = tiltSeriesMeta("/path/to/tilt_series_star_file", "/path/to/rel_proj_path")
-          >>> ts.filterTilts({"rlnCtfMaxResolution": (7.5, 100), "rlnDefocusU": (1, 80000)})
+          >>> ts.filterTilts({"rlnCtfMaxResolution": (7.5, 100,-35,35), "rlnDefocusU": (1, 80000,-60,60)})
       """
       pTilt = "rlnTomoNominalStageTiltAngle"  # fieldName for tiltRange
       dfTmp = self.all_tilts_df
@@ -440,9 +441,9 @@ class tiltSeriesMeta:
       pass 
     
     def getMicrographMovieNameFull(self):
-      return self.relProjPath+ts.all_tilts_df['rlnMicrographMovieName'] 
+      return self.relProjPath+self.all_tilts_df['rlnMicrographName'] 
     
-    def addColumns(self,colums_df):  
+    def addColumns(self,columns_df):  
       """
       Adds new columns to the DataFrame stored in the instance variable `all_tilts_df`.
 
@@ -460,9 +461,13 @@ class tiltSeriesMeta:
       - None. The method updates `all_tilts_df` in place by adding the new columns from `columns_df`.
 
       """ 
-      self.all_tilts_df=self.all_tilts_df.merge(colums_df,on='cryoBoostKey',how='left') 
+      k=columns_df['cryoBoostKey'].apply(os.path.basename)
+      if (k.is_unique):
+        columns_df['cryoBoostKey']=k
+      
+      self.all_tilts_df=self.all_tilts_df.merge(columns_df,on='cryoBoostKey',how='left') 
         
-
+"""""
 # %%
 ts=tiltSeriesMeta("../../data/tilts/tilt_series_ctf.star","../../")
 #ts=tiltSeriesMeta("/fs/pool/pool-plitzko3/Michael/01-Data/relion/231117_Ribo_Vfischeri_Oda/CtfFind/job007/tilt_series_ctf.star","/fs/pool/pool-plitzko3/Michael/01-Data/relion/231117_Ribo_Vfischeri_Oda/")
@@ -489,6 +494,8 @@ ts=tiltSeriesMeta("/fs/pool/pool-plitzko3/Michael/01-Data/relion/231117_Ribo_Vfi
 relP="/fs/pool/pool-plitzko3/fbeck/cElegans/full1kTomosAreAlg/relion5/"
 ts=relP+"CtfFind/job004/tilt_series_ctf.star"
 ts=tiltSeriesMeta(ts,relP)
+
+"""
 # %%
 
 

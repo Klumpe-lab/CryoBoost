@@ -137,7 +137,7 @@ def predictPilImageStack(pilImageStack,learn):
     return pred_labels,pred_probs
     
 
-def predict_tilts(tilseriesStar,relionProj,model,sz=384,batchSize=50,gpu=3,max_workers=20):
+def predict_tilts(ts,model,sz=384,batchSize=50,gpu=3,max_workers=20):
     """
     Predict the class of a PIL image stack using a fastai learner.
 
@@ -152,9 +152,10 @@ def predict_tilts(tilseriesStar,relionProj,model,sz=384,batchSize=50,gpu=3,max_w
     print("loading model:",model)
     learn =load_learner(model)
     _=learn.model.eval()
-    print("reading:",tilseriesStar)
-    tiltspath,nrTomo=getTiltImagePathFromTiltStar(tilseriesStar,relionProj)
-    print("found:",str(len(tiltspath)),"tilts from",str(nrTomo),'tomograms')
+    #print("reading:",tilseriesStar)
+    #tiltspath,nrTomo=getTiltImagePathFromTiltStar(tilseriesStar,relionProj)
+    tiltspath=ts.getMicrographMovieNameFull()
+    print("found:",str(len(tiltspath)),"tilts from",str(ts.nrTomo),'tomograms')
     
     #Custom dataloader refused to work in fastAI switched to direct prediction
     #Images get transformed to pilImages and the batch wise predicted
@@ -171,6 +172,14 @@ def predict_tilts(tilseriesStar,relionProj,model,sz=384,batchSize=50,gpu=3,max_w
         all_pLabels.extend(pLables)
         all_pProb.extend(pProb)
         
+    df = pd.DataFrame({
+    'cryoBoostDlLables': all_pLabels,
+    'cryoBoostDlProbabilities': all_pProb,
+    'cryoBoostKey': tiltspath
+    })
+    
+    
+    ts.addColumns(df)
         
-    return all_pLabels,all_pProb,tiltspath    
+    return ts    
         

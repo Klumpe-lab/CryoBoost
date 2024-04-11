@@ -1,6 +1,7 @@
 from src.filterTilts.filterTiltsDL import filterTiltsDL
 from src.filterTilts.filterTiltsRule import filterTiltsRule
 from starfile import read as starread
+from src.rw.librw import tiltSeriesMeta
 import pandas as pd
 import os
 
@@ -11,20 +12,15 @@ def test_fitlerTiltsDL_TiltseriesStar():
     
     
     tilseriesStar="data/tilts/tilt_series_ctf.star"
-    relionProj="./"
+    relionProj=os.path.abspath(__file__)
+    relionProj=os.path.dirname(os.path.dirname(os.path.dirname(relionProj)))+os.path.sep
     model="data/models/model.pkl"
-    lablesPred,probs,tiltspath=filterTiltsDL(tilseriesStar,relionProj,model,'binary')
     
-    st = starread(tilseriesStar)
-    lablesTrue = pd.Series([])
-    for ts in st["rlnTomoTiltSeriesStarFile"]:
-        stts = starread(os.path.join(pathToRelionProj, ts))
-        tmp=stts['cryoBoostLabel']
-        lablesTrue = pd.concat([lablesTrue, tmp])
+    ts=tiltSeriesMeta(tilseriesStar,relionProj)
+    ts=filterTiltsDL(ts,model,'binary')
+    assert (ts.all_tilts_df.cryoBoostDlLables == ts.all_tilts_df.cryoBoostLabel).all()
     
-    lablesTrue_list = lablesTrue.tolist()
-    
-    assert (lablesTrue_list==lablesPred)
+   
 
 def test_fitlerTiltsRule_TiltseriesStar():
     
