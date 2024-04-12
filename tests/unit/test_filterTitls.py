@@ -5,6 +5,7 @@ from src.rw.librw import tiltSeriesMeta
 import pandas as pd
 import subprocess
 import os
+import pytest
 
 
 def test_fitlerTiltsDL_binaryWithModel():
@@ -65,3 +66,26 @@ def test_crboost_filterTilts_filterbyDLModel():
     ts=tiltSeriesMeta(outputFold + os.path.sep + "tiltseries_filtered.star")
     
     assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()
+    
+@pytest.mark.parametrize("test_input", 
+                         [("--ctfMaxResolution '1,20,-70,70'"), 
+                          ("--ctfMaxResolution '1,20,-70,70'"), 
+                          ("--model data/models/model.pkl")])
+def test_crboost_filterTilts(test_input):
+    
+    tilseriesStar="data/tilts/tilt_series_ctf.star"
+    relionProj=os.path.abspath(__file__)
+    relionProj=os.path.dirname(os.path.dirname(os.path.dirname(relionProj)))+os.path.sep
+    outputFold=relionProj+"tmpOut/"
+    
+    call=relionProj + "/bin/crboost_filterTitlts.py"
+    call+=" --in_mics " + relionProj + tilseriesStar
+    call+=" --o " + outputFold
+    call+=" " + test_input
+    
+    result = subprocess.run(call, capture_output=True, text=True,shell=True)
+    ts=tiltSeriesMeta(outputFold + os.path.sep + "tiltseries_filtered.star")
+    
+    assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()    
+
+
