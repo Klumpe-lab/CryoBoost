@@ -313,7 +313,7 @@ class tiltSeriesMeta:
         writeTiltSeries(self, tiltseriesStarFile, tiltSeriesStarFolder='tilt_series'): Writes the tilt series star file and its associated tilt series files.
     """
 
-    def __init__(self, tiltseriesStarFile, relProjPath):
+    def __init__(self, tiltseriesStarFile, relProjPath=''):
         """
         Initializes the tiltSeriesMeta class.
 
@@ -392,8 +392,8 @@ class tiltSeriesMeta:
         ts_df = self.all_tilts_df[self.tilt_series_df.columns].copy()
         ts_df.drop_duplicates(inplace=True)
         tsFold = os.path.dirname(tiltseriesStarFile) + os.path.sep + tiltSeriesStarFolder + os.path.sep
-        ts_df['rlnTomoTiltSeriesStarFile'] = tsFold + os.path.basename(tiltseriesStarFile)
-
+        #ts_df['rlnTomoTiltSeriesStarFile'] = tsFold + os.path.basename(ts_df.rlnTomoTiltSeriesStarFile)
+        ts_df['rlnTomoTiltSeriesStarFile'] = ts_df['rlnTomoTiltSeriesStarFile'].apply(lambda x: os.path.join(tsFold, os.path.basename(x)))
         starwrite(ts_df, tiltseriesStarFile)
 
         fold = os.path.dirname(tiltseriesStarFile)
@@ -402,6 +402,7 @@ class tiltSeriesMeta:
             oneTs_df = self.all_tilts_df[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series].copy()
             oneTs_df.drop(self.tilt_series_df.columns, axis=1, inplace=True)
             starwrite(oneTs_df, fold + os.sep + tiltSeriesStarFolder + os.sep + os.path.basename(tilt_series))
+            
     def filterTilts(self, fitlterParams):
       """
       Filters the tilt series based on the provided parameters.
@@ -467,6 +468,9 @@ class tiltSeriesMeta:
       
       self.all_tilts_df=self.all_tilts_df.merge(columns_df,on='cryoBoostKey',how='left') 
         
+
+
+#lagacy
 """""
 # %%
 ts=tiltSeriesMeta("../../data/tilts/tilt_series_ctf.star","../../")

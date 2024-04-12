@@ -3,13 +3,11 @@ from src.filterTilts.filterTiltsRule import filterTiltsRule
 from starfile import read as starread
 from src.rw.librw import tiltSeriesMeta
 import pandas as pd
+import subprocess
 import os
 
-pathToStarFile = "data/tilts/tilt_series_ctfLables.star"
-pathToRelionProj = "./"
 
-def test_fitlerTiltsDL_TiltseriesStar():
-    
+def test_fitlerTiltsDL_binaryWithModel():
     
     tilseriesStar="data/tilts/tilt_series_ctf.star"
     relionProj=os.path.abspath(__file__)
@@ -18,26 +16,37 @@ def test_fitlerTiltsDL_TiltseriesStar():
     
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
     ts=filterTiltsDL(ts,model,'binary','data/tmp/')
-    assert (ts.all_tilts_df.cryoBoostDlLabel=="good").all()
+    assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()
     
     
-def test_fitlerTiltsRule_TiltseriesStar():
+def test_fitlerTiltsRule_filterbyCtrMaxResolution():
     
     tilseriesStar="data/tilts/tilt_series_ctf.star"
     relionProj=os.path.abspath(__file__)
     relionProj=os.path.dirname(os.path.dirname(os.path.dirname(relionProj)))+os.path.sep
-    model="data/models/model.pkl"
+    filterParams = {"rlnCtfMaxResolution": (1,20,-70,70)}
     
+    os.makedirs("tmpOut", exist_ok=True)
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
-    
-    
-    filterTiltsRule(tilseriesStar,out_dir,shift_init=None,defocus_init=None,res_init=res)
-    st = starread(tilseriesStar)
-    
-    
-    
-    assert (lablesTrue_list==lablesPred)
+    ts=filterTiltsRule(ts,filterParams,'tmpOut')
+    assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()
   
     
-
+def test_crboost_filterTilts_filterbyMaxResolution():
+    
+    tilseriesStar="data/tilts/tilt_series_ctf.star"
+    relionProj=os.path.abspath(__file__)
+    relionProj=os.path.dirname(os.path.dirname(os.path.dirname(relionProj)))+os.path.sep
+    outputFold=relionProj+"tmpOut/"
+    
+    call=relionProj + "/bin/crboost_filterTitlts.py"
+    call+=" --in_mics " + relionProj + tilseriesStar
+    call+=" --o " + outputFold
+    call+=" --ctfMaxResolution '1,20,-70,70'"
+    
+    result = subprocess.run(call, capture_output=True, text=True,shell=True)
+    ts=tiltSeriesMeta(outputFold + os.path.sep + "tiltseries_filtered.star")
+    
+    assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()
+    
 

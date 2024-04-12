@@ -10,49 +10,42 @@ sys.path.append(root_dir)
 from src.filterTilts.libFilterTilts import filterTitls
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Rule based exclusion")
+    parser = argparse.ArgumentParser(description="filter tilts")
     parser.add_argument("--in_mics", "-in_mics", required=True, help="Input tilt series STAR file")
     parser.add_argument("--o", dest="out_dir", required=True, help="Output directory name")
-    parser.add_argument("--shift", "-shift", required=False, default=None, help="threshold movement")
-    parser.add_argument("--defocus", "-defocus", required=False, default=None, help="threshold defocus")
-    parser.add_argument("--resolution", "-resolution", required=False, default=None, help="threshold resolution")
+    parser.add_argument("--driftInAng","-shift",dest="rlnAccumMotionTotal",required=False, default=None, help="threshold movement")
+    parser.add_argument("--defocusInAng", "-defocus",dest="rlnDefocusU" ,required=False, default=None, help="threshold defocus")
+    parser.add_argument("--ctfMaxResolution", "-resolution",dest="rlnCtfMaxResolution" ,required=False, default=None, help="threshold resolution")
+    parser.add_argument("--model", "-mod",dest="model" ,required=False, default=None, help="model for prediction")
     parser.add_argument("--j", "-nr_threads", required=False, default=None, help="Nr of threads used. Ignore!")
-    return parser.parse_args()
+    args,unkArgs=parser.parse_known_args()
+    return args,unkArgs
 
 def main():
-    args = parse_arguments()
-
-    python_script = os.path.join(root_dir, "src/lib/exclude_tilts/exclude_tilts_rules.py")
     
-    # only in_mics and out_dir should be required, rest only appended if value is given
-    python_command = f"python3 {python_script} --in_mics {args.in_mics} --o {args.out_dir} "
+    args,addArg = parse_arguments()
+    filterParams = {}
+    for arg, value in vars(args).items():
+        if (value==None):
+            continue
+        if ((arg == 'rlnAccumMotionTotal') | (arg == 'rlnDefocusU') | (arg == 'rlnCtfMaxResolution')):
+            filterParams[arg] = [float(num) for num in value.split(',')]   
     
-    if args.shift:
-        python_command += f"--shift {args.shift} "
-
-    if args.defocus:
-        python_command += f"--defocus {args.defocus} "
-
-    if args.resolution:
-        python_command += f"--resolution {args.resolution} "
-
-    if args.j:
-        python_command += f"--j {args.j} "
-
-    python_exit_status = os.system(python_command)
-
-
+    filterTitls(args.in_mics,relionProj='',pramRuleFilter=filterParams,model=None,plot=None,outputFolder=args.out_dir)
+    
+    
+    return 
     # Redirect stdout and stderr to files
     os.chdir(args.out_dir)
     with open("run.out", "w") as out_file:
         sys.stdout = out_file
     with open("run.err", "w") as err_file:
         sys.stderr = err_file
-        if python_exit_status != 0:
-            sys.stderr.write(f"Error occurred while running {python_script}\n")
+        if  succes == 0:
+            sys.stderr.write(f"Error occurred while running\n")
 
 
-    if python_exit_status == 0:
+    if succes == 0:
         open("RELION_JOB_EXIT_SUCCESS", "w").close()
     else:
         open("RELION_JOB_EXIT_FAILURE", "w").close()
@@ -61,3 +54,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+ #if ((arg == 'in_mics') | (arg == 'out_dir') | (arg == 'model')):
+ #           filterParams[arg] = value
