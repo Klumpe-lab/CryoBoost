@@ -12,7 +12,9 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
         ts=filterTiltsDL(ts,model,'binary',plot)
    
     ts.writeTiltSeries(outputFolder+"tiltseries_filtered.star")
-
+    
+    
+    
 def plotFilterTiltsResults(ts,outputFolder,plot):
     if (plot==None):
         return

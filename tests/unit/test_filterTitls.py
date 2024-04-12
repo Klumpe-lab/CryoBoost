@@ -49,4 +49,19 @@ def test_crboost_filterTilts_filterbyMaxResolution():
     
     assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()
     
-
+def test_crboost_filterTilts_filterbyDLModel():
+    
+    tilseriesStar="data/tilts/tilt_series_ctf.star"
+    relionProj=os.path.abspath(__file__)
+    relionProj=os.path.dirname(os.path.dirname(os.path.dirname(relionProj)))+os.path.sep
+    outputFold=relionProj+"tmpOut/"
+    
+    call=relionProj + "/bin/crboost_filterTitlts.py"
+    call+=" --in_mics " + relionProj + tilseriesStar
+    call+=" --o " + outputFold
+    call+=" --model data/models/model.pkl"
+    
+    result = subprocess.run(call, capture_output=True, text=True,shell=True)
+    ts=tiltSeriesMeta(outputFold + os.path.sep + "tiltseries_filtered.star")
+    
+    assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()

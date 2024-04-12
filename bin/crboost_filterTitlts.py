@@ -31,30 +31,10 @@ def main():
         if ((arg == 'rlnAccumMotionTotal') | (arg == 'rlnDefocusU') | (arg == 'rlnCtfMaxResolution')):
             filterParams[arg] = [float(num) for num in value.split(',')]   
     
-    filterTitls(args.in_mics,relionProj='',pramRuleFilter=filterParams,model=None,plot=None,outputFolder=args.out_dir)
+    filterTitls(args.in_mics,relionProj='',pramRuleFilter=filterParams,model=args.model,plot=None,outputFolder=args.out_dir)
     
     
-    return 
-    # Redirect stdout and stderr to files
-    os.chdir(args.out_dir)
-    with open("run.out", "w") as out_file:
-        sys.stdout = out_file
-    with open("run.err", "w") as err_file:
-        sys.stderr = err_file
-        if  succes == 0:
-            sys.stderr.write(f"Error occurred while running\n")
-
-
-    if succes == 0:
-        open("RELION_JOB_EXIT_SUCCESS", "w").close()
-    else:
-        open("RELION_JOB_EXIT_FAILURE", "w").close()
-
-    sys.exit(0)
-
 if __name__ == '__main__':
     main()
 
 
- #if ((arg == 'in_mics') | (arg == 'out_dir') | (arg == 'model')):
- #           filterParams[arg] = value
