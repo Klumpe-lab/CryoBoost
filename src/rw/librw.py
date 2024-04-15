@@ -281,16 +281,50 @@ def write_star(scheme_name, path_and_name):
   df_as_star = starfile.write(scheme_name, path_and_name)
   return df_as_star
 
+# %%
 
 # create Sphinx documentation: sphinx-build -M html docs/ docs/
 # remove everything in the _build: make clean
 # update Sphinx documentation: make html
-
-# %%
 import pandas as pd
 from pathlib import Path
 from starfile import read as starread
 from starfile import write as starwrite
+
+class schemeMeta:
+  """
+  """
+  def __init__(self, schemeFolderPath):
+    self.schemeFilePath=schemeFolderPath+os.path.sep+"scheme.star"
+    self.schemeFolderPath=schemeFolderPath
+    self.read_scheme()
+  
+  def read_scheme(self):
+    self.scheme_star_dict=starread(self.schemeFilePath)
+    self.jobs_in_scheme = self.scheme_star_dict["scheme_edges"].rlnSchemeEdgeOutputNodeName.iloc[1:-1]
+    self.job_star_dict = {
+    f"{job}": read_star(os.path.join(self.schemeFolderPath, f"{job}/job.star"))
+    for job in jobs_in_scheme}
+    self.scheme_star_dict = starread(self.schemeFilePath)
+    self.nrJobs = len(self.jobs_in_scheme)
+  
+  def getJobOptions(self, jobName):
+    return self.job_star_dict[jobName]["joboptions_values"]   
+  
+  def write_scheme(self,schemeFolderPath):
+     os.makedirs(schemeFolderPath, exist_ok=False)
+     starwrite(self.scheme_star_dict,schemeFolderPath+os.path.sep+"scheme.star")
+
+    # repeat for all jobs, creating a job.star file in these directories
+     for job in self.jobs_in_scheme:
+        jobFold = schemeFolderPath+os.path.sep+job
+        os.makedirs(jobFold, exist_ok=False)
+        job_star = self.job_star_dict[job]
+        write_star(job_star,jobFold+os.path.sep+"job.star")
+        
+
+# %%
+
 
 class tiltSeriesMeta:
     """

@@ -7,7 +7,6 @@ import pandas as pd
 import subprocess
 import os
 import pytest
-import inspect
 
 
 def idfn(test_input,context):
@@ -108,9 +107,3 @@ def test_crboost_filterTilts(test_input):
     
     assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()    
 
-
-
-#ids=["filterTilts-rlnCtfMaxResolution", 
-    # "filterTilts-rlnDefocusU", 
- #   "filterTilts-rlnAccumMotionTotal", 
- #   "filterTilts-model"])

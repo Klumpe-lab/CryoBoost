@@ -1,0 +1,52 @@
+
+# set new names for parameters in job to give more descriptive names
+# Job = in which job this parameter should be changed (job name or all)
+# Parameter = original name (as in job.star file)
+# Alias = new parameter name that should be displayed
+aliases:
+
+  - Job: importmovies
+    Parameter: Cs
+    Alias: Spherical aberration
+
+  - Job: importmovies
+    Parameter: angpix
+    Alias: Pixel in A
+
+  - Job: importmovies
+    Parameter: movie_files
+    Alias: Path to movies
+
+  - Job: motioncorr
+    Parameter: eer_grouping
+    Alias: eer grouping    
+
+  - Job: reconstruction
+    Parameter: xdim
+    Alias: x dimensions 
+
+  - Job: reconstruction
+    Parameter: ydim
+    Alias: y dimensions
+
+  - Job: all
+    Parameter: qsubscript
+    Alias: q Submission Script
+
+
+# parameters have different names in header/mdoc than in Relion --> make compatible
+# key = parameter name in header/mdoc file
+# value = parameter name in config_aliases file (code uses that name directly to find the correct entry, avoids additional loops)
+
+meta_data:
+
+  header:
+    - EER_number: eer grouping
+
+  mdoc:
+    - ImageSize: x dimensions
+    - ImageSize: y dimensions
+    - PixelSpacing: Pixel in A
+    - Voltage: kV
+
+
