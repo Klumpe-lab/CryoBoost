@@ -1,11 +1,25 @@
 from src.filterTilts.filterTiltsDL import filterTiltsDL
 from src.filterTilts.filterTiltsRule import filterTiltsRule
+from src.filterTilts.libFilterTilts import filterTitls
 from starfile import read as starread
 from src.rw.librw import tiltSeriesMeta
 import pandas as pd
 import subprocess
 import os
 import pytest
+import inspect
+
+
+def idfn(test_input,context):
+    
+    if (isinstance(test_input, dict)):
+        key=list(test_input.keys())[0]
+        value = str(test_input[key])
+    else:
+        key=""
+        value = str(test_input)
+   
+    return f"{context['function_name']} {key}-{value}"
 
 
 def test_fitlerTiltsDL_binaryWithModel():
@@ -20,12 +34,19 @@ def test_fitlerTiltsDL_binaryWithModel():
     assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()
     
     
-def test_fitlerTiltsRule_filterbyCtrMaxResolution():
+
+@pytest.mark.parametrize("test_input", 
+                         [({"rlnCtfMaxResolution": (1,20,-70,70)}), 
+                          ({"rlnDefocusU": (1,50000,-70,70)}), 
+                          ({"rlnAccumMotionTotal": (1,10,-70,70)})],
+                           ids=lambda val: idfn(val, {'function_name': 'filterTiltsRule'}))
+@pytest.mark.filterTiltsRule
+def test_filterTiltsRule(test_input):
     
     tilseriesStar="data/tilts/tilt_series_ctf.star"
     relionProj=os.path.abspath(__file__)
     relionProj=os.path.dirname(os.path.dirname(os.path.dirname(relionProj)))+os.path.sep
-    filterParams = {"rlnCtfMaxResolution": (1,20,-70,70)}
+    filterParams = test_input
     
     os.makedirs("tmpOut", exist_ok=True)
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
@@ -33,44 +54,43 @@ def test_fitlerTiltsRule_filterbyCtrMaxResolution():
     assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()
   
     
-def test_crboost_filterTilts_filterbyMaxResolution():
+@pytest.mark.parametrize("test_input", 
+                         [({"rlnCtfMaxResolution": (1,20,-70,70)}), 
+                          ({"rlnDefocusU": (1,50000,-70,70)}), 
+                          ({"rlnAccumMotionTotal": (1,10,-70,70)}), 
+                          ({"model": "data/models/model.pkl"})],
+                           ids=lambda val: idfn(val, {'function_name': 'filterTilts'}))
+@pytest.mark.filter_tests
+def test_fitlerTilts(test_input):
     
     tilseriesStar="data/tilts/tilt_series_ctf.star"
     relionProj=os.path.abspath(__file__)
     relionProj=os.path.dirname(os.path.dirname(os.path.dirname(relionProj)))+os.path.sep
     outputFold=relionProj+"tmpOut/"
+    filterParams = test_input
+    inpModel=None
+    inpF=None
+    plot=None   
     
-    call=relionProj + "/bin/crboost_filterTitlts.py"
-    call+=" --in_mics " + relionProj + tilseriesStar
-    call+=" --o " + outputFold
-    call+=" --ctfMaxResolution '1,20,-70,70'"
-    
-    result = subprocess.run(call, capture_output=True, text=True,shell=True)
+    os.makedirs("tmpOut", exist_ok=True)
+    if (next(iter(test_input))=="model"):
+        inpModel=test_input["model"]
+    else:
+        inpF=test_input
+        
+    filterTitls(tilseriesStar,relionProj,inpF,inpModel,plot,outputFold)
     ts=tiltSeriesMeta(outputFold + os.path.sep + "tiltseries_filtered.star")
-    
-    assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()
-    
-def test_crboost_filterTilts_filterbyDLModel():
-    
-    tilseriesStar="data/tilts/tilt_series_ctf.star"
-    relionProj=os.path.abspath(__file__)
-    relionProj=os.path.dirname(os.path.dirname(os.path.dirname(relionProj)))+os.path.sep
-    outputFold=relionProj+"tmpOut/"
-    
-    call=relionProj + "/bin/crboost_filterTitlts.py"
-    call+=" --in_mics " + relionProj + tilseriesStar
-    call+=" --o " + outputFold
-    call+=" --model data/models/model.pkl"
-    
-    result = subprocess.run(call, capture_output=True, text=True,shell=True)
-    ts=tiltSeriesMeta(outputFold + os.path.sep + "tiltseries_filtered.star")
-    
-    assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()
+    assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()    
+
+
     
 @pytest.mark.parametrize("test_input", 
                          [("--ctfMaxResolution '1,20,-70,70'"), 
-                          ("--ctfMaxResolution '1,20,-70,70'"), 
-                          ("--model data/models/model.pkl")])
+                          ("--driftInAng '1,10,-70,70'"), 
+                          ("--defocusInAng '1,50000,-70,70'"), 
+                          ("--model data/models/model.pkl")],
+                           ids=lambda val: idfn(val, {'function_name': 'cryoboost_filterTilts'}))
+@pytest.mark.crboost_filterTilts
 def test_crboost_filterTilts(test_input):
     
     tilseriesStar="data/tilts/tilt_series_ctf.star"
@@ -89,3 +109,8 @@ def test_crboost_filterTilts(test_input):
     assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()    
 
 
+
+#ids=["filterTilts-rlnCtfMaxResolution", 
+    # "filterTilts-rlnDefocusU", 
+ #   "filterTilts-rlnAccumMotionTotal", 
+ #   "filterTilts-model"])
