@@ -9,7 +9,7 @@ current_dir = os.path.dirname(os.path.abspath(__name__))
 root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
 
-from src.rw.librw import get_alias, get_alias_reverse, job_star_dict
+
 
 def browse_dirs(target_field):
     """
@@ -45,7 +45,7 @@ def change_bckgrnd(table_widget, row_index, col_index, colour = (QColor(200, 200
     table_widget.item(row_index, col_index).setBackground(colour)
 
 
-def change_values(table_widget, param_val_dict, job_names):
+def change_values(table_widget, param_val_dict, job_names,conf):
     """
     goes to the tab defined and changes the respective parameter to the new value.
 
@@ -69,7 +69,7 @@ def change_values(table_widget, param_val_dict, job_names):
         # look for an alias for the param and if one is present, set the param to this alias
         original_param_name = None
         for job in job_names:
-            original_param_name = get_alias(job, param)
+            original_param_name = conf.get_alias(job, param)
             if original_param_name:
                 break
 
@@ -86,7 +86,7 @@ def change_values(table_widget, param_val_dict, job_names):
                 break
 
 
-def update_df(job_star_dict, table_widget, table_nRows, table_nCols, current_job_tab, path_to_alias_yaml_for_unitTest = "../src/read_write/config_aliases.yaml"):
+def update_df(job_star_dict, table_widget, table_nRows, table_nCols, current_job_tab, conf):
     """
     update the df that is turned into a job.star file afterwards.
 
@@ -119,7 +119,7 @@ def update_df(job_star_dict, table_widget, table_nRows, table_nCols, current_job
             value = table_widget.item(row, col).text()
             # check whether there is an alias for a parameter name and if yes, change back to original name 
             if col == 0:
-                original_param_name = get_alias_reverse(current_job_tab, value, path_to_alias_yaml_for_unitTest)
+                original_param_name = conf.get_alias_reverse(current_job_tab, value)
                 if original_param_name != None:
                     # param_name = original_param_name
                     value = original_param_name     

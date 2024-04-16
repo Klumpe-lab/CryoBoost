@@ -9,10 +9,11 @@ current_dir = os.path.dirname(os.path.abspath(__name__))
 # change the path to be until src
 root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
-
 #from lib.functions import get_value_from_tab
-from src.gui.libGui import browse_dirs, change_values, update_df, abs_to_loc_path
-from src.rw.librw import scheme_star_dict, job_star_dict, jobs_in_scheme, get_alias, get_alias_reverse, load_config, read_mdoc, read_header, write_star
+#from src.gui.libGui import browse_dirs, change_values, update_df, abs_to_loc_path
+#from src.rw.librw import scheme_star_dict, job_star_dict, jobs_in_scheme, get_alias, get_alias_reverse, load_config, read_mdoc, read_header, write_star
+from src.gui.libGui import change_values,browse_dirs
+from src.rw.librw import schemeMeta,cbconfig,read_mdoc
 
 class MainUI(QMainWindow):
     """
@@ -41,7 +42,13 @@ class MainUI(QMainWindow):
         self.btn_browse_target.clicked.connect(self.browsePathTarget)
         self.btn_writeStar.clicked.connect(self.changeDf)
         self.btn_writeStar.clicked.connect(self.writeStar)
-        
+        #constants
+        self.cbdat = type('', (), {})() 
+        self.cbdat.defaultSchemePath="./config/master_scheme"
+        self.cbdat.confPath="./config/conf.yaml"
+        self.cbdat.scheme=schemeMeta(self.cbdat.defaultSchemePath)
+        self.cbdat.conf=cbconfig(self.cbdat.confPath)
+            
 
     def makeJobTabs(self):
         """
@@ -51,12 +58,14 @@ class MainUI(QMainWindow):
         # define where the new tabs should be inserted so all tabs can be used in order             
         first_insert_position = 1
         # loop through the jobs and create a tab for each job
-        for job in jobs_in_scheme:
+        
+        conf=self.cbdat.conf
+        for job in self.cbdat.scheme.jobs_in_scheme:
             # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
             self.tabWidget.insertTab(first_insert_position, QWidget(), job)
             # build a table with the dataframe containinng the parameters for the respective job in the tab
-            self.df = (job_star_dict[job]["joboptions_values"])
-            nRows, nColumns = self.df.shape
+            df_job = self.cbdat.scheme.job_star[job].dict["joboptions_values"]
+            nRows, nColumns = df_job.shape
             # create empty table with the dimensions of the df
             self.table = QTableWidget(self)
             self.table.setColumnCount(nColumns)
@@ -68,10 +77,10 @@ class MainUI(QMainWindow):
             for row in range(nRows):
                 for col in range(nColumns):
                     # set the value that should be added to the respective col/row combination in the df containing the parameters
-                    current_value = self.df.iloc[row, col]
+                    current_value =df_job.iloc[row, col]
                     # see whether there is an alias for the parameter (only for the Parameters column)
                     if col == 0:
-                        alias = get_alias(job, current_value)
+                        alias = conf.get_alias(job, current_value)
                         # if there is an alias, set the widgetItem to this alias, else, do as normal
                         if alias != None:
                             self.table.setItem(row, col, QTableWidgetItem(alias))
@@ -103,13 +112,13 @@ class MainUI(QMainWindow):
  
         # go to the importmovies tab by getting the index where importmovies is
         # if header also has parameters for other jobs, have to loop through here
-        for current_tab in jobs_in_scheme:
-            index_import = jobs_in_scheme[jobs_in_scheme == current_tab].index
+        for current_tab in self.cbdat.scheme.jobs_in_scheme:
+            index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
             self.tabWidget.setCurrentIndex(index_import.item())
             # find the  copy the text of the input field to the path to file, check for aliases of the field, and
             # iterate over the parameters of the header to input them too
             table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
-            change_values(table_widget, params_dict_movies, jobs_in_scheme)
+            change_values(table_widget, params_dict_movies, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
         # go back to setup tab
         self.tabWidget.setCurrentIndex(0)
 
@@ -139,13 +148,13 @@ class MainUI(QMainWindow):
             pass
         # go to the importmovies tab by getting the index where importmovies is
         # if mdoc also has parameters for other jobs, have to loop through here
-        for current_tab in jobs_in_scheme:
-            index_import = jobs_in_scheme[jobs_in_scheme == current_tab].index
+        for current_tab in self.cbdat.scheme.jobs_in_scheme:
+            index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_schem == current_tab].index
             self.tabWidget.setCurrentIndex(index_import.item())
             # find the  copy the text of the input field to the path to file, check for aliases of the field, and
             # iterate over the parameters of the header to input them too
             table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
-            change_values(table_widget, params_dict_mdoc, jobs_in_scheme)
+            change_values(table_widget, params_dict_mdoc, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
         # go back to setup tab
         self.tabWidget.setCurrentIndex(0)
         
@@ -159,19 +168,19 @@ class MainUI(QMainWindow):
         microscope = self.dropDown_config.currentText()
         # only do something if a microscope is chosen
         if microscope != "Choose Microscope Set-Up":
-            microscope_parameters_list_of_dicts = load_config(microscope)
+            microscope_parameters_list_of_dicts = self.cbdat.conf.confdata['microscope']
             microscope_parameters = {}
             for dicts in microscope_parameters_list_of_dicts:
                 microscope_parameters.update(dicts)
 
             # exclude the first tab (= set up)
-            for job_tab_index in range(1, len(jobs_in_scheme) + 1):
+            for job_tab_index in range(1, len(self.cbdat.scheme.jobs_in_scheme) + 1):
                 # go to the tabs based on their index
                 self.tabWidget.setCurrentIndex(job_tab_index)
                 # access the TableWidget in the currently open TabWidget
                 table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
                 #change_values(table_widget, microscope_parameters, jobs_in_scheme)
-                change_values(table_widget, microscope_parameters, jobs_in_scheme)
+                change_values(table_widget, microscope_parameters, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
             # go back to setup tab
             self.tabWidget.setCurrentIndex(0)
 

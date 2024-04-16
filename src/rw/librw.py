@@ -8,109 +8,73 @@ import glob
 
 
 #from lib.functions import calculate_dose_rate_per_pixel, extract_eer_from_header
+class cbconfig:
+  def __init__(self,configPath):
+    self.configPath = configPath
+    self.read_config()
 
-def read_config(filename):
-  """
-  reads a configuration file in yaml format.
-  
-  Args:
-    filename (str): name of the .yaml file.
-  
-  Returns: 
-    dict: dictioanry with paramName and data.
-  """
-  with open(filename) as f:
-    data = yaml.load(f, Loader=yaml.FullLoader)
+  def read_config(self):
+    """
+    reads a configuration file in yaml format.
     
-  return data    
+    Args:
+      filename (str): name of the .yaml file.
+    
+    Returns: 
+      dict: dictioanry with paramName and data.
+    """
+    with open(self.configPath) as f:
+      self.confdata = yaml.load(f, Loader=yaml.FullLoader)
+      
+        
+  def get_alias(self,job, parameter):
+    """
+    some inputs used by Relion are not self-explanatory (eg. qsub_extra2) so a yaml list was created to change the 
+    respective name that is displayed while still keeping the original name for writing the data.
 
+    Args:
+      job (str): job name the parameter is used for.
+      parameter (str): parameter name.
 
-def read_star(scheme_name, do_dict = False):
-  """
-  reads a .star file and turns it into a pd df.
+    Returns:
+      alias (str): alias displayed instead of the parameter name.
 
-  Args:
-    scheme_name (str): path to a star file.
-
-  Returns:
-    dict: dict containing the df containing the information of the star file at the defined location.
-
-  """
-  data_as_dict = starfile.read(scheme_name, always_dict = do_dict)
-  return data_as_dict
-
-path_to_scheme = "/fs/gpfs41/lv01/fileset02/pool/pool-plitzko3/Michael/00-Other/CryoTheraPy/data/master_scheme_bck"
-scheme_star_dict = read_star(path_to_scheme + "/scheme.star")
-
-
-# create a pd.series from the edges in the scheme.star (= the order of jobs that are executed), removing the
-# first and the last as they are usually EXIT_maxtime and WAIT, i.e. not jobs
-jobs_in_scheme = scheme_star_dict["scheme_edges"].rlnSchemeEdgeOutputNodeName.iloc[1:-1]
-
-
-job_star_dict = {
-  f"{job}": read_star(os.path.join(path_to_scheme, f"{job}/job.star"))
-  for job in jobs_in_scheme
-}
-#job_star_dict["scheme_star"] = scheme_star_dict
-
-
-def get_alias(job, parameter, path_to_yaml = "../src/read_write/config_aliases.yaml"):
-  """
-  some inputs used by Relion are not self-explanatory (eg. qsub_extra2) so a yaml list was created to change the 
-  respective name that is displayed while still keeping the original name for writing the data.
-
-  Args:
-    job (str): job name the parameter is used for.
-    parameter (str): parameter name.
-
-  Returns:
-    alias (str): alias displayed instead of the parameter name.
-
-  Example:
-    job
-  """
-  # path works for any module in the lib/app/ directory
-  # "r" means that the file should be opened with reading permissions
-  with open(path_to_yaml, "r") as file:
-    yaml_data = yaml.safe_load(file)
-
-   # go through entries in the aliases dict
-  for entry in yaml_data["aliases"]:
-    # if the entry Job of one of the lists equals the given job or all and the entry Parameter contains the given 
-    # parameter name, return the entry Alias
-    if (entry["Job"] == job or entry["Job"] == "all") and entry["Parameter"] == parameter:
-      return entry["Alias"]
-  return None
+    Example:
+      job
+    """
+    
+    for entry in self.confdata["aliases"]:
+      # if the entry Job of one of the lists equals the given job or all and the entry Parameter contains the given 
+      # parameter name, return the entry Alias
+      if (entry["Job"] == job or entry["Job"] == "all") and entry["Parameter"] == parameter:
+        return entry["Alias"]
+    return None
 
 
 # do the same the other way around to get the parameter name from the alias again
-def get_alias_reverse(job, alias, path_to_yaml = "../src/read_write/config_aliases.yaml"):
-  """
-  reverse of the get alias function, i.e. returns the parameter name as used in the .star file when entering the 
-  alias. Kept seperate to keep reading and writing clearly separated to avoid errors. 
+  def get_alias_reverse(self,job, alias,):
+    """
+    reverse of the get alias function, i.e. returns the parameter name as used in the .star file when entering the 
+    alias. Kept seperate to keep reading and writing clearly separated to avoid errors. 
 
-  Args:
-    job (str): job name the parameter is used for.
-    alias (str): alias displayed instead of the parameter name.
+    Args:
+      job (str): job name the parameter is used for.
+      alias (str): alias displayed instead of the parameter name.
 
-  Returns:
-    parameter (str): parameter name as displayed in the job.star file.
+    Returns:
+      parameter (str): parameter name as displayed in the job.star file.
 
-  Example:
-    job
-  """
-  # path works for any module in the lib/app/ directory
-  with open(path_to_yaml, "r") as file:
-    yaml_data = yaml.safe_load(file)
-
-  # go through entries in the aliases dict
-  for entry in yaml_data["aliases"]:
-    # if the entry Job of one of the lists equals the given job or all and the entry Alias contains the given 
-    # parameter name, return the entry Parameter
-    if (entry["Job"] == job or entry["Job"] == "all") and entry["Alias"] == alias:
-      return entry["Parameter"]
-  return None
+    Example:
+      job
+    """
+    
+    # go through entries in the aliases dict
+    for entry in self.confdata["aliases"]:
+      # if the entry Job of one of the lists equals the given job or all and the entry Alias contains the given 
+      # parameter name, return the entry Parameter
+      if (entry["Job"] == job or entry["Job"] == "all") and entry["Alias"] == alias:
+        return entry["Parameter"]
+    return None
 
 
 def read_header(path_to_frames):
@@ -231,55 +195,8 @@ def load_config(microscope, path_to_yaml = "../config/config_microscopes.yaml"):
       return entry["Parameters"]
 
 
-def locate_val(job_name:str, var:str, job_dict = "joboptions_values", column_variable = "rlnJobOptionVariable", column_value = "rlnJobOptionValue"):
-  """
-  locates the value defined of the dict defined in the job_star_dict dictionary so it can be displayed and edited.
-
-  Args:
-    job_name (str): job name as str as it's stated in the job_star_dict ("importmovies", "motioncorr", "ctffind", "aligntilts", "reconstruction").
-    var (str): name of variable/parameter that should be changed (parameters as defined in the job.star files).
-    job_dict (str): dataframe that should be accessed inside the job defined in job_name (standard input is the df containing the parameters).
-    column_variable (str): column in the dataframe containing the parameters (standard input is the correct name).
-    column_value (str): column in the dataframe containing the values assigned to each parameter (standard input is the correct name).
-
-  Returns:
-    str: value that is currently assigned to the defined parameter of the defined job.
-  """
-  val = job_star_dict[job_name][job_dict].loc[job_star_dict[job_name][job_dict][column_variable] == var, column_value].values[0]
-  return val
 
 
-def update_job_star_dict(job_name, param, value):
-  """
-  updates the job_star_dict dictionary (containing all .star files of the repective jobs) with the values provided.
-
-  Args:
-    job_name (str): job name as str as it's stated in the job_star_dict ("importmovies", "motioncorr", "ctffind", "aligntilts", "reconstruction").
-    param (str): parameter that should be updated as str as it's called in the respective job.star file.
-    value (str): new value that should be placed in the job.star file for the set parameter.
-
-  Returns:
-    job_star_dict with updated value for respective parameter.
-  """
-  index = job_star_dict[job_name]["joboptions_values"].index[job_star_dict[job_name]["joboptions_values"]["rlnJobOptionVariable"] == param]
-  job_star_dict[job_name]["joboptions_values"].iloc[index, 1] = value
-  return job_star_dict
-
-
-def write_star(scheme_name, path_and_name):
-  """
-  reads a pd df and turns it into a .star file.
-
-  Args:
-    scheme_name (df): dataframe with the information of the star file.
-    path_and_name (str): path (including file name) to where the new file should be saved.
-
-  Returns:
-    .star file: star file at the given path.
-
-  """
-  df_as_star = starfile.write(scheme_name, path_and_name)
-  return df_as_star
 
 # %%
 # create Sphinx documentation: sphinx-build -M html docs/ docs/
@@ -344,12 +261,51 @@ class schemeMeta:
     self.jobs_in_scheme = self.scheme_star.dict["scheme_edges"].rlnSchemeEdgeOutputNodeName.iloc[1:-1]
     self.job_star = {
     f"{job}": starFileMeta(os.path.join(self.schemeFolderPath, f"{job}/job.star"))
-    for job in jobs_in_scheme}
+    for job in self.jobs_in_scheme}
     #self.scheme_star_dict = starFileMeta(self.schemeFilePath)
     self.nrJobs = len(self.jobs_in_scheme)
   
   def getJobOptions(self, jobName):
     return self.job_star[jobName].dict["joboptions_values"]   
+  
+  def locate_val(self,job_name:str,var:str):
+    """
+    locates the value defined of the dict defined in the job_star_dict dictionary so it can be displayed and edited.
+
+    Args:
+      job_name (str): job name as str as it's stated in the job_star_dict ("importmovies", "motioncorr", "ctffind", "aligntilts", "reconstruction").
+      var (str): name of variable/parameter that should be changed (parameters as defined in the job.star files).
+      job_dict (str): dataframe that should be accessed inside the job defined in job_name (standard input is the df containing the parameters).
+      column_variable (str): column in the dataframe containing the parameters (standard input is the correct name).
+      column_value (str): column in the dataframe containing the values assigned to each parameter (standard input is the correct name).
+
+    Returns:
+      str: value that is currently assigned to the defined parameter of the defined job.
+    """
+    job_dict = "joboptions_values", 
+    column_variable = "rlnJobOptionVariable" 
+    column_value = "rlnJobOptionValue"
+    val = self.job_star[job_name].dict[job_dict].loc[self.job_star[job_name].dict[job_dict][column_variable] == var, column_value].values[0]
+    return val
+  
+  def update_job_star_dict(self,job_name, param, value):
+      """
+      updates the job_star_dict dictionary (containing all .star files of the repective jobs) with the values provided.
+
+      Args:
+        job_name (str): job name as str as it's stated in the job_star_dict ("importmovies", "motioncorr", "ctffind", "aligntilts", "reconstruction").
+        param (str): parameter that should be updated as str as it's called in the respective job.star file.
+        value (str): new value that should be placed in the job.star file for the set parameter.
+
+      Returns:
+        job_star_dict with updated value for respective parameter.
+      """
+      index = self.job_star[job_name].dict["joboptions_values"].index[self.job_star[job_name].dict["joboptions_values"]["rlnJobOptionVariable"] == param]
+      self.job_star[job_name].dict["joboptions_values"].iloc[index, 1] = value
+      
+      return self.job_star[job_name].dict
+
+
   
   def write_scheme(self,schemeFolderPath):
      os.makedirs(schemeFolderPath, exist_ok=False)
