@@ -282,7 +282,6 @@ def write_star(scheme_name, path_and_name):
   return df_as_star
 
 # %%
-
 # create Sphinx documentation: sphinx-build -M html docs/ docs/
 # remove everything in the _build: make clean
 # update Sphinx documentation: make html
@@ -290,6 +289,47 @@ import pandas as pd
 from pathlib import Path
 from starfile import read as starread
 from starfile import write as starwrite
+
+class starFileMeta:
+  """_summary_
+
+  Raises:
+      Exception: _description_
+
+  Returns:
+      _type_: _description_
+  """
+  def __init__(self, starfile,always_dict = True):
+    
+    self.always_dict = always_dict
+    if isinstance(starfile, str):
+      self.starfilePath = starfile
+      self.readStar()
+    if isinstance(starfile, pd.DataFrame):
+      self.df = starfile
+      self.dict = None  
+    if isinstance(starfile, dict):
+      self.dict = starfile
+      self.df = None  
+    
+    
+  def readStar(self):
+    self.dict = starread(self.starfilePath, always_dict = self.always_dict)
+    if (len(self.dict.keys())==1):
+      self.df=self.dict[next(iter(self.dict.keys()))]
+    else:
+      self.df=None
+    
+  def writeStar(self,starfilePath):
+    
+    if isinstance(self.dict, dict):
+       starwrite(self.dict,starfilePath)
+       return
+    if isinstance(self.df, pd.DataFrame):
+        starwrite(self.df,starfilePath)
+        return
+    
+
 
 class schemeMeta:
   """
@@ -300,31 +340,28 @@ class schemeMeta:
     self.read_scheme()
   
   def read_scheme(self):
-    self.scheme_star_dict=starread(self.schemeFilePath)
-    self.jobs_in_scheme = self.scheme_star_dict["scheme_edges"].rlnSchemeEdgeOutputNodeName.iloc[1:-1]
-    self.job_star_dict = {
-    f"{job}": read_star(os.path.join(self.schemeFolderPath, f"{job}/job.star"))
+    self.scheme_star=starFileMeta(self.schemeFilePath)
+    self.jobs_in_scheme = self.scheme_star.dict["scheme_edges"].rlnSchemeEdgeOutputNodeName.iloc[1:-1]
+    self.job_star = {
+    f"{job}": starFileMeta(os.path.join(self.schemeFolderPath, f"{job}/job.star"))
     for job in jobs_in_scheme}
-    self.scheme_star_dict = starread(self.schemeFilePath)
+    #self.scheme_star_dict = starFileMeta(self.schemeFilePath)
     self.nrJobs = len(self.jobs_in_scheme)
   
   def getJobOptions(self, jobName):
-    return self.job_star_dict[jobName]["joboptions_values"]   
+    return self.job_star[jobName].dict["joboptions_values"]   
   
   def write_scheme(self,schemeFolderPath):
      os.makedirs(schemeFolderPath, exist_ok=False)
-     starwrite(self.scheme_star_dict,schemeFolderPath+os.path.sep+"scheme.star")
+     self.scheme_star.writeStar(schemeFolderPath+os.path.sep+"scheme.star")
 
     # repeat for all jobs, creating a job.star file in these directories
      for job in self.jobs_in_scheme:
         jobFold = schemeFolderPath+os.path.sep+job
         os.makedirs(jobFold, exist_ok=False)
-        job_star = self.job_star_dict[job]
-        write_star(job_star,jobFold+os.path.sep+"job.star")
+        job_star = self.job_star[job]
+        job_star.writeStar(jobFold+os.path.sep+"job.star")
         
-
-# %%
-
 
 class tiltSeriesMeta:
     """
@@ -383,16 +420,18 @@ class tiltSeriesMeta:
             >>> tilt_series_df = ts.readTiltSeries()
         """
         print("Reading: " + self.tiltseriesStarFile)
-        tilt_series_df = starread(self.tiltseriesStarFile)
-        self.nrTomo=tilt_series_df.shape[0]
+        tilt_series=starFileMeta(self.tiltseriesStarFile)
+        #tilt_series_df =tilt_series.dict[next(iter(tilt_series.dict.keys()))] 
+        self.nrTomo=tilt_series.df.shape[0]
         all_tilts_df = pd.DataFrame()
         tilt_series_tmp = pd.DataFrame()
         
         i = 0
-        for tilt_series in tilt_series_df["rlnTomoTiltSeriesStarFile"]:
-            tilt_star_df = read_star(self.relProjPath + tilt_series)
-            all_tilts_df = pd.concat([all_tilts_df, tilt_star_df], ignore_index=True)
-            tmp_df = pd.concat([tilt_series_df.iloc[[i]]] * tilt_star_df.shape[0], ignore_index=True)
+        for tilt_seriesName in tilt_series.df["rlnTomoTiltSeriesStarFile"]:
+           # tilt_star_df = read_star(self.relProjPath + tilt_series)
+            tilt_star=starFileMeta(self.relProjPath + tilt_seriesName)
+            all_tilts_df = pd.concat([all_tilts_df, tilt_star.df], ignore_index=True)
+            tmp_df = pd.concat([tilt_series.df.iloc[[i]]] * tilt_star.df.shape[0], ignore_index=True)
             tilt_series_tmp = pd.concat([tilt_series_tmp, tmp_df], ignore_index=True)
             i += 1
 
@@ -406,7 +445,7 @@ class tiltSeriesMeta:
           raise Exception("rlnMicrographName is not unique !!")        
 
         self.all_tilts_df = all_tilts_df
-        self.tilt_series_df = tilt_series_df
+        self.tilt_series_df = tilt_series.df
 
     def writeTiltSeries(self, tiltseriesStarFile, tiltSeriesStarFolder='tilt_series'):
         """
@@ -428,14 +467,17 @@ class tiltSeriesMeta:
         tsFold = os.path.dirname(tiltseriesStarFile) + os.path.sep + tiltSeriesStarFolder + os.path.sep
         ts_df['rlnTomoTiltSeriesStarFile'] = ts_df['rlnTomoTiltSeriesStarFile'].apply(lambda x: os.path.join(tsFold, os.path.basename(x)))
         os.makedirs(tsFold,exist_ok=True)
-        starwrite(ts_df, tiltseriesStarFile)
-
+        stTs=starFileMeta(ts_df)
+        stTs.writeStar(tiltseriesStarFile)
+       
         fold = os.path.dirname(tiltseriesStarFile)
         Path(fold + os.sep + tiltSeriesStarFolder).mkdir(exist_ok=True)
         for tilt_series in self.tilt_series_df["rlnTomoTiltSeriesStarFile"]:
             oneTs_df = self.all_tilts_df[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series].copy()
             oneTs_df.drop(self.tilt_series_df.columns, axis=1, inplace=True)
-            starwrite(oneTs_df, fold + os.sep + tiltSeriesStarFolder + os.sep + os.path.basename(tilt_series))
+            stOneTs=starFileMeta(oneTs_df)
+            stOneTs.writeStar(fold + os.sep + tiltSeriesStarFolder + os.sep + os.path.basename(tilt_series))
+           
             
     def filterTilts(self, fitlterParams):
       """
