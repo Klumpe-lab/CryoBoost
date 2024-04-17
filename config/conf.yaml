@@ -61,6 +61,8 @@ microscopes:
       - Spherical aberration: 2.7
       - kV: 300
       - q Submission Script: ../../../01-Data/relion/qsub_gpu_Relion5.sh
+      
+    
       # Camera =
 
   - Microscope: Titan Krios 5
@@ -70,3 +72,10 @@ microscopes:
       - kV: test
       - q Submission Script: ho-ho-ho
       # Camera =
+   
+  - Microscope: Titan Krios 2
+    Parameters:
+      # microscope = Titan Krios:
+      - Spherical aberration: 2.8
+      - kV: 330
+      - q Submission Script: mySub    

@@ -3,23 +3,15 @@ import os
 from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow, QDialog, QComboBox, QTabWidget, QWidget
 from PyQt6.QtCore import Qt
-
-
-current_dir = os.path.dirname(os.path.abspath(__name__))
-# change the path to be until src
-root_dir = os.path.abspath(os.path.join(current_dir, '../'))
-sys.path.append(root_dir)
-#from lib.functions import get_value_from_tab
-#from src.gui.libGui import browse_dirs, change_values, update_df, abs_to_loc_path
-#from src.rw.librw import scheme_star_dict, job_star_dict, jobs_in_scheme, get_alias, get_alias_reverse, load_config, read_mdoc, read_header, write_star
-from src.gui.libGui import change_values,browse_dirs
+from src.gui.libGui import change_values,browse_dirs,abs_to_loc_path,update_df
 from src.rw.librw import schemeMeta,cbconfig,read_mdoc
+
 
 class MainUI(QMainWindow):
     """
     Main window of the UI.
     """
-    def __init__(self):
+    def __init__(self,args):
         """
         Setting up the buttons in the code and connecting them to their respective functions.
         """ 
@@ -35,20 +27,27 @@ class MainUI(QMainWindow):
         self.line_path_mdocs.textChanged.connect(self.loadPathMdocs)
         self.btn_browse_mdocs.clicked.connect(self.browsePathMdocs)
         self.btn_use_movie_path.clicked.connect(self.mdocs_use_movie_path)
-        self.dropDown_config.addItem("Choose Microscope Set-Up")
-        self.dropDown_config.addItem("Titan Krios 4")
-        self.dropDown_config.addItem("Titan Krios 5")
         self.dropDown_config.activated.connect(self.loadConfig)
         self.btn_browse_target.clicked.connect(self.browsePathTarget)
         self.btn_writeStar.clicked.connect(self.changeDf)
         self.btn_writeStar.clicked.connect(self.writeStar)
-        #constants
+        #custom varibales
         self.cbdat = type('', (), {})() 
-        self.cbdat.defaultSchemePath="./config/master_scheme"
-        self.cbdat.confPath="./config/conf.yaml"
+        self.cbdat.CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
+        self.cbdat.defaultSchemePath=self.cbdat.CRYOBOOST_HOME + "/config/master_scheme"
+        self.cbdat.confPath=self.cbdat.CRYOBOOST_HOME + "/config/conf.yaml"
         self.cbdat.scheme=schemeMeta(self.cbdat.defaultSchemePath)
         self.cbdat.conf=cbconfig(self.cbdat.confPath)
-            
+        
+        #change to be gernic from config
+        self.dropDown_config.addItem("Choose Microscope Set-Up")
+        for i in self.cbdat.conf.microscope_presets:
+            self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
+        
+        #set command line arguments
+        self.makeJobTabs()
+        self.line_path_mdocs.setText(args.mdocs)    
+        self.line_path_movies.setText(args.movies)
 
     def makeJobTabs(self):
         """
@@ -149,7 +148,7 @@ class MainUI(QMainWindow):
         # go to the importmovies tab by getting the index where importmovies is
         # if mdoc also has parameters for other jobs, have to loop through here
         for current_tab in self.cbdat.scheme.jobs_in_scheme:
-            index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_schem == current_tab].index
+            index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
             self.tabWidget.setCurrentIndex(index_import.item())
             # find the  copy the text of the input field to the path to file, check for aliases of the field, and
             # iterate over the parameters of the header to input them too
@@ -168,11 +167,7 @@ class MainUI(QMainWindow):
         microscope = self.dropDown_config.currentText()
         # only do something if a microscope is chosen
         if microscope != "Choose Microscope Set-Up":
-            microscope_parameters_list_of_dicts = self.cbdat.conf.confdata['microscope']
-            microscope_parameters = {}
-            for dicts in microscope_parameters_list_of_dicts:
-                microscope_parameters.update(dicts)
-
+            microscope_parameters=self.cbdat.conf.get_microscopePreSet(microscope)
             # exclude the first tab (= set up)
             for job_tab_index in range(1, len(self.cbdat.scheme.jobs_in_scheme) + 1):
                 # go to the tabs based on their index
@@ -210,6 +205,7 @@ class MainUI(QMainWindow):
             self.line_path_mdocs.setText("./" + self.name_new_frames_dir + "/")
         self.line_path_movies.setText("./" + self.name_new_frames_dir + "/")
 
+        jobs_in_scheme = self.cbdat.scheme.jobs_in_scheme
         # exclude the first tab (= set up)
         for job_tab_index in range(1, len(jobs_in_scheme) + 1):
             # save the name of the job based on the index (tabs also created in order of the index --> is the same)
@@ -223,7 +219,7 @@ class MainUI(QMainWindow):
             nRows = table_widget.rowCount()
             nColumns = table_widget.columnCount()
             # iterate through the table and access each row
-            update_df(job_star_dict, table_widget, nRows, nColumns, job)
+            update_df(self.cbdat.scheme.job_star_dict, table_widget, nRows, nColumns, job)
         # in the end, go back to the start relion tab from where the command was started (range excludes last entry)
         self.tabWidget.setCurrentIndex(len(jobs_in_scheme) + 1)
 
@@ -238,17 +234,9 @@ class MainUI(QMainWindow):
         self.path_to_new_project = self.line_path_new_project.text()
 
         # create the master_scheme dict (where all other jobs are in) at the position set
-        path_scheme_star = os.path.join(self.path_to_new_project, "Schemes/master_scheme/scheme.star")
-        # make a directory with this path and raise an error if such a directory already exists
-        os.makedirs(path_scheme_star, exist_ok=False)
-        write_star(scheme_star_dict, path_scheme_star)
-
-        # repeat for all jobs, creating a job.star file in these directories
-        for job in jobs_in_scheme:
-            path = os.path.join(self.path_to_new_project, f"Schemes/master_scheme/{job}/job.star")
-            os.makedirs(path, exist_ok=False)
-            job_star = job_star_dict[job]
-            write_star(job_star, path)
+        path_scheme = os.path.join(self.path_to_new_project, "Schemes/master_scheme/")
+        # make a directory with this path and raise an error if such a directory alr1eady exists
+        self.cbdat.scheme.writeStar(path_scheme)
 
 
 if __name__ == "__main__":

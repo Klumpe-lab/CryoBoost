@@ -12,6 +12,7 @@ class cbconfig:
   def __init__(self,configPath):
     self.configPath = configPath
     self.read_config()
+    self.get_microscopePreSetNames()
 
   def read_config(self):
     """
@@ -49,9 +50,37 @@ class cbconfig:
       if (entry["Job"] == job or entry["Job"] == "all") and entry["Parameter"] == parameter:
         return entry["Alias"]
     return None
-
-
-# do the same the other way around to get the parameter name from the alias again
+  
+  
+  def get_microscopePreSet(self,microscope):
+      mic_data= self.confdata['microscopes']
+      for entry in mic_data:
+          if entry["Microscope"] == microscope:
+              microscope_parameters_list_of_dicts= entry["Parameters"]
+      
+      microscope_parameters = {}
+      for dicts in microscope_parameters_list_of_dicts:
+          microscope_parameters.update(dicts)
+      
+      return microscope_parameters    
+  
+  def get_microscopePreSetNames(self):
+      mic_data = self.confdata['microscopes']
+      microscope_presets = {}  # Initialize an empty dictionary
+      for i, entry in enumerate(mic_data):  # Use enumerate to get both index and entry
+        microscope_presets[i] = entry["Microscope"]
+      self.microscope_presets=microscope_presets
+      
+      return microscope_presets
+      
+      
+      # mic_data= self.confdata['microscopes']
+      # for entry in mic_data:
+      #      microscope_presets[i]= entry["Microscope"]
+      
+      # return microscope_presets
+      
+  
   def get_alias_reverse(self,job, alias,):
     """
     reverse of the get alias function, i.e. returns the parameter name as used in the .star file when entering the 
@@ -164,38 +193,6 @@ def read_mdoc(path_to_mdoc_dir, path_to_yaml = "../src/read_write/config_reading
                 else:      
                   return_mdoc_data[yaml_alias] = mdoc_current_line_value
   return(return_mdoc_data) 
-
-
-def load_config(microscope, path_to_yaml = "../config/config_microscopes.yaml"):
-  """
-  reads the config_microscopes.yaml file, looks for the chosen microscope setup, and returns a list of dicts
-  containing the parameters that are solely based on the setup.
-
-  Args:
-    microscope (str): the name of the microscope setup.
-
-  Returns:
-    entry["Parameters"] (list): a list of dicts, with each dict containing one parameter name and the associated value.
-
-  Example:
-  microscope = "Titan Krios 4"
-  
-    when the input is "Titan Krios 4", as it is when choosing this setup in the ui, the config_microscopes.yaml
-    file will be opened and the list "microscopes" will be searched for a dict where the entry "Microscope" is 
-    "Titan Krios 4". If this is found, the list saved under the key "Parameters" of the same dict, containing a 
-    dict for every parameter solely determined by the setup (key = parameter, value = associated value), will be returned.
-  """
-  with open(path_to_yaml, "r") as file:
-    yaml_data = yaml.safe_load(file)
-  # go through entries in the microscopes dict
-  for entry in yaml_data["microscopes"]:
-    # look for an entry that equals the selected microscope
-    if entry["Microscope"] == microscope:
-      # return the list (containing a dict for each parameter) at the entry Parameters
-      return entry["Parameters"]
-
-
-
 
 
 # %%
