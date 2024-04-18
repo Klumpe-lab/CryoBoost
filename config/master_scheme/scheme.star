@@ -44,7 +44,7 @@ _rlnSchemeJobName #2
 _rlnSchemeJobMode #3 
 _rlnSchemeJobHasStarted #4 
 aligntilts AlignTiltSeries/job109/   continue            1 
-   ctffind CtfFind/job107/   continue            1 
+ctffind CtfFind/job107/   continue            1 
 exclude_rule_based External/job108/   continue            1
 feature_analysis  External/   continue    1
 importmovies ImportTomo/job105/   continue            1 

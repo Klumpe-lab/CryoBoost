@@ -22,6 +22,15 @@ def test_writeScheme():
     assert (sc.jobs_in_scheme == scnew.jobs_in_scheme).all()   
     for job in sc.jobs_in_scheme:
         assert (sc.job_star[job].dict['joboptions_values'] == scnew.job_star[job].dict['joboptions_values']).all().all()
-        
+ 
+def test_filterScheme():
+     inputScheme='config/master_scheme/'
+     nodesToFilter={0:"importmovies",1:"motioncorr",2:"ctffind",
+                    3:"aligntilts",4:"reconstruction"}
+     
+     sc=schemeMeta(inputScheme)
+     scFilt=sc.filterSchemeByNodes(nodesToFilter)
+     
+     assert 1==1      
 
     

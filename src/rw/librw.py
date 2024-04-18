@@ -51,6 +51,8 @@ class cbconfig:
         return entry["Alias"]
     return None
   
+  def getJobOutput(self, jobName):
+    return self.confdata["star_file"][jobName]
   
   def get_microscopePreSet(self,microscope):
       mic_data= self.confdata['microscopes']
@@ -203,6 +205,7 @@ import pandas as pd
 from pathlib import Path
 from starfile import read as starread
 from starfile import write as starwrite
+import copy
 
 class starFileMeta:
   """_summary_
@@ -249,9 +252,14 @@ class schemeMeta:
   """
   """
   def __init__(self, schemeFolderPath):
+    self.CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
+    self.conf=cbconfig(self.CRYOBOOST_HOME + "/config/conf.yaml")
     self.schemeFilePath=schemeFolderPath+os.path.sep+"scheme.star"
     self.schemeFolderPath=schemeFolderPath
     self.read_scheme()
+    
+
+    
   
   def read_scheme(self):
     self.scheme_star=starFileMeta(self.schemeFilePath)
@@ -265,6 +273,67 @@ class schemeMeta:
   def getJobOptions(self, jobName):
     return self.job_star[jobName].dict["joboptions_values"]   
   
+  def filterSchemeByNodes(self, nodes):
+    
+    scFilt=copy.deepcopy(self)
+    filtEdges_df=self.filterEdgesByNodes(self.scheme_star.dict["scheme_edges"], nodes)
+    jobStar_dict=self.job_star
+    schemeJobs_df=self.scheme_star.dict["scheme_jobs"]
+    jobStar_dictFilt=self.filterjobStarByNodes(jobStar_dict,nodes)
+    #schemeJobs_dfFilt=self.filterSchemeJobsByNodes(schemeJobs_df,nodes)
+    scFilt.scheme_star.dict["scheme_edges"]=filtEdges_df
+    scFilt.job_star=jobStar_dictFilt
+    scFilt.nrJobs =len(scFilt.job_star)
+    scFilt.jobs_in_scheme = scFilt.scheme_star.dict["scheme_edges"].rlnSchemeEdgeOutputNodeName.iloc[1:-1]
+    
+    return scFilt   
+  
+  
+  def filterjobStarByNodes(self,jobStarDict,nodes): 
+    
+    schemeJobs_dfFilt={}
+    for nodeid, node in nodes.items():
+      schemeJobs_dfFilt[node]=jobStarDict[node]
+      if (nodeid>0):
+          indMinusOne=nodes[nodeid-1]
+          input=self.scheme_star.dict["scheme_general"]["rlnSchemeName"]+self.conf.getJobOutput(indMinusOne)
+          #input="Muhhhhhhh"
+          df=schemeJobs_dfFilt[node].dict["joboptions_values"]
+          ind=df.rlnJobOptionVariable=="input_star_mics"
+          if not any(ind):
+             ind=df.rlnJobOptionVariable=="in_tiltseries" 
+          if not any(ind):
+             raise Exception("nether input_star_mics nor in_tiltseries found")
+          
+          # Get the index of the row to update
+          row_index = schemeJobs_dfFilt[node].dict["joboptions_values"].index[ind]
+          schemeJobs_dfFilt[node].dict["joboptions_values"].loc[row_index, "rlnJobOptionValue"] = input
+          #schemeJobs_dfFilt[node].dict["joboptions_values"].loc[ind].rlnJobOptionValue=input  
+          
+          
+    return schemeJobs_dfFilt 
+  
+  
+  def filterSchemeJobsByNodes(self,jobs_df,jobStarDict,nodes): 
+    pass
+    return schemeJobs_dfFilt 
+  
+  def filterEdgesByNodes(self,edge_df, nodes):     
+    
+    tmpEdge=edge_df.loc[0:0].copy(deep=True)
+    schemeEdge_df=tmpEdge
+    for nodeid, node in nodes.items(): 
+        dfOneEdge=tmpEdge.copy(deep=True)
+        dfOneEdge["rlnSchemeEdgeInputNodeName"]=schemeEdge_df.loc[nodeid].rlnSchemeEdgeOutputNodeName
+        dfOneEdge["rlnSchemeEdgeOutputNodeName"]=node
+        schemeEdge_df=pd.concat([schemeEdge_df,dfOneEdge],ignore_index=True) 
+    dfOneEdge=tmpEdge
+    dfOneEdge["rlnSchemeEdgeInputNodeName"]=schemeEdge_df.iloc[-1].rlnSchemeEdgeOutputNodeName
+    dfOneEdge["rlnSchemeEdgeOutputNodeName"]="WAIT"
+    schemeEdge_df=pd.concat([schemeEdge_df,dfOneEdge],ignore_index=True) 
+    
+    return schemeEdge_df
+      
   def locate_val(self,job_name:str,var:str):
     """
     locates the value defined of the dict defined in the job_star_dict dictionary so it can be displayed and edited.

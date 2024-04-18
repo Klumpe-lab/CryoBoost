@@ -9,7 +9,12 @@ current_dir = os.path.dirname(os.path.abspath(__name__))
 root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
 
-
+def get_inputNodesFromSchemeTable(table_widget,jobsOnly=True):
+    
+    inputNodes={}
+    for row in range(table_widget.rowCount()):
+        inputNodes[row]=table_widget.item(row,0).text()        
+    return inputNodes
 
 def browse_dirs(target_field):
     """

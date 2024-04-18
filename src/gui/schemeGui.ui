@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>813</width>
-    <height>629</height>
+    <height>649</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,15 +31,8 @@
        <attribute name="title">
         <string>Jobs and Set-Up</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QPushButton" name="btn_makeJobTabs">
-          <property name="text">
-           <string>Set Jobs</string>
-          </property>
-         </widget>
-        </item>
-        <item>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="3" rowspan="3">
          <widget class="QGroupBox" name="groupBox_in_paths">
           <property name="title">
            <string>Paths and Set-Up</string>
@@ -54,9 +47,6 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLineEdit" name="line_path_movies"/>
-             </item>
              <item row="13" column="0">
               <widget class="QComboBox" name="dropDown_config"/>
              </item>
@@ -67,19 +57,8 @@
                </property>
               </widget>
              </item>
-             <item row="7" column="1">
-              <widget class="QPushButton" name="btn_browse_mdocs">
-               <property name="text">
-                <string>Browse</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QPushButton" name="btn_browse_movies">
-               <property name="text">
-                <string>Browse</string>
-               </property>
-              </widget>
+             <item row="1" column="0">
+              <widget class="QLineEdit" name="line_path_movies"/>
              </item>
              <item row="7" column="0">
               <widget class="QLineEdit" name="line_path_mdocs"/>
@@ -88,13 +67,6 @@
               <widget class="QLabel" name="lbl_path_movies">
                <property name="text">
                 <string>Path to movies directory:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="10" column="1">
-              <widget class="QPushButton" name="btn_use_movie_path">
-               <property name="text">
-                <string>Same as path to movies</string>
                </property>
               </widget>
              </item>
@@ -112,10 +84,48 @@
                </property>
               </widget>
              </item>
+             <item row="10" column="1">
+              <widget class="QPushButton" name="btn_use_movie_path">
+               <property name="text">
+                <string>Same as path to movies</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="btn_browse_movies">
+               <property name="text">
+                <string>Browse</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="1">
+              <widget class="QPushButton" name="btn_browse_mdocs">
+               <property name="text">
+                <string>Browse</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
           </layout>
          </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="btn_makeJobTabs">
+          <property name="text">
+           <string>Set Jobs</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="check_edit_scheme">
+          <property name="text">
+           <string>Edit Scheme</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QTableWidget" name="table_scheme"/>
         </item>
        </layout>
       </widget>

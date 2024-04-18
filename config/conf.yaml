@@ -78,4 +78,13 @@ microscopes:
       # microscope = Titan Krios:
       - Spherical aberration: 2.8
       - kV: 330
-      - q Submission Script: mySub    
+      - q Submission Script: mySub
+
+star_file:
+
+  importmovies: importmovies/tilt_series.star
+  motioncorr: motioncorr/corrected_tilt_series.star
+  ctffind: ctffind/tilt_series_ctf.star
+  feature_analysis: feature_analysis/feature_analysis.star
+  exclude_rule_based: exclude_rule_based/excluded_tilts_rule.star
+  aligntilts: aligntilts/aligned_tilt_series.star        
