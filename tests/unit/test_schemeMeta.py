@@ -31,6 +31,7 @@ def test_filterScheme():
      sc=schemeMeta(inputScheme)
      scFilt=sc.filterSchemeByNodes(nodesToFilter)
      
-     assert 1==1      
+     
+     assert list(nodesToFilter.values()) == list(scFilt.jobs_in_scheme)     
 
     

@@ -22,7 +22,7 @@ class MainUI(QMainWindow):
     """
     Main window of the UI.
     """
-    def __init__(self):
+    def __init__(self,args):
         """
         Setting up the buttons in the code and connecting them to their respective functions.
         """ 
@@ -274,13 +274,13 @@ class MainUI(QMainWindow):
  
         # go to the importmovies tab by getting the index where importmovies is
         # if header also has parameters for other jobs, have to loop through here
-        for current_tab in self.jobs_in_scheme:
-            index_import = self.jobs_in_scheme[self.jobs_in_scheme == current_tab].index
+        for current_tab in self.cbdat.scheme.jobs_in_scheme:
+            index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
             self.tabWidget.setCurrentIndex(index_import.item())
             # find the  copy the text of the input field to the path to file, check for aliases of the field, and
             # iterate over the parameters of the header to input them too
             table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
-            change_values(table_widget, params_dict_movies, self.jobs_in_scheme)
+            change_values(table_widget, params_dict_movies, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
         # go back to setup tab
         self.tabWidget.setCurrentIndex(0)
 
@@ -310,13 +310,13 @@ class MainUI(QMainWindow):
             pass
         # go to the importmovies tab by getting the index where importmovies is
         # if mdoc also has parameters for other jobs, have to loop through here
-        for current_tab in self.jobs_in_scheme:
-            index_import = self.jobs_in_scheme[self.jobs_in_scheme == current_tab].index
+        for current_tab in self.cbdat.scheme.jobs_in_scheme:
+            index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
             self.tabWidget.setCurrentIndex(index_import.item())
             # find the  copy the text of the input field to the path to file, check for aliases of the field, and
             # iterate over the parameters of the header to input them too
             table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
-            change_values(table_widget, params_dict_mdoc, self.jobs_in_scheme)
+            change_values(table_widget, params_dict_mdoc, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
         # go back to setup tab
         self.tabWidget.setCurrentIndex(0)
         
@@ -370,9 +370,9 @@ class MainUI(QMainWindow):
         self.line_path_movies.setText("./" + self.name_new_frames_dir + "/")
 
         # exclude the first tab (= set up)
-        for job_tab_index in range(1, len(self.jobs_in_scheme) + 1):
+        for job_tab_index in range(1, len(self.cbdat.scheme.jobs_in_scheme) + 1):
             # save the name of the job based on the index (tabs also created in order of the index --> is the same)
-            job = self.jobs_in_scheme[job_tab_index]
+            job = self.cbdat.scheme.jobs_in_scheme[job_tab_index]
             #job_name = self.tabWidget.tabText(job_tab)
             # go to the tabs based on their index
             self.tabWidget.setCurrentIndex(job_tab_index)
@@ -382,9 +382,9 @@ class MainUI(QMainWindow):
             nRows = table_widget.rowCount()
             nColumns = table_widget.columnCount()
             # iterate through the table and access each row
-            update_df(self.job_star_dict, table_widget, nRows, nColumns, job)
+            update_df(self.cbdat.scheme.job_star, table_widget, nRows, nColumns, job,self.cbdat.conf)
         # in the end, go back to the start relion tab from where the command was started (range excludes last entry)
-        self.tabWidget.setCurrentIndex(len(self.jobs_in_scheme) + 1)
+        self.tabWidget.setCurrentIndex(len(self.cbdat.scheme.jobs_in_scheme) + 1)
 
 
     def writeStar(self):
@@ -397,9 +397,9 @@ class MainUI(QMainWindow):
         self.path_to_new_project = self.line_path_new_project.text()
 
         # create the master_scheme dict (where all other jobs are in) at the position set
-        path_scheme = os.path.join(self.path_to_new_project, "Schemes/master_scheme/scheme.star")
+        path_scheme = os.path.join(self.path_to_new_project, "Schemes/master_scheme/")
         # make a directory with this path and raise an error if such a directory already exists
-        self.cbdat.scheme.writeStar(path_scheme)
+        self.cbdat.scheme.write_scheme(path_scheme)
        
 
 

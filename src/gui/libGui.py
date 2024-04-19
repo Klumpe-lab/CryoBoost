@@ -129,7 +129,7 @@ def update_df(job_star_dict, table_widget, table_nRows, table_nCols, current_job
                     # param_name = original_param_name
                     value = original_param_name     
             # insert value at the position defined by the index of the table
-            job_star_dict[current_job_tab]["joboptions_values"].iloc[row, col] = value
+            job_star_dict[current_job_tab].dict["joboptions_values"].iloc[row, col] = value
     return(job_star_dict)
 
 

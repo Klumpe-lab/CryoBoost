@@ -9,6 +9,13 @@ __pycache__/
 #raw Data   
 data/raw
 
+#laucnhjson
+launch*.json
+launch.json
+
+#swap
+.*.kate-swp
+
 # Miscellaneous
 .DS_Store
 

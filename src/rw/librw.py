@@ -316,7 +316,7 @@ class schemeMeta:
   
   def filterSchemeJobsByNodes(self,jobs_df,jobStarDict,nodes): 
     pass
-    return schemeJobs_dfFilt 
+    return 1 
   
   def filterEdgesByNodes(self,edge_df, nodes):     
     
