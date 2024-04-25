@@ -57,7 +57,7 @@ def test_filterTiltsRule(test_input):
                          [({"rlnCtfMaxResolution": (1,20,-70,70)}), 
                           ({"rlnDefocusU": (1,50000,-70,70)}), 
                           ({"rlnAccumMotionTotal": (1,10,-70,70)}), 
-                          ({"model": "data/models/model.pkl"})],
+                          ({"model": "default"})],
                            ids=lambda val: idfn(val, {'function_name': 'filterTilts'}))
 @pytest.mark.filter_tests
 def test_fitlerTilts(test_input):

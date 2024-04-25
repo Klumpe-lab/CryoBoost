@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/fs/pool/pool-fbeck/projects/4TomoPipe/trainClassifyer/softFastAI/conda3/bin/python 
 import argparse
 import os
 import sys
@@ -32,6 +32,10 @@ def main():
             filterParams[arg] = [float(num) for num in value.split(',')]   
     
     filterTitls(args.in_mics,relionProj='',pramRuleFilter=filterParams,model=args.model,plot=None,outputFolder=args.out_dir)
+    print("filtering done")
+    successName=args.out_dir + "/RELION_JOB_EXIT_SUCCESS"
+    with open(successName, 'a'):
+        os.utime(successName, None)
     
     
 if __name__ == '__main__':

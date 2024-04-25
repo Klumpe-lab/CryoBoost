@@ -49,8 +49,8 @@ part_tomos         ""
 qsub_extra1          3 
 qsub_extra2          3 
 qsub_extra3    p.hpcl8 
-qsub_extra4      gpu:2 
-qsubscript ../../qsub_gpu_Relion5.sh 
+qsub_extra4     2 
+qsubscript    qsub/qsub_hpcl89.sh 
  queuename    openmpi 
 tilt_axis_angle        -95 
  tomo_star         "" 

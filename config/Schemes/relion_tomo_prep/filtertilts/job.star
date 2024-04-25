@@ -16,26 +16,26 @@ loop_
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
   do_queue         No 
-    fn_exe ../../../../00-Other/CryoTheraPy/bin/parser_feature_analyser.py 
+    fn_exe /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/bin/crboost_filterTitlts.py
   in_3dref         "" 
  in_coords         "" 
    in_mask         "" 
-    in_mic Schemes/master_scheme/ctffind/tilt_series_ctf.star 
+    in_mic         Schemes/relion_tomo_prep/ctffind/tilt_series_ctf.star
     in_mov         "" 
    in_part         "" 
 min_dedicated          1 
-nr_threads          1 
+nr_threads          20
 other_args         "" 
 param10_label         "" 
 param10_value         "" 
-param1_label         y1 
-param1_value rlnCtfMaxResolution 
-param2_label         "" 
-param2_value         "" 
-param3_label         "" 
-param3_value         "" 
-param4_label         "" 
-param4_value         "" 
+param1_label      model 
+param1_value      default
+param2_label      defocusInAng
+param2_value      2000,140000,-70,70 
+param3_label      ctfMaxResolution
+param3_value      0,50,-70,70 
+param4_label      driftInAng
+param4_value      1,90000,-70,70    
 param5_label         "" 
 param5_value         "" 
 param6_label         "" 
@@ -50,7 +50,7 @@ param9_value         ""
 qsub_extra1          3 
 qsub_extra2          3 
 qsub_extra3    p.hpcl8 
-qsub_extra4      gpu:2 
-qsubscript /fs/pool/pool-bmapps/hpcl8/app/soft/RELION/5.0-beta-1//scripts/qsub.sh 
+qsub_extra4      2 
+qsubscript    qsub/qsub_hpcl89.sh 
  queuename    openmpi 
  

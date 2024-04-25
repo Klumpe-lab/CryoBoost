@@ -18,7 +18,7 @@ _rlnJobOptionValue #2
 binned_angpix      11.72 
   do_queue        Yes 
 generate_split_tomograms         No 
-in_tiltseries Schemes/master_scheme/aligntilts/aligned_tilt_series.star
+in_tiltseries Schemes/relion_tomo_prep/aligntilts/aligned_tilt_series.star
 min_dedicated          1 
     nr_mpi          3 
 nr_threads          2 

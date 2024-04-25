@@ -297,11 +297,13 @@ class schemeMeta:
       if (nodeid>0):
           indMinusOne=nodes[nodeid-1]
           input=self.scheme_star.dict["scheme_general"]["rlnSchemeName"]+self.conf.getJobOutput(indMinusOne)
-          #input="Muhhhhhhh"
+          
           df=schemeJobs_dfFilt[node].dict["joboptions_values"]
           ind=df.rlnJobOptionVariable=="input_star_mics"
           if not any(ind):
              ind=df.rlnJobOptionVariable=="in_tiltseries" 
+          if not any(ind):
+             ind=df.rlnJobOptionVariable=="in_mic"
           if not any(ind):
              raise Exception("nether input_star_mics nor in_tiltseries found")
           
@@ -374,13 +376,13 @@ class schemeMeta:
 
   
   def write_scheme(self,schemeFolderPath):
-     os.makedirs(schemeFolderPath, exist_ok=False)
+     os.makedirs(schemeFolderPath, exist_ok=True)
      self.scheme_star.writeStar(schemeFolderPath+os.path.sep+"scheme.star")
 
     # repeat for all jobs, creating a job.star file in these directories
      for job in self.jobs_in_scheme:
         jobFold = schemeFolderPath+os.path.sep+job
-        os.makedirs(jobFold, exist_ok=False)
+        os.makedirs(jobFold, exist_ok=True)
         job_star = self.job_star[job]
         job_star.writeStar(jobFold+os.path.sep+"job.star")
         
@@ -489,7 +491,9 @@ class tiltSeriesMeta:
         tsFold = os.path.dirname(tiltseriesStarFile) + os.path.sep + tiltSeriesStarFolder + os.path.sep
         ts_df['rlnTomoTiltSeriesStarFile'] = ts_df['rlnTomoTiltSeriesStarFile'].apply(lambda x: os.path.join(tsFold, os.path.basename(x)))
         os.makedirs(tsFold,exist_ok=True)
-        stTs=starFileMeta(ts_df)
+        ts_dict={}
+        ts_dict['global']=ts_df
+        stTs=starFileMeta(ts_dict)
         stTs.writeStar(tiltseriesStarFile)
        
         fold = os.path.dirname(tiltseriesStarFile)
@@ -497,7 +501,10 @@ class tiltSeriesMeta:
         for tilt_series in self.tilt_series_df["rlnTomoTiltSeriesStarFile"]:
             oneTs_df = self.all_tilts_df[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series].copy()
             oneTs_df.drop(self.tilt_series_df.columns, axis=1, inplace=True)
-            stOneTs=starFileMeta(oneTs_df)
+            tomoName = self.all_tilts_df.loc[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series, 'rlnTomoName'].unique()[0]
+            oneTS_dict={}
+            oneTS_dict[tomoName]=oneTs_df
+            stOneTs=starFileMeta(oneTS_dict)
             stOneTs.writeStar(fold + os.sep + tiltSeriesStarFolder + os.sep + os.path.basename(tilt_series))
            
             

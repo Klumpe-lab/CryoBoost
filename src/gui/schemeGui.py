@@ -32,11 +32,12 @@ class MainUI(QMainWindow):
         #custom varibales
         self.cbdat = type('', (), {})() 
         self.cbdat.CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
-        self.cbdat.defaultSchemePath=self.cbdat.CRYOBOOST_HOME + "/config/master_scheme"
+        self.cbdat.defaultSchemePath=self.cbdat.CRYOBOOST_HOME + "/config/Schemes/relion_tomo_prep/"
         self.cbdat.confPath=self.cbdat.CRYOBOOST_HOME + "/config/conf.yaml"
         self.cbdat.scheme=schemeMeta(self.cbdat.defaultSchemePath)
         self.cbdat.conf=cbconfig(self.cbdat.confPath)     
-       
+        self.cbdat.args=args
+        
         self.btn_makeJobTabs.clicked.connect(self.makeJobTabs)
         self.groupBox_in_paths.setEnabled(False)
         # have now put to textChanged --> every key entered updates it. If it takes too long to iterate every
@@ -67,16 +68,23 @@ class MainUI(QMainWindow):
         self.dropDown_config.addItem("Choose Microscope Set-Up")
         for i in self.cbdat.conf.microscope_presets:
             self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
+            
+        if (self.cbdat.args.autoGen):
+            self.makeJobTabs()
+            
     def makeJobTabs(self):
         """
         insert a new tab for every job and place a table with the parameters found in the respective job.star
         file in the ["joboptions_values"] df.
         """
-        if self.check_edit_scheme.isChecked():
+        if ((self.check_edit_scheme.isChecked()) and (self.cbdat.args.autoGen == False)):
             EditScheme(self.table_scheme, self).exec()
+        
         inputNodes=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
+        
         self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes)
         
+
         # define where the new tabs should be inserted so all tabs can be used in order             
         first_insert_position = 1
         # loop through the jobs and create a tab for each job
@@ -118,6 +126,14 @@ class MainUI(QMainWindow):
             tab_layout.addWidget(self.table)
             #self.table.setMinimumSize(1500, 400)            
             first_insert_position += 1
+        
+        if (self.cbdat.args.mdocs != None):
+            self.line_path_mdocs.setText(self.cbdat.args.mdocs)
+        if (self.cbdat.args.movies != None):
+             self.line_path_movies.setText(self.cbdat.args.movies)
+        if (self.cbdat.args.proj != None):
+             self.line_path_new_project.setText(self.cbdat.args.proj)
+             
         # make groupBox_in_paths available so it can only be used after the tabs are created (--> can load in data)
         self.groupBox_in_paths.setEnabled(True)
 
@@ -362,9 +378,13 @@ class MainUI(QMainWindow):
         self.name_new_mdocs_dir = self.line_path_mdocs.text().split("/")[-2]
 
         abs_to_loc_path(self.line_path_movies.text(), self.line_path_mdocs.text(), self.path_to_new_project)
+        
+        import shutil
+        shutil.copytree(os.getenv("CRYOBOOST_HOME") + "/config/qsub", self.path_to_new_project + os.path.sep + "qsub",dirs_exist_ok=True)
+        
 
         if self.line_path_mdocs.text() != self.line_path_movies.text():
-            self.line_path_mdocs.setText("./" + self.name_new_mdocs_dir)
+            self.line_path_mdocs.setText("./" + self.name_new_mdocs_dir + "/")
         else:
             self.line_path_mdocs.setText("./" + self.name_new_frames_dir + "/")
         self.line_path_movies.setText("./" + self.name_new_frames_dir + "/")
@@ -397,7 +417,11 @@ class MainUI(QMainWindow):
         self.path_to_new_project = self.line_path_new_project.text()
 
         # create the master_scheme dict (where all other jobs are in) at the position set
-        path_scheme = os.path.join(self.path_to_new_project, "Schemes/master_scheme/")
+        
+        if not os.path.exists(self.path_to_new_project):
+            os.makedirs(self.path_to_new_project)
+        
+        path_scheme = os.path.join(self.path_to_new_project, self.cbdat.scheme.scheme_star.dict['scheme_general']['rlnSchemeName'])
         # make a directory with this path and raise an error if such a directory already exists
         self.cbdat.scheme.write_scheme(path_scheme)
        

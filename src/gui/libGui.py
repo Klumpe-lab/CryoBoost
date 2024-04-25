@@ -156,14 +156,33 @@ def abs_to_loc_path(path_frames, path_mdocs, path_out_dir):
         the path to the input in Relion to ./frames. As the path to the frames and to the mdocs is identical,
         only one symlink will be created for both.
     """
+    import warnings
     original_directory = os.getcwd()
 
+    if not os.path.exists(path_out_dir):
+        os.makedirs(path_out_dir)      
+    
     os.chdir(path_out_dir)
     command_frames = f"ln -s {path_frames} ./"
-    os.system(command_frames)
+    
+    foldFrames=os.path.basename(path_frames.rstrip("/"))
+    if os.path.exists(foldFrames):
+        warnings.warn("Path to frames already exists." + f" {foldFrames} ")
+        #os.unlink(foldFrames)
+    else:
+        os.system(command_frames)
+    
     if path_frames != path_mdocs:
         command_mdoc = f"ln -s {path_mdocs} ./"
-        os.system(command_mdoc)
+        #if os.path.exists(path_frames):
+        foldMdocs=os.path.basename(path_mdocs.rstrip("/"))
+        if os.path.exists(foldMdocs):
+            warnings.warn("Path to mdocs already exists." + f" {foldMdocs} ")
+            #os.unlink(foldMdocs)
+        else:
+            os.system(command_mdoc)
+    
+    
     # Reset directory
     os.chdir(original_directory)
     

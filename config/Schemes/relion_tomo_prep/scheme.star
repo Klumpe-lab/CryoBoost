@@ -1,13 +1,13 @@
 
-# version 30001
+# version 50001
 
 data_scheme_general
 
-_rlnSchemeName                       Schemes/master_scheme/
-_rlnSchemeCurrentNodeName            reconstruction
+_rlnSchemeName                       Schemes/relion_tomo_prep/
+_rlnSchemeCurrentNodeName            WAIT
  
 
-# version 30001
+# version 50001
 
 data_scheme_floats
 
@@ -20,7 +20,7 @@ maxtime_hr    48.000000    48.000000
   wait_sec   180.000000   180.000000 
  
 
-# version 30001
+# version 50001
 
 data_scheme_operators
 
@@ -34,7 +34,7 @@ EXIT_maxtime exit_maxtime  undefined maxtime_hr  undefined
       WAIT       wait  undefined   wait_sec  undefined 
  
 
-# version 30001
+# version 50001
 
 data_scheme_jobs
 
@@ -43,16 +43,15 @@ _rlnSchemeJobNameOriginal #1
 _rlnSchemeJobName #2 
 _rlnSchemeJobMode #3 
 _rlnSchemeJobHasStarted #4 
-aligntilts AlignTiltSeries/job109/   continue            1 
-ctffind CtfFind/job107/   continue            1 
-exclude_rule_based External/job108/   continue            1
-feature_analysis  External/   continue    1
-importmovies ImportTomo/job105/   continue            1 
-motioncorr MotionCorr/job106/   continue            1 
-reconstruction ReconstructTomograms/job110/   continue            1
+aligntilts aligntilts   continue            0 
+   ctffind    ctffind   continue            0 
+filtertilts filtertilts   continue            0 
+importmovies importmovies   continue            0 
+motioncorr motioncorr   continue            0 
+reconstruction reconstruction   continue            0 
  
 
-# version 30001
+# version 50001
 
 data_scheme_edges
 
@@ -66,9 +65,8 @@ _rlnSchemeEdgeBooleanVariable #5
 EXIT_maxtime importmovies            0  undefined  undefined 
 importmovies motioncorr            0  undefined  undefined 
 motioncorr    ctffind            0  undefined  undefined 
-ctffind     feature_analysis             0  undefined  undefined
-feature_analysis     exclude_rule_based             0  undefined  undefined
-exclude_rule_based  aligntilts            0  undefined  undefined  
+   ctffind filtertilts            0  undefined  undefined 
+filtertilts aligntilts            0  undefined  undefined 
 aligntilts reconstruction            0  undefined  undefined 
 reconstruction       WAIT            0  undefined  undefined 
  

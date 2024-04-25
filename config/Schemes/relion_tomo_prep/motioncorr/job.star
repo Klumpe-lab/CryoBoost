@@ -31,19 +31,19 @@ fn_motioncor2_exe /fs/pool/pool-bmapps/hpcl8/app/soft/MOTIONCOR2/1.4.0/bin/motio
    gpu_ids          0 
 group_for_ps         10 
 group_frames          1 
-input_star_mics Schemes/master_scheme/importmovies/tilt_series.star  
+input_star_mics Schemes/relion_tomo_prep/importmovies/tilt_series.star  
 min_dedicated          1 
-    nr_mpi          8 
+    nr_mpi          48 
 nr_threads          1 
 other_args         "" 
 other_motioncor2_args         "" 
    patch_x          1 
    patch_y          1 
       qsub     sbatch 
-qsub_extra1          3 
-qsub_extra2          3 
+qsub_extra1          2 
+qsub_extra2          24 
 qsub_extra3    p.hpcl8 
-qsub_extra4      gpu:2 
-qsubscript ../../qsub_gpu_Relion5.sh 
+qsub_extra4      2 
+qsubscript    qsub/qsub_hpcl89.sh 
  queuename    openmpi 
  

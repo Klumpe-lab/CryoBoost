@@ -28,7 +28,7 @@ do_phaseshift         No
 fn_ctffind_exe /fs/pool/pool-bmapps/hpcl8/app/soft/CTFFIND/4.1.14/bin/ctffind 
 fn_gctf_exe /fs/pool/pool-bmapps/hpcl8/app/soft/GCTF/1.06/bin4app/gctf 
    gpu_ids         "" 
-input_star_mics Schemes/master_scheme/motioncorr/corrected_tilt_series.star 
+input_star_mics Schemes/relion_tomo_prep/motioncorr/corrected_tilt_series.star 
 min_dedicated          1 
     nr_mpi         16 
 other_args         "" 
@@ -40,8 +40,8 @@ phase_step         10
 qsub_extra1          1 
 qsub_extra2         16 
 qsub_extra3    p.hpcl8 
-qsub_extra4      gpu:2 
-qsubscript ../../qsub_gpu_Relion5.sh 
+qsub_extra4      2 
+qsubscript    qsub/qsub_hpcl89.sh 
  queuename    openmpi 
     resmax          5 
     resmin         30 

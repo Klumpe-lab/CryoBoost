@@ -23,7 +23,7 @@ do_imod_patchtrack         No
   do_queue        Yes 
 fiducial_diameter         10 
    gpu_ids        0:1 
-in_tiltseries Schemes/master_scheme/exclude_rule_based/excluded_tilts_rule.star 
+in_tiltseries Schemes/relion_tomo_prep/exclude_rule_based/excluded_tilts_rule.star 
 min_dedicated          1 
 other_args         "" 
 patch_overlap         50 
@@ -32,7 +32,7 @@ patch_size        100
 qsub_extra1          3 
 qsub_extra2          2 
 qsub_extra3    p.hpcl8 
-qsub_extra4      gpu:2 
-qsubscript ../../qsub_gpu_Relion5.sh 
+qsub_extra4      2 
+qsubscript   qsub/qsub_hpcl89.sh 
  queuename    openmpi 
  

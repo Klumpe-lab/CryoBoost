@@ -85,6 +85,6 @@ star_file:
   importmovies: importmovies/tilt_series.star
   motioncorr: motioncorr/corrected_tilt_series.star
   ctffind: ctffind/tilt_series_ctf.star
-  feature_analysis: feature_analysis/feature_analysis.star
-  exclude_rule_based: exclude_rule_based/excluded_tilts_rule.star
+  analysetilts: feature_analysis/feature_analysis.star
+  filtertilts: filtertilts/tiltseries_filtered.star
   aligntilts: aligntilts/aligned_tilt_series.star        

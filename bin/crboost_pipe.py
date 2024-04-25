@@ -6,11 +6,12 @@ import sys
 from PyQt6.QtWidgets import QApplication
 from src.gui.schemeGui import MainUI 
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="scheme gui")
-    parser.add_argument("--scheme", "-s", required=False, help="Input input scheme file")
-    parser.add_argument("--movies", "-f", required=False, help="Input input movie dir")
-    parser.add_argument("--mdocs", "-m", required=False,default="umba,umba",help="Input input mdocs dir")
+    parser.add_argument("--scheme", "-s", required=False,default="master" ,help="path to scheme folder")
+    parser.add_argument("--movies", "-mov", required=False,default="None",help="Input input movie dir")
+    parser.add_argument("--mdocs", "-m", required=False,default="None",help="Input input mdocs dir")
     parser.add_argument("--proj", "-p", required=False, help="Output output project dir")
     parser.add_argument("--gui", "-g", required=False,default=True,help="Outpu output project dir")
     parser.add_argument("--autoGen", "-aG", required=False, default=False, help="gen Project and scheme")
