@@ -30,15 +30,15 @@ fn_gctf_exe /fs/pool/pool-bmapps/hpcl8/app/soft/GCTF/1.06/bin4app/gctf
    gpu_ids         "" 
 input_star_mics Schemes/relion_tomo_prep/motioncorr/corrected_tilt_series.star 
 min_dedicated          1 
-    nr_mpi         16 
+    nr_mpi         72 
 other_args         "" 
 other_gctf_args         "" 
  phase_max        180 
  phase_min          0 
 phase_step         10 
       qsub     sbatch 
-qsub_extra1          1 
-qsub_extra2         16 
+qsub_extra1          3 
+qsub_extra2         24 
 qsub_extra3    p.hpcl8 
 qsub_extra4      2 
 qsubscript    qsub/qsub_hpcl89.sh 

@@ -15,7 +15,7 @@ data_joboptions_values
 loop_ 
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
-aretomo_thickness        200 
+aretomo_thickness        250 
 aretomo_tiltcorrect        Yes 
 do_aretomo        Yes 
 do_imod_fiducials         No 

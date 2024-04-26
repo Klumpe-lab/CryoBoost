@@ -15,7 +15,7 @@ data_joboptions_values
 loop_ 
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
-  do_queue         No 
+  do_queue         Yes 
     fn_exe /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/bin/crboost_filterTitlts.py
   in_3dref         "" 
  in_coords         "" 
@@ -24,7 +24,7 @@ _rlnJobOptionValue #2
     in_mov         "" 
    in_part         "" 
 min_dedicated          1 
-nr_threads          20
+nr_threads          24
 other_args         "" 
 param10_label         "" 
 param10_value         "" 
@@ -47,8 +47,8 @@ param8_value         ""
 param9_label         "" 
 param9_value         "" 
       qsub     sbatch 
-qsub_extra1          3 
-qsub_extra2          3 
+qsub_extra1          1 
+qsub_extra2          1 
 qsub_extra3    p.hpcl8 
 qsub_extra4      2 
 qsubscript    qsub/qsub_hpcl89.sh 

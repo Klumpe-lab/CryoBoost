@@ -33,14 +33,14 @@ group_for_ps         10
 group_frames          1 
 input_star_mics Schemes/relion_tomo_prep/importmovies/tilt_series.star  
 min_dedicated          1 
-    nr_mpi          48 
+    nr_mpi          72 
 nr_threads          1 
 other_args         "" 
 other_motioncor2_args         "" 
    patch_x          1 
    patch_y          1 
       qsub     sbatch 
-qsub_extra1          2 
+qsub_extra1          3 
 qsub_extra2          24 
 qsub_extra3    p.hpcl8 
 qsub_extra4      2 

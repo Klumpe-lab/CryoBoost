@@ -1,6 +1,6 @@
 from src.rw.librw import tiltSeriesMeta
 
-def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None):
+def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None,threads=24):
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
     
     if (pramRuleFilter!=None):
@@ -9,7 +9,7 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
 
     if (model!=None):
         from src.filterTilts.filterTiltsDL import filterTiltsDL
-        ts=filterTiltsDL(ts,model,'binary',plot)
+        ts=filterTiltsDL(ts,model,'binary',plot,threads=24)
    
     ts.writeTiltSeries(outputFolder+"tiltseries_filtered.star")
     
