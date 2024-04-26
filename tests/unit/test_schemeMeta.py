@@ -2,14 +2,14 @@ from src.rw.librw import schemeMeta
 import shutil,os
 
 def test_readScheme():
-    inputScheme='config/master_scheme/'
+    inputScheme='config/Schemes/relion_tomo_prep/'
     sc=schemeMeta(inputScheme)
     assert (sc.jobs_in_scheme == ['importmovies', 'motioncorr', 
-                                 'ctffind','feature_analysis','exclude_rule_based', 
+                                 'ctffind','filtertilts', 
                                  'aligntilts', 'reconstruction']).all()
 
 def test_writeScheme():
-    inputScheme='config/master_scheme/'
+    inputScheme='config/Schemes/relion_tomo_prep/'
     output = 'tmpOut/testScheme/'
     
     if ((output[0]!='/') and ('tmpOut' in output) and os.path.exists(output)): 
@@ -24,7 +24,7 @@ def test_writeScheme():
         assert (sc.job_star[job].dict['joboptions_values'] == scnew.job_star[job].dict['joboptions_values']).all().all()
  
 def test_filterScheme():
-     inputScheme='config/master_scheme/'
+     inputScheme='config/Schemes/relion_tomo_prep/'
      nodesToFilter={0:"importmovies",1:"motioncorr",2:"ctffind",
                     3:"aligntilts",4:"reconstruction"}
      
