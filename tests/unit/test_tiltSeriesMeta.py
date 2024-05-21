@@ -6,11 +6,12 @@ from pandas.testing import assert_frame_equal
 def test_writeTiltSeries():
 
     tilseriesStar='data/tilts/tilt_series_ctf.star'
-    outputTiltSeries='tmpOut/tilt_series.star'
+    outputTiltSeries='tmpOut/tsRw/tilt_series_testRw.star'
     relionProj=os.path.abspath(__file__)
     relionProj=os.path.dirname(os.path.dirname(os.path.dirname(relionProj)))+os.path.sep
  
     os.makedirs("tmpOut", exist_ok=True)
+    os.makedirs("tmpOut/tsRw/", exist_ok=True)
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
     ts.writeTiltSeries(outputTiltSeries)
     tsNew=tiltSeriesMeta(outputTiltSeries,relionProj)

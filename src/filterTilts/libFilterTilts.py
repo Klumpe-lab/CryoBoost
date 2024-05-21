@@ -2,6 +2,7 @@ from src.rw.librw import tiltSeriesMeta
 
 def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None,threads=24):
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
+    plotTiltStat(ts,outputFolder,plot=True)
     
     if (pramRuleFilter!=None):
         from src.filterTilts.filterTiltsRule import filterTiltsRule
@@ -13,9 +14,18 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
    
     ts.writeTiltSeries(outputFolder+"tiltseries_filtered.star")
     
+def plotTiltStat(ts,outputFolder,plot=None):
+    import matplotlib.pyplot as plt
+    import os
+    if (plot==None):
+        return
+    #dummy plot replaced by michael's code
+    ts.all_tilts_df.reset_index().plot(kind='scatter', x='rlnTomoNominalStageTiltAngle', y='rlnCtfMaxResolution', title='Scatter Plot using Pandas')
+    plt.savefig(outputFolder+ os.path.sep +'tiltseriesStatistic.pdf')
+    pass
     
     
-def plotFilterTiltsResults(ts,outputFolder,plot):
+def plotFilterTiltsResults(ts,outputFolder,plot=None):
     if (plot==None):
         return
     

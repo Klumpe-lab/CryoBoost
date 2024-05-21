@@ -18,9 +18,10 @@ launch.json
 
 # Miscellaneous
 .DS_Store
+tmpOut/
+
 
 # Distribution / packaging
-tmpOut
 .Python
 build/
 develop-eggs/
