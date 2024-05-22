@@ -23,7 +23,7 @@ do_imod_patchtrack         No
   do_queue        Yes 
 fiducial_diameter         10 
    gpu_ids        0:1 
-in_tiltseries Schemes/relion_tomo_prep/exclude_rule_based/excluded_tilts_rule.star 
+in_tiltseries Schemes/relion_tomo_prep/filtertilts/tiltseries_filtered.star 
 min_dedicated          1 
 other_args         "" 
 patch_overlap         50 

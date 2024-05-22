@@ -27,11 +27,11 @@ class EditScheme(QDialog):
         loadUi(os.path.abspath(__file__).replace('.py','.ui'), self)
         self.table_scheme = table_scheme
 
-        self.table_scheme_options.setColumnCount(5)
-        self.table_scheme_current.setColumnCount(5)
-        self.labels_options = ["Add Job", "Job Name", "Fork", "Output if True", "Boolean Variable"]
+        self.table_scheme_options.setColumnCount(2)
+        self.table_scheme_current.setColumnCount(2)
+        self.labels_options = ["Add Job", "Job Name"] #, "Fork", "Output if True", "Boolean Variable"]
         self.table_scheme_options.setHorizontalHeaderLabels(self.labels_options) 
-        self.labels_current = ["Remove Job", "Job Name", "Fork", "Output if True", "Boolean Variable"]
+        self.labels_current = ["Remove Job", "Job Name"]#, "Fork", "Output if True", "Boolean Variable"]
         self.table_scheme_current.setHorizontalHeaderLabels(self.labels_current) 
         self.editSchemeList()
         self.btn_copy_scheme.clicked.connect(self.copyJobs)
@@ -49,16 +49,15 @@ class EditScheme(QDialog):
             self.table_scheme_options.setItem(i, 0, QTableWidgetItem())
             self.table_scheme_options.item(i, 0).setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
             self.table_scheme_options.item(i, 0).setCheckState(Qt.CheckState.Unchecked)
-
             self.table_scheme_options.setItem(i, 1, QTableWidgetItem(str(job))) # make the field uneditable
 
 
-            self.table_scheme_options.setItem(i, 2, QTableWidgetItem())
-            self.table_scheme_options.item(i, 2).setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
-            self.table_scheme_options.item(i, 2).setCheckState(Qt.CheckState.Unchecked)
+            #self.table_scheme_options.setItem(i, 2, QTableWidgetItem())
+            #self.table_scheme_options.item(i, 2).setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+            #self.table_scheme_options.item(i, 2).setCheckState(Qt.CheckState.Unchecked)
 
-            self.table_scheme_options.setItem(i, 3, QTableWidgetItem(str("undefined")))
-            self.table_scheme_options.setItem(i, 4, QTableWidgetItem(str("undefined")))
+            #self.table_scheme_options.setItem(i, 3, QTableWidgetItem(str("undefined")))
+            #self.table_scheme_options.setItem(i, 4, QTableWidgetItem(str("undefined")))
 
 
     def copyJobs(self):

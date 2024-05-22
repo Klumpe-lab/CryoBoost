@@ -107,6 +107,42 @@ class cbconfig:
         return entry["Parameter"]
     return None
 
+def importFolderBySymlink(sourceFold, targetFold):
+    """
+    creates a symlink from sourceFold to targetFold
+
+    Args:
+        path_frames (str): absolute path to the imported frames.
+        targetFold (str): path where the symlink will be created
+
+    Returns:
+        -
+
+    Example:
+        path_frames = /fs/pool/pool-plitzko3/Michael/01-Data/relion/frames
+        path_out_dir = /fs/pool/pool-plitzko3/Michael/01-Data/project
+
+        importFolderBySymlink(path_frames, path_out_dir)
+        
+    """
+    import warnings
+    
+    if not os.path.exists(targetFold):
+        os.makedirs(targetFold)      
+    
+    command_frames = f"ln -s {os.path.abspath(sourceFold)} {targetFold}" + os.path.sep
+    
+    foldFrames=targetFold + os.path.sep + os.path.basename(sourceFold.rstrip("/")) 
+    if os.path.exists(foldFrames):
+        warnings.warn("Path to folder already exists." + f" {foldFrames} ")
+        #os.unlink(foldFrames)
+    else:
+        os.system(command_frames)
+    
+   
+    
+
+
 
 def read_header(path_to_frames):
   """

@@ -133,59 +133,6 @@ def update_df(job_star_dict, table_widget, table_nRows, table_nCols, current_job
     return(job_star_dict)
 
 
-def abs_to_loc_path(path_frames, path_mdocs, path_out_dir):
-    """
-    Relion only accepts local paths, browsing for paths returns absolute paths. To combine this, create symlinks
-    in the out_dir based on the data of the absolute paths.
-
-    Args:
-        path_frames (str): absolute path to the imported frames.
-        path_mdocs (str): absolute path to the mdoc files.
-        path_out_dir (str): absolute path to the project directory, in which the scheme will be executed.
-
-    Returns:
-        Creates symlinks for the input data and changes the respective fields in Relion to relative paths
-        pointing to these symlinks.
-
-    Example:
-        path_frames = /fs/pool/pool-plitzko3/Michael/01-Data/relion/frames
-        path_mdocs = /fs/pool/pool-plitzko3/Michael/01-Data/relion/frames
-        path_out_dir = /fs/pool/pool-plitzko3/Michael/01-Data/project
-
-        create a symlink to /fs/pool/pool-plitzko3/Michael/01-Data/relion/frames called frames and changes
-        the path to the input in Relion to ./frames. As the path to the frames and to the mdocs is identical,
-        only one symlink will be created for both.
-    """
-    import warnings
-    original_directory = os.getcwd()
-
-    if not os.path.exists(path_out_dir):
-        os.makedirs(path_out_dir)      
-    
-    os.chdir(path_out_dir)
-    command_frames = f"ln -s {path_frames} ./"
-    
-    foldFrames=os.path.basename(path_frames.rstrip("/"))
-    if os.path.exists(foldFrames):
-        warnings.warn("Path to frames already exists." + f" {foldFrames} ")
-        #os.unlink(foldFrames)
-    else:
-        os.system(command_frames)
-    
-    if path_frames != path_mdocs:
-        command_mdoc = f"ln -s {path_mdocs} ./"
-        #if os.path.exists(path_frames):
-        foldMdocs=os.path.basename(path_mdocs.rstrip("/"))
-        if os.path.exists(foldMdocs):
-            warnings.warn("Path to mdocs already exists." + f" {foldMdocs} ")
-            #os.unlink(foldMdocs)
-        else:
-            os.system(command_mdoc)
-    
-    
-    # Reset directory
-    os.chdir(original_directory)
-    
 
 def read_header():
     pass

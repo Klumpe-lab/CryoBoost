@@ -3,6 +3,10 @@
 # Job = in which job this parameter should be changed (job name or all)
 # Parameter = original name (as in job.star file)
 # Alias = new parameter name that should be displayed
+submission:
+  - HeadNode: hpcl8001
+    SshCommand: "ssh "
+    
 aliases:
 
   - Job: importmovies

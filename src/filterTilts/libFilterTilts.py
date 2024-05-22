@@ -2,7 +2,7 @@ from src.rw.librw import tiltSeriesMeta
 
 def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None,threads=24):
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
-    plotTiltStat(ts,outputFolder,plot=True)
+    plotTiltStat(ts,outputFolder)
     
     if (pramRuleFilter!=None):
         from src.filterTilts.filterTiltsRule import filterTiltsRule
@@ -78,3 +78,5 @@ def plotFilterTiltsResults(ts,outputFolder,plot=None):
     fig.savefig(f'{outputFolder}/plot_results.pdf')
     #plt.show()   
     
+
+

@@ -5,7 +5,7 @@ import sys
 
 from PyQt6.QtWidgets import QApplication
 from src.gui.schemeGui import MainUI 
-
+from src.pipe.libpipe import pipe
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="scheme gui")
@@ -29,7 +29,17 @@ def open_scheme_gui(args):
 def main():
     
     args,addArg = parse_arguments()
-    open_scheme_gui(args)
+    args.gui=False
+    if (args.gui):
+        open_scheme_gui(args)
+    else:
+        pipeRunner=pipe(args)
+        pipeRunner.initProject()
+        pipeRunner.writeScheme()
+        pipeRunner.runScheme()
+        
+        
+        
     
 if __name__ == '__main__':
     main()

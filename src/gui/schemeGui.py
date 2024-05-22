@@ -14,9 +14,10 @@ root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
 
 #from lib.functions import get_value_from_tab
-from src.gui.libGui import browse_dirs, change_values, update_df, abs_to_loc_path, change_bckgrnd,get_inputNodesFromSchemeTable 
-from src.rw.librw import schemeMeta,cbconfig,read_mdoc
+from src.gui.libGui import browse_dirs, change_values, update_df, change_bckgrnd,get_inputNodesFromSchemeTable 
+from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
+
 
 class MainUI(QMainWindow):
     """
@@ -51,19 +52,19 @@ class MainUI(QMainWindow):
         self.btn_browse_target.clicked.connect(self.browsePathTarget)
         self.btn_writeStar.clicked.connect(self.changeDf)
         self.btn_writeStar.clicked.connect(self.writeStar)
-        self.table_scheme.setColumnCount(4)
-        #self.table_scheme.setEditTriggers(QAbstractItemView.editTriggers)
         
-        self.labels_scheme = ["Job Name", "Fork", "Output if True", "Boolean Variable"]
+        #self.table_scheme.setEditTriggers(QAbstractItemView.editTriggers)
+        self.table_scheme.setColumnCount(1) #origianlly 4
+        self.labels_scheme = ["Job Name"] #, "Fork", "Output if True", "Boolean Variable"]
         self.table_scheme.setHorizontalHeaderLabels(self.labels_scheme) 
         self.table_scheme.setRowCount(len(self.cbdat.scheme.jobs_in_scheme))    
         for i, job in enumerate(self.cbdat.scheme.jobs_in_scheme):
             self.table_scheme.setItem(i, 0, QTableWidgetItem(str(job))) 
-            self.table_scheme.setItem(i, 1, QTableWidgetItem())
-            self.table_scheme.item(i, 1).setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
-            self.table_scheme.item(i, 1).setCheckState(Qt.CheckState.Unchecked)
-            self.table_scheme.setItem(i, 2, QTableWidgetItem(str("undefined")))
-            self.table_scheme.setItem(i, 3, QTableWidgetItem(str("undefined")))
+            #self.table_scheme.setItem(i, 1, QTableWidgetItem())
+            #self.table_scheme.item(i, 1).setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+            #self.table_scheme.item(i, 1).setCheckState(Qt.CheckState.Unchecked)
+            #self.table_scheme.setItem(i, 2, QTableWidgetItem(str("undefined")))
+            #self.table_scheme.setItem(i, 3, QTableWidgetItem(str("undefined")))
        
         self.dropDown_config.addItem("Choose Microscope Set-Up")
         for i in self.cbdat.conf.microscope_presets:
@@ -237,7 +238,9 @@ class MainUI(QMainWindow):
         self.name_new_frames_dir = self.line_path_movies.text().split("/")[-2]
         self.name_new_mdocs_dir = self.line_path_mdocs.text().split("/")[-2]
 
-        abs_to_loc_path(self.line_path_movies.text(), self.line_path_mdocs.text(), self.path_to_new_project)
+       
+        importFolderBySymlink(self.line_path_movies.text(), self.path_to_new_project)
+        importFolderBySymlink(self.line_path_mdocs.text(), self.path_to_new_project)
         
         import shutil
         shutil.copytree(os.getenv("CRYOBOOST_HOME") + "/config/qsub", self.path_to_new_project + os.path.sep + "qsub",dirs_exist_ok=True)
