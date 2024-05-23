@@ -294,9 +294,6 @@ class schemeMeta:
     self.schemeFolderPath=schemeFolderPath
     self.read_scheme()
     
-
-    
-  
   def read_scheme(self):
     self.scheme_star=starFileMeta(self.schemeFilePath)
     self.jobs_in_scheme = self.scheme_star.dict["scheme_edges"].rlnSchemeEdgeOutputNodeName.iloc[1:-1]

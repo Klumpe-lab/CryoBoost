@@ -5,7 +5,7 @@
 # Alias = new parameter name that should be displayed
 submission:
   - HeadNode: hpcl8001
-    SshCommand: "ssh "
+    SshCommand: "ssh -X "
     
 aliases:
 
