@@ -23,6 +23,17 @@ class pipe:
     self.pathMdoc=args.mdocs
     self.pathFrames=args.movies
     self.pathProject=args.proj
+    headNode=self.conf.confdata['submission'][0]['HeadNode']
+    sshStr=sub=self.conf.confdata['submission'][0]['SshCommand']
+    schemeName=self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName']
+    schemeName=os.path.basename(schemeName.strip(os.path.sep)) #remove path from schemeName
+    relSchemeStart="relion_schemer --scheme " + schemeName  + " --run"
+    relGuiStart="relion --tomo --do_projdir "
+    chFold="cd " + os.path.abspath(self.pathProject) + ";"
+    envStr="module load RELION/5.0-beta-3;"
+    logStr=" > " + schemeName + ".log 2>&1 " 
+    self.commandScheme=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeStart + logStr + '"'
+    self.commandGui=sshStr + " " + headNode + ' "'  + envStr + chFold + relGuiStart  + '"'
     
       
   def initProject(self):
@@ -41,22 +52,20 @@ class pipe:
      self.scheme.write_scheme(path_scheme)
   
   def runScheme(self):
-    headNode=self.conf.confdata['submission'][0]['HeadNode']
-    sshStr=sub=self.conf.confdata['submission'][0]['SshCommand']
-    schemeName=self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName']
-    schemeName=os.path.basename(schemeName.strip(os.path.sep)) #remove path from schemeName
-    relSchemeStart="relion_schemer --scheme " + schemeName  + " --run"
-    relGuiStart="relion --tomo --do_projdir "
-    chFold="cd " + os.path.abspath(self.pathProject) + ";"
-    envStr="module load RELION/5.0-beta-3;"
-    logStr=" > " + schemeName + ".log 2>&1 " 
-    commandScheme=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeStart + logStr + '"'
-    commandGui=sshStr + " " + headNode + ' "'  + envStr + chFold + relGuiStart  + '"'
-    
     print("-----------------------------------------")
-    print(commandGui)
-    p=run_command_async(commandGui)
-    print(commandScheme)
-    p=run_command_async(commandScheme)
+    print(self.commandScheme)
+    p=run_command_async(self.commandScheme)
     print("-----------------------------------------")
-          
+ 
+  def runSchemeSync(self):
+    print("-----------------------------------------")
+    print(self.commandScheme)
+    p=run_command(self.commandScheme)
+    print("-----------------------------------------")
+ 
+ 
+  def openRelionGui(self):
+    print("-----------------------------------------")
+    print(self.commandGui)
+    p=run_command_async(self.commandGui)
+    print("-----------------------------------------")        

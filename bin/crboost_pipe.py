@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/fs/pool/pool-fbeck/projects/4TomoPipe/trainClassifyer/softFastAI/conda3/bin/python
 import argparse
 import os
 import sys
@@ -13,9 +13,11 @@ def parse_arguments():
     parser.add_argument("--movies", "-mov", required=False,default="None",help="Input input movie dir")
     parser.add_argument("--mdocs", "-m", required=False,default="None",help="Input input mdocs dir")
     parser.add_argument("--proj", "-p", required=False, help="Output output project dir")
-    parser.add_argument("--gui", "-g", required=False,default=True,help="Outpu output project dir")
-    parser.add_argument("--autoGen", "-aG", required=False, default=False, help="gen Project and scheme")
-    parser.add_argument("--autoLaunch", "-aL", required=False, default=False, help="launch relion scheme")
+    parser.add_argument("--noGui", "-nG", required=False,action='store_true',help="do not open cryoboost gui")
+    parser.add_argument("--autoGen", "-aG", required=False, action='store_true', help="gen Project and scheme")
+    parser.add_argument("--autoLaunch", "-aL", required=False, action='store_true', help="launch relion scheme")
+    parser.add_argument("--autoLaunchSync", "-aLsync", required=False, action='store_true', help="launch relion scheme synchrone")
+    parser.add_argument("--relionGui", "-rg", required=False,  action='store_true', help="launch relion gui")
     args,unkArgs=parser.parse_known_args()
     return args,unkArgs
 
@@ -29,15 +31,21 @@ def open_scheme_gui(args):
 def main():
     
     args,addArg = parse_arguments()
-    args.gui=False
-    if (args.gui):
-        open_scheme_gui(args)
-    else:
+    #print(args)
+    if args.noGui:
         pipeRunner=pipe(args)
         pipeRunner.initProject()
-        pipeRunner.writeScheme()
-        pipeRunner.runScheme()
-        
+        if args.autoGen:
+            pipeRunner.writeScheme()
+        if args.relionGui:
+            pipeRunner.openRelionGui()
+        if args.autoLaunch:
+            pipeRunner.runScheme()
+        if args.autoLaunchSync:
+            pipeRunner.runSchemeSync()
+            
+    else:
+        open_scheme_gui(args) 
         
         
     
