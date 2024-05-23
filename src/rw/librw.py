@@ -364,7 +364,7 @@ class schemeMeta:
         schemeEdge_df=pd.concat([schemeEdge_df,dfOneEdge],ignore_index=True) 
     dfOneEdge=tmpEdge
     dfOneEdge["rlnSchemeEdgeInputNodeName"]=schemeEdge_df.iloc[-1].rlnSchemeEdgeOutputNodeName
-    dfOneEdge["rlnSchemeEdgeOutputNodeName"]="WAIT"
+    dfOneEdge["rlnSchemeEdgeOutputNodeName"]="EXIT" #was "WAIT"
     schemeEdge_df=pd.concat([schemeEdge_df,dfOneEdge],ignore_index=True) 
     
     return schemeEdge_df

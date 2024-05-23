@@ -30,6 +30,7 @@ _rlnSchemeOperatorType #2
 _rlnSchemeOperatorOutput #3 
 _rlnSchemeOperatorInput1 #4 
 _rlnSchemeOperatorInput2 #5 
+EXIT       exit  undefined  undefined  undefined
 EXIT_maxtime exit_maxtime  undefined maxtime_hr  undefined 
       WAIT       wait  undefined   wait_sec  undefined 
  
@@ -68,5 +69,5 @@ motioncorr    ctffind            0  undefined  undefined
    ctffind filtertilts            0  undefined  undefined 
 filtertilts aligntilts            0  undefined  undefined 
 aligntilts reconstruction            0  undefined  undefined 
-reconstruction       WAIT            0  undefined  undefined 
+reconstruction       EXIT            0  undefined  undefined 
  
