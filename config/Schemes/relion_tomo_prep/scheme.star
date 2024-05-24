@@ -51,8 +51,6 @@ importmovies importmovies   continue            0
 motioncorr motioncorr   continue            0 
 reconstruction reconstruction   continue            0 
  
-
-
 # version 50001
 
 data_scheme_edges

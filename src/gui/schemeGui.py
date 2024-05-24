@@ -30,19 +30,28 @@ class MainUI(QMainWindow):
         super(MainUI, self).__init__()
         loadUi(os.path.abspath(__file__).replace('.py','.ui'), self)
        
+        self.cbdat=self.initializeDataStrcuture(args)
+        self.setCallbacks()
+        self.genSchemeTable()
+       
+        if (self.cbdat.args.autoGen or self.cbdat.args.skipSchemeEdit):
+            self.makeJobTabsFromScheme()
+    
+    def initializeDataStrcuture(self,args):
         #custom varibales
-        self.cbdat = type('', (), {})() 
-        self.cbdat.CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
-        self.cbdat.defaultSchemePath=self.cbdat.CRYOBOOST_HOME + "/config/Schemes/relion_tomo_prep/"
-        self.cbdat.confPath=self.cbdat.CRYOBOOST_HOME + "/config/conf.yaml"
-        self.cbdat.scheme=schemeMeta(self.cbdat.defaultSchemePath)
-        self.cbdat.conf=cbconfig(self.cbdat.confPath)     
-        self.cbdat.args=args
+        cbdat = type('', (), {})() 
+        cbdat.CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
+        cbdat.defaultSchemePath=cbdat.CRYOBOOST_HOME + "/config/Schemes/relion_tomo_prep/"
+        cbdat.confPath=cbdat.CRYOBOOST_HOME + "/config/conf.yaml"
+        cbdat.scheme=schemeMeta(cbdat.defaultSchemePath)
+        cbdat.conf=cbconfig(cbdat.confPath)     
+        cbdat.args=args
         
-        self.btn_makeJobTabs.clicked.connect(self.makeJobTabs)
+        return cbdat
+    
+    def setCallbacks(self):
+        self.btn_makeJobTabs.clicked.connect(self.makeJobTabsFromScheme)
         self.groupBox_in_paths.setEnabled(False)
-        # have now put to textChanged --> every key entered updates it. If it takes too long to iterate every
-        # time, change to editingFinished
         self.line_path_movies.textChanged.connect(self.loadPathMovies)
         self.btn_browse_movies.clicked.connect(self.browsePathMovies)
         self.line_path_mdocs.textChanged.connect(self.loadPathMdocs)
@@ -52,8 +61,11 @@ class MainUI(QMainWindow):
         self.btn_browse_target.clicked.connect(self.browsePathTarget)
         self.btn_writeStar.clicked.connect(self.changeDf)
         self.btn_writeStar.clicked.connect(self.writeStar)
-        
-        #self.table_scheme.setEditTriggers(QAbstractItemView.editTriggers)
+        self.dropDown_config.addItem("Choose Microscope Set-Up")
+        for i in self.cbdat.conf.microscope_presets:
+            self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
+    
+    def genSchemeTable(self):
         self.table_scheme.setColumnCount(1) #origianlly 4
         self.labels_scheme = ["Job Name"] #, "Fork", "Output if True", "Boolean Variable"]
         self.table_scheme.setHorizontalHeaderLabels(self.labels_scheme) 
@@ -65,68 +77,22 @@ class MainUI(QMainWindow):
             #self.table_scheme.item(i, 1).setCheckState(Qt.CheckState.Unchecked)
             #self.table_scheme.setItem(i, 2, QTableWidgetItem(str("undefined")))
             #self.table_scheme.setItem(i, 3, QTableWidgetItem(str("undefined")))
-       
-        self.dropDown_config.addItem("Choose Microscope Set-Up")
-        for i in self.cbdat.conf.microscope_presets:
-            self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
             
-        if (self.cbdat.args.autoGen):
-            self.makeJobTabs()
-            
-    def makeJobTabs(self):
+    def makeJobTabsFromScheme(self):
         """
         insert a new tab for every job and place a table with the parameters found in the respective job.star
         file in the ["joboptions_values"] df.
         """
-        if ((self.check_edit_scheme.isChecked()) and (self.cbdat.args.autoGen == False)):
+        if ((self.check_edit_scheme.isChecked()) and (self.cbdat.args.autoGen == False) and (self.cbdat.args.skipSchemeEdit == False)):
             EditScheme(self.table_scheme, self).exec()
         
         inputNodes=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
-        
         self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes)
         
-
-        # define where the new tabs should be inserted so all tabs can be used in order             
-        first_insert_position = 1
-        # loop through the jobs and create a tab for each job
-        
-        conf=self.cbdat.conf
+        insertPosition=1
         for job in self.cbdat.scheme.jobs_in_scheme:
-            # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
-            self.tabWidget.insertTab(first_insert_position, QWidget(), job)
-            # build a table with the dataframe containinng the parameters for the respective job in the tab
-            df_job = self.cbdat.scheme.job_star[job].dict["joboptions_values"]
-            nRows, nColumns = df_job.shape
-            # create empty table with the dimensions of the df
-            self.table = QTableWidget(self)
-            self.table.setColumnCount(nColumns)
-            self.table.setRowCount(nRows)
-            self.table.setHorizontalHeaderLabels(("Parameter", "Value"))
-            # this doesn't work yet...:
-            #self.table.setMinimumSize(1500, 400)            
-            # populate the table with the values of the df
-            for row in range(nRows):
-                for col in range(nColumns):
-                    # set the value that should be added to the respective col/row combination in the df containing the parameters
-                    current_value =df_job.iloc[row, col]
-                    # see whether there is an alias for the parameter (only for the Parameters column)
-                    if col == 0:
-                        alias = conf.get_alias(job, current_value)
-                        # if there is an alias, set the widgetItem to this alias, else, do as normal
-                        if alias != None:
-                            self.table.setItem(row, col, QTableWidgetItem(alias))
-                        else:
-                            self.table.setItem(row, col, QTableWidgetItem(current_value))
-                        # set the flag for this field as not editable --> people cannot accidentally change the 
-                        # name of a parameter, inhibiting Relion later
-                        self.table.item(row, col).setFlags(self.table.item(row, col).flags() & ~Qt.ItemFlag.ItemIsEditable)
-                    else:
-                        self.table.setItem(row, col, QTableWidgetItem(current_value))
-            # set where this table should be placed
-            tab_layout = QVBoxLayout(self.tabWidget.widget(first_insert_position))
-            tab_layout.addWidget(self.table)
-            #self.table.setMinimumSize(1500, 400)            
-            first_insert_position += 1
+           self.schemeJobToTab(job,self.cbdat.conf,insertPosition)
+           insertPosition += 1 
         
         if (self.cbdat.args.mdocs != None):
             self.line_path_mdocs.setText(self.cbdat.args.mdocs)
@@ -138,6 +104,38 @@ class MainUI(QMainWindow):
         # make groupBox_in_paths available so it can only be used after the tabs are created (--> can load in data)
         self.groupBox_in_paths.setEnabled(True)
 
+    def schemeJobToTab(self,job,conf,insertPosition):
+        # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
+        self.tabWidget.insertTab(insertPosition, QWidget(), job)
+        # build a table with the dataframe containinng the parameters for the respective job in the tab
+        df_job = self.cbdat.scheme.job_star[job].dict["joboptions_values"]
+        nRows, nColumns = df_job.shape
+        # create empty table with the dimensions of the df
+        self.table = QTableWidget(self)
+        self.table.setColumnCount(nColumns)
+        self.table.setRowCount(nRows)
+        self.table.setHorizontalHeaderLabels(("Parameter", "Value"))
+       
+        for row in range(nRows):
+            for col in range(nColumns):
+                # set the value that should be added to the respective col/row combination in the df containing the parameters
+                current_value =df_job.iloc[row, col]
+                # see whether there is an alias for the parameter (only for the Parameters column)
+                if col == 0:
+                    alias = conf.get_alias(job, current_value)
+                    # if there is an alias, set the widgetItem to this alias, else, do as normal
+                    if alias != None:
+                        self.table.setItem(row, col, QTableWidgetItem(alias))
+                    else:
+                        self.table.setItem(row, col, QTableWidgetItem(current_value))
+                    self.table.item(row, col).setFlags(self.table.item(row, col).flags() & ~Qt.ItemFlag.ItemIsEditable)
+                else:
+                    self.table.setItem(row, col, QTableWidgetItem(current_value))
+        # set where this table should be placed
+        tab_layout = QVBoxLayout(self.tabWidget.widget(insertPosition))
+        tab_layout.addWidget(self.table)
+        #self.table.setMinimumSize(1500, 400)            
+        
 
     def loadPathMovies(self):
         """
@@ -147,10 +145,6 @@ class MainUI(QMainWindow):
         # save the input of the field as variable
         params_dict_movies = {"movie_files": self.line_path_movies.text() + "*.eer"}
 
-        # reading the header doesn't work yet!
- 
-        # go to the importmovies tab by getting the index where importmovies is
-        # if header also has parameters for other jobs, have to loop through here
         for current_tab in self.cbdat.scheme.jobs_in_scheme:
             index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
             self.tabWidget.setCurrentIndex(index_import.item())
