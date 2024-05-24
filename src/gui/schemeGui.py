@@ -5,6 +5,7 @@ from PyQt6 import QtWidgets
 from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow, QDialog, QComboBox, QTabWidget, QWidget, QCheckBox, QAbstractItemView
 from PyQt6.QtCore import Qt
+from src.pipe.libpipe import pipe
 import yaml
 
 
@@ -14,10 +15,9 @@ root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
 
 #from lib.functions import get_value_from_tab
-from src.gui.libGui import browse_dirs, change_values, update_df, change_bckgrnd,get_inputNodesFromSchemeTable 
+from src.gui.libGui import browse_dirs, change_values, change_bckgrnd,get_inputNodesFromSchemeTable 
 from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
-
 
 class MainUI(QMainWindow):
     """
@@ -59,8 +59,7 @@ class MainUI(QMainWindow):
         self.btn_use_movie_path.clicked.connect(self.mdocs_use_movie_path)
         self.dropDown_config.activated.connect(self.loadConfig)
         self.btn_browse_target.clicked.connect(self.browsePathTarget)
-        self.btn_writeStar.clicked.connect(self.changeDf)
-        self.btn_writeStar.clicked.connect(self.writeStar)
+        self.btn_genProject.clicked.connect(self.generateProject)
         self.dropDown_config.addItem("Choose Microscope Set-Up")
         for i in self.cbdat.conf.microscope_presets:
             self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
@@ -219,7 +218,7 @@ class MainUI(QMainWindow):
         browse_dirs(self.line_path_new_project)
 
 
-    def changeDf(self):
+    def generateProject(self):
         """
         first, create a symlink to the frames and mdoc files and change the absolute paths provided by the browse 
         function to relative paths to these links and change the input fields accordingly.
@@ -228,41 +227,81 @@ class MainUI(QMainWindow):
         it if there is) and then writing the value into the df for the job.star file at the same position as it 
         is in the table (table is created based on this df so it should always be the same position and name). 
         """
-        self.path_to_new_project = self.line_path_new_project.text()        
-        self.name_new_frames_dir = self.line_path_movies.text().split("/")[-2]
-        self.name_new_mdocs_dir = self.line_path_mdocs.text().split("/")[-2]
-
-       
-        importFolderBySymlink(self.line_path_movies.text(), self.path_to_new_project)
-        importFolderBySymlink(self.line_path_mdocs.text(), self.path_to_new_project)
+        scheme=self.cbdat.scheme
+        scheme=self.updateSchemeFromJobTabs(scheme,self.tabWidget)
+        self.cbdat.scheme=scheme
         
-        import shutil
-        shutil.copytree(os.getenv("CRYOBOOST_HOME") + "/config/qsub", self.path_to_new_project + os.path.sep + "qsub",dirs_exist_ok=True)
+        args=self.cbdat.args
+        args.mdocs=self.line_path_mdocs.text()
+        args.movies=self.line_path_movies.text()
+        args.proj=self.line_path_new_project.text()
+        args.scheme=scheme
         
-
-        if self.line_path_mdocs.text() != self.line_path_movies.text():
-            self.line_path_mdocs.setText("./" + self.name_new_mdocs_dir + "/")
-        else:
-            self.line_path_mdocs.setText("./" + self.name_new_frames_dir + "/")
-        self.line_path_movies.setText("./" + self.name_new_frames_dir + "/")
-
-        # exclude the first tab (= set up)
-        for job_tab_index in range(1, len(self.cbdat.scheme.jobs_in_scheme) + 1):
-            # save the name of the job based on the index (tabs also created in order of the index --> is the same)
-            job = self.cbdat.scheme.jobs_in_scheme[job_tab_index]
-            #job_name = self.tabWidget.tabText(job_tab)
-            # go to the tabs based on their index
-            self.tabWidget.setCurrentIndex(job_tab_index)
-            # access the TableWidget in the currently open TabWidget
-            table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
+        pipeRunner=pipe(args)
+        pipeRunner.initProject()
+        pipeRunner.writeScheme()
+        self.cbdat.pipRunner=pipeRunner
+        
+        
+    def updateSchemeFromJobTabs(self,scheme,tabWidget):
+        
+        for job_tab_index in range(1, len(scheme.jobs_in_scheme) + 1):
+           
+            tabWidget.setCurrentIndex(job_tab_index)
+            table_widget = tabWidget.currentWidget().findChild(QTableWidget)
             
             nRows = table_widget.rowCount()
             nColumns = table_widget.columnCount()
-            # iterate through the table and access each row
-            update_df(self.cbdat.scheme.job_star, table_widget, nRows, nColumns, job,self.cbdat.conf)
-        # in the end, go back to the start relion tab from where the command was started (range excludes last entry)
-        self.tabWidget.setCurrentIndex(len(self.cbdat.scheme.jobs_in_scheme) + 1)
+           
+            job = scheme.jobs_in_scheme[job_tab_index]
+            self.update_df(scheme.job_star, table_widget, nRows, nColumns, job,self.cbdat.conf)
+        
+        tabWidget.setCurrentIndex(len(self.cbdat.scheme.jobs_in_scheme) + 1)
+        return scheme    
+    
+    def update_df(self,job_star_dict, table_widget, table_nRows, table_nCols, current_job_tab, conf):
+        """
+        update the df that is turned into a job.star file afterwards.
 
+        Args:
+            job_star_dict (dict): a dict containing a dict for each job, each containing a df with the respective
+            parameters as value to the key "joboptions_values"
+            table_widget (PyQt6 tabWidge): the widget containing the updated values.
+            table_nRows (int): number or rows in table of current tab.
+            table_nCols (int): number or columns in table of current tab.
+            current_job_tab (str): name of the current job (for aliases).
+
+        Returns:
+            updated job_star_dict.
+
+        Example:
+            job_star_dict = job_star_dict 
+            table_widget = table 
+            table_nRows = 30 
+            table_nCols = 2 
+            current_job_tab = "importmovies" 
+
+            It will go through the table row by row, extracting the input into each field. For inputs in the first
+            columns, it will look for aliases in the yaml file, so all params have the name that Relion expects.
+            Once the correct param name is determined, it writes the respective input into the respective position
+            in the "joboptions_values" df of the "importmovies" dict inside the job_star_dict dict.
+        """
+        for row in range(table_nRows):
+            for col in range(table_nCols):
+                # set the value to the text in the respective field (determined by row and col index)
+                value = table_widget.item(row, col).text()
+                # check whether there is an alias for a parameter name and if yes, change back to original name 
+                if col == 0:
+                    original_param_name = conf.get_alias_reverse(current_job_tab, value)
+                    if original_param_name != None:
+                        # param_name = original_param_name
+                        value = original_param_name     
+                # insert value at the position defined by the index of the table
+                job_star_dict[current_job_tab].dict["joboptions_values"].iloc[row, col] = value
+        return(job_star_dict)
+   
+        
+    
 
     def writeStar(self):
         """

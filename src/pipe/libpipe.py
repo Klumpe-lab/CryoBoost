@@ -7,7 +7,8 @@ import subprocess
 class pipe:
   """_summary_
 
-  Raises:
+  Raises:if (type(args.scheme) == str and os.path.exists(file_path)):
+      self.defaultSchemePath=args.scheme
       Exception: _description_
 
   Returns:
@@ -15,9 +16,16 @@ class pipe:
   """
   def __init__(self,args):
     CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
-    self.defaultSchemePath=CRYOBOOST_HOME + "/config/Schemes/relion_tomo_prep/"
+    if (type(args.scheme) == str and os.path.exists(args.scheme)==False):
+      self.defaultSchemePath=CRYOBOOST_HOME + "/config/Schemes/" + args.scheme
+    if (type(args.scheme) == str and os.path.exists(args.scheme)):
+      self.defaultSchemePath=args.scheme
+    if type(args.scheme)==schemeMeta:  
+      self.scheme=args.scheme
+    else:
+      self.scheme=schemeMeta(self.defaultSchemePath)
+    
     self.confPath=CRYOBOOST_HOME + "/config/conf.yaml"
-    self.scheme=schemeMeta(self.defaultSchemePath)
     self.conf=cbconfig(self.confPath)     
     self.args=args
     self.pathMdoc=args.mdocs

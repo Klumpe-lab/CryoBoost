@@ -91,46 +91,6 @@ def change_values(table_widget, param_val_dict, job_names,conf):
                 break
 
 
-def update_df(job_star_dict, table_widget, table_nRows, table_nCols, current_job_tab, conf):
-    """
-    update the df that is turned into a job.star file afterwards.
-
-    Args:
-        job_star_dict (dict): a dict containing a dict for each job, each containing a df with the respective
-        parameters as value to the key "joboptions_values"
-        table_widget (PyQt6 tabWidge): the widget containing the updated values.
-        table_nRows (int): number or rows in table of current tab.
-        table_nCols (int): number or columns in table of current tab.
-        current_job_tab (str): name of the current job (for aliases).
-
-    Returns:
-        updated job_star_dict.
-
-    Example:
-        job_star_dict = job_star_dict 
-        table_widget = table 
-        table_nRows = 30 
-        table_nCols = 2 
-        current_job_tab = "importmovies" 
-
-        It will go through the table row by row, extracting the input into each field. For inputs in the first
-        columns, it will look for aliases in the yaml file, so all params have the name that Relion expects.
-        Once the correct param name is determined, it writes the respective input into the respective position
-        in the "joboptions_values" df of the "importmovies" dict inside the job_star_dict dict.
-    """
-    for row in range(table_nRows):
-        for col in range(table_nCols):
-            # set the value to the text in the respective field (determined by row and col index)
-            value = table_widget.item(row, col).text()
-            # check whether there is an alias for a parameter name and if yes, change back to original name 
-            if col == 0:
-                original_param_name = conf.get_alias_reverse(current_job_tab, value)
-                if original_param_name != None:
-                    # param_name = original_param_name
-                    value = original_param_name     
-            # insert value at the position defined by the index of the table
-            job_star_dict[current_job_tab].dict["joboptions_values"].iloc[row, col] = value
-    return(job_star_dict)
 
 
 
