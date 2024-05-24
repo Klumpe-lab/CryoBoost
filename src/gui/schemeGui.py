@@ -249,79 +249,37 @@ class MainUI(QMainWindow):
            
             tabWidget.setCurrentIndex(job_tab_index)
             table_widget = tabWidget.currentWidget().findChild(QTableWidget)
+            jobName = scheme.jobs_in_scheme[job_tab_index]
+            scheme.job_star[jobName]=self.updateSchemeJobFromTable(scheme.job_star[jobName], table_widget,jobName,self.cbdat.conf)
+
             
-            nRows = table_widget.rowCount()
-            nColumns = table_widget.columnCount()
-           
-            job = scheme.jobs_in_scheme[job_tab_index]
-            self.update_df(scheme.job_star, table_widget, nRows, nColumns, job,self.cbdat.conf)
-        
         tabWidget.setCurrentIndex(len(self.cbdat.scheme.jobs_in_scheme) + 1)
         return scheme    
     
-    def update_df(self,job_star_dict, table_widget, table_nRows, table_nCols, current_job_tab, conf):
+    def updateSchemeJobFromTable(self,job, table_widget, jobName, conf):
         """
-        update the df that is turned into a job.star file afterwards.
-
-        Args:
-            job_star_dict (dict): a dict containing a dict for each job, each containing a df with the respective
-            parameters as value to the key "joboptions_values"
-            table_widget (PyQt6 tabWidge): the widget containing the updated values.
-            table_nRows (int): number or rows in table of current tab.
-            table_nCols (int): number or columns in table of current tab.
-            current_job_tab (str): name of the current job (for aliases).
-
-        Returns:
-            updated job_star_dict.
-
-        Example:
-            job_star_dict = job_star_dict 
-            table_widget = table 
-            table_nRows = 30 
-            table_nCols = 2 
-            current_job_tab = "importmovies" 
-
-            It will go through the table row by row, extracting the input into each field. For inputs in the first
-            columns, it will look for aliases in the yaml file, so all params have the name that Relion expects.
-            Once the correct param name is determined, it writes the respective input into the respective position
-            in the "joboptions_values" df of the "importmovies" dict inside the job_star_dict dict.
+        update the job_star_dict with the values of the table_widget
         """
-        for row in range(table_nRows):
-            for col in range(table_nCols):
-                # set the value to the text in the respective field (determined by row and col index)
+        nRows = table_widget.rowCount()
+        nCols = table_widget.columnCount()
+        
+        for row in range(nRows):
+            for col in range(nCols):
                 value = table_widget.item(row, col).text()
-                # check whether there is an alias for a parameter name and if yes, change back to original name 
                 if col == 0:
-                    original_param_name = conf.get_alias_reverse(current_job_tab, value)
+                    original_param_name = conf.get_alias_reverse(jobName, value)
                     if original_param_name != None:
                         # param_name = original_param_name
                         value = original_param_name     
                 # insert value at the position defined by the index of the table
-                job_star_dict[current_job_tab].dict["joboptions_values"].iloc[row, col] = value
-        return(job_star_dict)
+                job.dict["joboptions_values"].iloc[row, col] = value
+        
+        return job
    
         
     
 
-    def writeStar(self):
-        """
-        write the star file with the coordinates given and with the values of job_star_dict.
-        so far works only if the directory doesn't exist yet.
-        can be made into a pop-up window later.
-        """
-        # set the location for the new project to the link set in the respective field
-        self.path_to_new_project = self.line_path_new_project.text()
-
-        # create the master_scheme dict (where all other jobs are in) at the position set
-        
-        if not os.path.exists(self.path_to_new_project):
-            os.makedirs(self.path_to_new_project)
-        
-        path_scheme = os.path.join(self.path_to_new_project, self.cbdat.scheme.scheme_star.dict['scheme_general']['rlnSchemeName'])
-        # make a directory with this path and raise an error if such a directory already exists
-        self.cbdat.scheme.write_scheme(path_scheme)
-       
-
+    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
