@@ -155,7 +155,7 @@
           </rect>
          </property>
         </widget>
-        <widget class="QPushButton" name="btn_genProject_5">
+        <widget class="QPushButton" name="btn_updateProject">
          <property name="geometry">
           <rect>
            <x>201</x>
@@ -217,7 +217,7 @@
           <string>Start</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="btn_stopWrokFlow">
+        <widget class="QPushButton" name="btn_stopWorkFlow">
          <property name="geometry">
           <rect>
            <x>210</x>
@@ -243,7 +243,7 @@
           <string>Reset</string>
          </property>
         </widget>
-        <widget class="QCheckBox" name="checkBox">
+        <widget class="QCheckBox" name="checkBox_openRelionGui">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -256,7 +256,7 @@
           <string>open Relion Gui</string>
          </property>
         </widget>
-        <widget class="QCheckBox" name="checkBox_2">
+        <widget class="QCheckBox" name="checkBox_scheduleJobs">
          <property name="geometry">
           <rect>
            <x>131</x>
@@ -270,7 +270,7 @@
          </property>
         </widget>
        </widget>
-       <widget class="QGroupBox" name="groupBox_3">
+       <widget class="QGroupBox" name="groupBox_Logs">
         <property name="geometry">
          <rect>
           <x>0</x>
@@ -282,7 +282,7 @@
         <property name="title">
          <string>Logs</string>
         </property>
-        <widget class="QTextBrowser" name="textBrowser">
+        <widget class="QTextBrowser" name="textBrowser_workFlow">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -292,7 +292,7 @@
           </rect>
          </property>
         </widget>
-        <widget class="QTextBrowser" name="textBrowser_2">
+        <widget class="QTextBrowser" name="textBrowserJobs">
          <property name="geometry">
           <rect>
            <x>340</x>

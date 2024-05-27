@@ -2,12 +2,16 @@ import sys
 import os
 import pandas as pd
 from PyQt6 import QtWidgets
+from PyQt6.QtGui import QTextCursor
 from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow, QDialog, QComboBox, QTabWidget, QWidget, QCheckBox, QAbstractItemView
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
+import asyncio
+import aiofiles  
 import yaml
-
+from PyQt6.QtCore import QTimer
+from qasync import QEventLoop, asyncSlot
 
 current_dir = os.path.dirname(os.path.abspath(__name__))
 # change the path to be until src
@@ -60,6 +64,9 @@ class MainUI(QMainWindow):
         self.dropDown_config.activated.connect(self.loadConfig)
         self.btn_browse_target.clicked.connect(self.browsePathTarget)
         self.btn_genProject.clicked.connect(self.generateProject)
+        self.btn_startWorkFlow.clicked.connect(self.startWorkflow)
+        self.btn_stopWorkFlow.clicked.connect(self.stopWorkflow)
+        self.btn_resetWorkFlow.clicked.connect(self.resetWorkflow)
         self.dropDown_config.addItem("Choose Microscope Set-Up")
         for i in self.cbdat.conf.microscope_presets:
             self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
@@ -165,7 +172,43 @@ class MainUI(QMainWindow):
     def mdocs_use_movie_path(self):
         self.line_path_mdocs.setText(self.line_path_movies.text())
 
+    def startWorkflow(self):
+        
+        self.cbdat.pipeRunner.runScheme()
+        logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
+        print(logfile_path)
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(lambda: self.view_log_file(logfile_path,interval=2))
+        self.timer.start(2000)  # Update the log fil
+        
+    
+    def stopWorkflow(self):
+        
+        #self.cbdat.pipeRunner.stopScheme()
+       print("stop")
+       
+    def resetWorkflow(self):
+               
+       print("reset done")   
+    
+    def view_log_file(self,log_file_path, interval=1):
+        """
+        Asynchronously view a log file, printing new content as it is added.
 
+        Parameters:
+        log_file_path (str): The path to the log file.
+        interval (int): The interval in seconds to wait before checking for new content.
+        """
+        print("logdisp started")
+        try:
+            with open(log_file_path, 'r') as log_file:
+                log_content = log_file.read()
+                self.textBrowser_workFlow.setText(log_content)
+        except Exception as e:
+            self.textBrowser_workFlow.setText(f"Failed to read log file: {e}")
+        self.textBrowser_workFlow.moveCursor(QTextCursor.MoveOperation.End)    
+    
+    
     def loadPathMdocs(self):
         """
         set the parameter path to mdoc in the importmovies job to the link provided here. Then, look into the 
@@ -240,7 +283,7 @@ class MainUI(QMainWindow):
         pipeRunner=pipe(args)
         pipeRunner.initProject()
         pipeRunner.writeScheme()
-        self.cbdat.pipRunner=pipeRunner
+        self.cbdat.pipeRunner=pipeRunner
         
         
     def updateSchemeFromJobTabs(self,scheme,tabWidget):
