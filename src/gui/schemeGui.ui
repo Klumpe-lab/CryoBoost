@@ -18,14 +18,14 @@
     <item row="0" column="0">
      <widget class="QLabel" name="label_4">
       <property name="text">
-       <string>CryoTheraPy</string>
+       <string>CryoBoost</string>
       </property>
      </widget>
     </item>
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -209,7 +209,7 @@
           <rect>
            <x>0</x>
            <y>30</y>
-           <width>201</width>
+           <width>181</width>
            <height>25</height>
           </rect>
          </property>
@@ -220,9 +220,9 @@
         <widget class="QPushButton" name="btn_stopWorkFlow">
          <property name="geometry">
           <rect>
-           <x>210</x>
+           <x>190</x>
            <y>30</y>
-           <width>201</width>
+           <width>191</width>
            <height>25</height>
           </rect>
          </property>
@@ -233,9 +233,9 @@
         <widget class="QPushButton" name="btn_resetWorkFlow">
          <property name="geometry">
           <rect>
-           <x>420</x>
+           <x>390</x>
            <y>30</y>
-           <width>201</width>
+           <width>171</width>
            <height>25</height>
           </rect>
          </property>
@@ -267,6 +267,19 @@
          </property>
          <property name="text">
           <string>schedule jobs</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_unlockWorkFlow">
+         <property name="geometry">
+          <rect>
+           <x>570</x>
+           <y>30</y>
+           <width>171</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Unlock</string>
          </property>
         </widget>
        </widget>

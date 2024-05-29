@@ -35,13 +35,25 @@ class pipe:
     sshStr=sub=self.conf.confdata['submission'][0]['SshCommand']
     schemeName=self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName']
     schemeName=os.path.basename(schemeName.strip(os.path.sep)) #remove path from schemeName
+    schemeLockFile=".relion_lock_scheme_" + schemeName + os.path.sep  + "lock_scheme"
     relSchemeStart="relion_schemer --scheme " + schemeName  + " --run"
+    self.schemeLockFile=schemeLockFile
+    self.schemeName=schemeName
+    
+    #relSchemeAbrot="relion_schemer --scheme " + schemeName  + " --abort; + pkill -f """ + 
+    relSchemeAbrot="pkill -f \'relion_schemer --scheme " + schemeName + "\'" 
+    relSchemeReset="relion_schemer --scheme " + schemeName  + " --reset"
+    relSchemeUnlock="rm " + schemeLockFile + ";rmdir "+ os.path.dirname(schemeLockFile)
     relGuiStart="relion --tomo --do_projdir "
     chFold="cd " + os.path.abspath(self.pathProject) + ";"
     envStr="module load RELION/5.0-beta-3;"
     logStr=" > " + schemeName + ".log 2>&1 " 
-    self.commandScheme=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeStart + logStr + '"'
+    logStrAdd=" >> " + schemeName + ".log 2>&1 "
+    self.commandSchemeStart=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeStart + logStrAdd + '"'
+    self.commandSchemeAbrot=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeAbrot + logStrAdd + '"'
+    self.commandSchemeReset=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeReset + logStrAdd + '"'
     self.commandGui=sshStr + " " + headNode + ' "'  + envStr + chFold + relGuiStart  + '"'
+    self.commandSchemeUnlock=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeUnlock + logStrAdd + '"'
     
       
   def initProject(self):
@@ -61,16 +73,37 @@ class pipe:
   
   def runScheme(self):
     print("-----------------------------------------")
-    print(self.commandScheme)
-    p=run_command_async(self.commandScheme)
+    print(self.commandSchemeStart)
+    p=run_command_async(self.commandSchemeStart)
     print("-----------------------------------------")
  
   def runSchemeSync(self):
     print("-----------------------------------------")
-    print(self.commandScheme)
-    p=run_command(self.commandScheme)
+    print(self.commandSchemeStart)
+    p=run_command(self.commandSchemeStart)
     print("-----------------------------------------")
  
+  def abortScheme(self):
+    print("-----------------------------------------")
+    print(self.commandSchemeAbrot)
+    p=run_command(self.commandSchemeAbrot)
+    self.unlockScheme(self)
+    print("-----------------------------------------")
+ 
+  def resetScheme(self):
+    print("-----------------------------------------")
+    print(self.commandSchemeReset)
+    p=run_command(self.commandSchemeReset)
+    print("-----------------------------------------")
+ 
+  def unlockScheme(self):
+    print("-----------------------------------------")  
+    pathLock=self.pathProject + os.path.sep + os.path.dirname(self.schemeLockFile)
+    print(pathLock)
+    if os.path.isdir(pathLock):
+      print(self.commandSchemeUnlock)
+      p=run_command(self.commandSchemeUnlock)
+    print("-----------------------------------------")
  
   def openRelionGui(self):
     print("-----------------------------------------")

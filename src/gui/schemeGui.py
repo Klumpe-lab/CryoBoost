@@ -66,6 +66,7 @@ class MainUI(QMainWindow):
         self.btn_genProject.clicked.connect(self.generateProject)
         self.btn_startWorkFlow.clicked.connect(self.startWorkflow)
         self.btn_stopWorkFlow.clicked.connect(self.stopWorkflow)
+        self.btn_unlockWorkFlow.clicked.connect(self.unlockWorkflow)
         self.btn_resetWorkFlow.clicked.connect(self.resetWorkflow)
         self.dropDown_config.addItem("Choose Microscope Set-Up")
         for i in self.cbdat.conf.microscope_presets:
@@ -178,28 +179,32 @@ class MainUI(QMainWindow):
         logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
         print(logfile_path)
         self.timer = QTimer(self)
-        self.timer.timeout.connect(lambda: self.view_log_file(logfile_path,interval=2))
+        self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
         self.timer.start(2000)  # Update the log fil
         
     
     def stopWorkflow(self):
-        
-        #self.cbdat.pipeRunner.stopScheme()
+       self.cbdat.pipeRunner.abortScheme()
        print("stop")
        
     def resetWorkflow(self):
-               
+       self.cbdat.pipeRunner.resetScheme()          
        print("reset done")   
     
-    def view_log_file(self,log_file_path, interval=1):
+    def unlockWorkflow(self):
+       self.cbdat.pipeRunner.unlockScheme()          
+       print("unlock done")   
+    
+    def view_log_file(self, log_file_path):
         """
-        Asynchronously view a log file, printing new content as it is added.
+        This function reads the content of a log file and displays it in a text browser.
 
         Parameters:
         log_file_path (str): The path to the log file.
-        interval (int): The interval in seconds to wait before checking for new content.
+
+        Returns:
+        None. The function updates the text in the text browser.
         """
-        print("logdisp started")
         try:
             with open(log_file_path, 'r') as log_file:
                 log_content = log_file.read()
@@ -207,7 +212,7 @@ class MainUI(QMainWindow):
         except Exception as e:
             self.textBrowser_workFlow.setText(f"Failed to read log file: {e}")
         self.textBrowser_workFlow.moveCursor(QTextCursor.MoveOperation.End)    
-    
+        
     
     def loadPathMdocs(self):
         """
