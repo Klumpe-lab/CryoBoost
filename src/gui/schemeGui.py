@@ -216,6 +216,18 @@ class MainUI(QMainWindow):
             self.textBrowser_workFlow.setText(f"Failed to read log file: {e}")
         self.textBrowser_workFlow.moveCursor(QTextCursor.MoveOperation.End)    
         
+        logOut,logError=self.cbdat.pipeRunner.getLastJobLogs()
+        try:
+            with open(logOut, 'r') as log_file:
+                log_content = log_file.read()
+                #self.textBrowserJobs.setText(log_content)
+            with open(logError, 'r') as log_fileError:
+                log_content += log_fileError.read()
+                self.textBrowserJobs.setText(log_content)    
+        except Exception as e:
+            self.textBrowserJobs.setText(f"Failed to read log file: {e}")
+        self.textBrowserJobs.moveCursor(QTextCursor.MoveOperation.End) 
+        
     
     def loadPathMdocs(self):
         """

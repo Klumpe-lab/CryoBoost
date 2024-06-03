@@ -138,8 +138,8 @@ class pipe:
                
   def getLastJobLogs(self):
       lastBatchJobId,lastJobFolder=self.parseSchemeLogFile()
-      jobOut=lastJobFolder+os.path.sep+"run.out"
-      jobErr=lastJobFolder+os.path.sep+"run.err"
+      jobOut=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.out"
+      jobErr=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.err"
       #TODO: check for ext Log
       return jobOut,jobErr               
   def writeToLog(self,text):
