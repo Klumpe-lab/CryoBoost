@@ -175,6 +175,9 @@ class MainUI(QMainWindow):
 
     def startWorkflow(self):
         
+        if self.checkBox_openRelionGui.isChecked():
+            self.cbdat.pipeRunner.openRelionGui()
+        
         self.cbdat.pipeRunner.runScheme()
         logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
         print(logfile_path)

@@ -1,7 +1,7 @@
 from src.rw.librw import cbconfig,importFolderBySymlink,schemeMeta
 from src.misc.system import run_command,run_command_async
 import shutil
-import os 
+import os,re 
 import subprocess
 
 class pipe:
@@ -40,17 +40,20 @@ class pipe:
     self.schemeLockFile=schemeLockFile
     self.schemeName=schemeName
     
+    chFold="cd " + os.path.abspath(self.pathProject) + ";"
     #relSchemeAbrot="relion_schemer --scheme " + schemeName  + " --abort; + pkill -f """ + 
     relSchemeAbrot="pkill -f \'relion_schemer --scheme " + schemeName + "\'" 
+    relStopLastJob="scancel XXXJOBIDXXX"
     relSchemeReset="relion_schemer --scheme " + schemeName  + " --reset"
     relSchemeUnlock="rm " + schemeLockFile + ";rmdir "+ os.path.dirname(schemeLockFile)
     relGuiStart="relion --tomo --do_projdir "
-    chFold="cd " + os.path.abspath(self.pathProject) + ";"
+   
     envStr="module load RELION/5.0-beta-3;"
     logStr=" > " + schemeName + ".log 2>&1 " 
     logStrAdd=" >> " + schemeName + ".log 2>&1 "
     self.commandSchemeStart=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeStart + logStrAdd + '"'
-    self.commandSchemeAbrot=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeAbrot + logStrAdd + '"'
+    self.commandSchemeAbrot=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeAbrot + ";" + logStrAdd + '"'
+    self.commandSchemeJobAbrot=sshStr + " " + headNode + ' "' + relStopLastJob + ";" + logStrAdd + '"'
     self.commandSchemeReset=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeReset + logStrAdd + '"'
     self.commandGui=sshStr + " " + headNode + ' "'  + envStr + chFold + relGuiStart  + '"'
     self.commandSchemeUnlock=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeUnlock + logStrAdd + '"'
@@ -84,10 +87,16 @@ class pipe:
     print("-----------------------------------------")
  
   def abortScheme(self):
+    self.writeToLog("Abort scheme: " + self.schemeName + "\n")
     print("-----------------------------------------")
+    lastBatchJobId,lastJobFolder=self.parseSchemeLogFile()
     print(self.commandSchemeAbrot)
+    self.writeToLog("==>" + self.commandSchemeAbrot)
     p=run_command(self.commandSchemeAbrot)
-    self.unlockScheme(self)
+    print(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
+    p=run_command(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
+    self.writeToLog("==>" + self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
+    self.unlockScheme()
     print("-----------------------------------------")
  
   def resetScheme(self):
@@ -97,16 +106,44 @@ class pipe:
     print("-----------------------------------------")
  
   def unlockScheme(self):
-    print("-----------------------------------------")  
     pathLock=self.pathProject + os.path.sep + os.path.dirname(self.schemeLockFile)
-    print(pathLock)
     if os.path.isdir(pathLock):
+      print("-----------------------------------------") 
+      print(pathLock)
       print(self.commandSchemeUnlock)
       p=run_command(self.commandSchemeUnlock)
-    print("-----------------------------------------")
+      print("-----------------------------------------")
  
   def openRelionGui(self):
     print("-----------------------------------------")
     print(self.commandGui)
     p=run_command_async(self.commandGui)
-    print("-----------------------------------------")        
+    print("-----------------------------------------") 
+  
+  def parseSchemeLogFile(self):
+   
+    file_path = self.pathProject + os.path.sep + self.schemeName + ".log"
+    with open(file_path, 'r') as file:
+        lastBatchJobID=None
+        lastJobFolder=None
+        for line in file:
+          reResLastBatchJob=re.search("Submitted batch job", line)
+          if (reResLastBatchJob):
+             lastBatchJobID=reResLastBatchJob.string.split("job")[1]  # Assuming the format is "Submitted jobid"
+          reReslastJobFolder=re.search("Creating new Job", line)
+          if (reReslastJobFolder):
+             lastJobFolder=reReslastJobFolder.string.split("Job:")[1].split(" ")[1] 
+             
+    return lastBatchJobID.strip(),lastJobFolder.strip()    
+               
+  def getLastJobLogs(self):
+      lastBatchJobId,lastJobFolder=self.parseSchemeLogFile()
+      jobOut=lastJobFolder+os.path.sep+"run.out"
+      jobErr=lastJobFolder+os.path.sep+"run.err"
+      #TODO: check for ext Log
+      return jobOut,jobErr               
+  def writeToLog(self,text):
+      logFile=self.pathProject+os.path.sep+self.schemeName+".log"
+      with open(logFile, "a") as myfile:
+          myfile.write(text)
+          
