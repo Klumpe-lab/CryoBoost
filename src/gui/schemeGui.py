@@ -4,7 +4,7 @@ import pandas as pd
 from PyQt6 import QtWidgets
 from PyQt6.QtGui import QTextCursor
 from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow, QDialog, QComboBox, QTabWidget, QWidget, QCheckBox, QAbstractItemView
+from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QDialog, QComboBox, QTabWidget, QWidget, QCheckBox, QAbstractItemView
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
 import asyncio
@@ -19,7 +19,7 @@ root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
 
 #from lib.functions import get_value_from_tab
-from src.gui.libGui import browse_dirs, change_values, change_bckgrnd,get_inputNodesFromSchemeTable 
+from src.gui.libGui import browse_dirs, change_values, change_bckgrnd,get_inputNodesFromSchemeTable,messageBox 
 from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
 
@@ -177,16 +177,35 @@ class MainUI(QMainWindow):
 
     def startWorkflow(self):
         
+        if (self.cbdat.pipeRunner.checkForLock()):
+            messageBox("lock exists","stop workflow first")
+            return
+              
         if self.checkBox_openRelionGui.isChecked():
             self.cbdat.pipeRunner.openRelionGui()
         self.cbdat.pipeRunner.runScheme()
         
+    
     def stopWorkflow(self):
-       self.cbdat.pipeRunner.abortScheme()
-      
+        reply = QMessageBox.question(self, 'Message',
+                                 "Do you really want to stop the workflow?",
+                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
+        if reply == QMessageBox.StandardButton.Yes:
+            self.cbdat.pipeRunner.abortScheme()
+  
        
     def resetWorkflow(self):
-       self.cbdat.pipeRunner.resetScheme()          
+       
+       if (self.cbdat.pipeRunner.checkForLock()):
+            messageBox("lock exists","stop workflow first")
+            return
+       
+       reply = QMessageBox.question(self, 'Message',
+                                 "Do you really want to reset the workflow?",
+                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
+       
+       if reply == QMessageBox.StandardButton.Yes:
+            self.cbdat.pipeRunner.resetScheme()          
          
     
     def unlockWorkflow(self):

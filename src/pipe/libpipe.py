@@ -94,10 +94,16 @@ class pipe:
     p=run_command(self.commandSchemeAbrot)
     self.writeToLog(" + " + self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId) + "\n")
     p=run_command(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
-    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    self.writeToLog(" + " + self.commandSchemeUnlock + "\n")
     self.unlockScheme()
+    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
     
- 
+  def checkForLock(self):  
+    pathLock=self.pathProject + os.path.sep + self.schemeLockFile
+    print(pathLock)
+    print(os.path.isfile(pathLock))
+    return os.path.isfile(pathLock)
+  
   def resetScheme(self):
     print("-----------------------------------------")
     print(self.commandSchemeReset)
@@ -120,20 +126,29 @@ class pipe:
     print("-----------------------------------------") 
   
   def parseSchemeLogFile(self):
-   
+    """
+    Parses the scheme log file to extract the last batch job ID and job folder.
+
+    Args:
+        self (Pipe): An instance of the Pipe class.
+
+    Returns:
+        tuple: A tuple containing the last batch job ID and job folder.
+
+    """
     file_path = self.pathProject + os.path.sep + self.schemeName + ".log"
     with open(file_path, 'r') as file:
-        lastBatchJobID=None
-        lastJobFolder=None
+        last_batch_job_id = None
+        last_job_folder = None
         for line in file:
-          reResLastBatchJob=re.search("Submitted batch job", line)
-          if (reResLastBatchJob):
-             lastBatchJobID=reResLastBatchJob.string.split("job")[1]  # Assuming the format is "Submitted jobid"
-          reReslastJobFolder=re.search("Creating new Job", line)
-          if (reReslastJobFolder):
-             lastJobFolder=reReslastJobFolder.string.split("Job:")[1].split(" ")[1] 
-             
-    return lastBatchJobID.strip(),lastJobFolder.strip()    
+            re_res_last_batch_job = re.search("Submitted batch job", line)
+            if re_res_last_batch_job:
+                last_batch_job_id = re_res_last_batch_job.string.split("job")[1]  # Assuming the format is "Submitted jobid"
+            re_res_last_job_folder = re.search("Creating new Job", line)
+            if re_res_last_job_folder:
+                last_job_folder = re_res_last_job_folder.string.split("Job:")[1].split(" ")[1] 
+
+    return last_batch_job_id.strip(), last_job_folder.strip()    
                
   def getLastJobLogs(self):
       lastBatchJobId,lastJobFolder=self.parseSchemeLogFile()

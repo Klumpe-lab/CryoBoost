@@ -3,6 +3,7 @@ import sys
 import os
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QTableWidgetItem, QTabWidget, QFileDialog
+from PyQt6.QtWidgets import QMessageBox
 
 current_dir = os.path.dirname(os.path.abspath(__name__))
 # change the path to be until src
@@ -15,6 +16,29 @@ def get_inputNodesFromSchemeTable(table_widget,jobsOnly=True):
     for row in range(table_widget.rowCount()):
         inputNodes[row]=table_widget.item(row,0).text()        
     return inputNodes
+
+
+def messageBox(title, text):
+    """
+    Shows a message box with the specified title and text.
+
+    Args:
+        title (str): title of the message box
+        text (str): text of the message box
+
+    Example:
+        title = "Error"
+        text = "Something went wrong"
+
+        messageBox(title, text)
+    """
+    message_box = QMessageBox()
+    message_box.setWindowTitle(title)
+    message_box.setText(text)
+    message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+    message_box.exec()    
+        
+
 
 def browse_dirs(target_field):
     """
