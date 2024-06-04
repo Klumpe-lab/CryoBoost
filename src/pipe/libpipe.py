@@ -52,7 +52,7 @@ class pipe:
     logStr=" > " + schemeName + ".log 2>&1 " 
     logStrAdd=" >> " + schemeName + ".log 2>&1 "
     self.commandSchemeStart=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeStart + logStrAdd + '"'
-    self.commandSchemeAbrot=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeAbrot + ";" + logStrAdd + '"'
+    self.commandSchemeAbrot=sshStr + " " + headNode + ' "'  + envStr  + relSchemeAbrot + ";" + logStrAdd + '"'
     self.commandSchemeJobAbrot=sshStr + " " + headNode + ' "' + relStopLastJob + ";" + logStrAdd + '"'
     self.commandSchemeReset=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeReset + logStrAdd + '"'
     self.commandGui=sshStr + " " + headNode + ' "'  + envStr + chFold + relGuiStart  + '"'
@@ -87,17 +87,16 @@ class pipe:
     print("-----------------------------------------")
  
   def abortScheme(self):
-    self.writeToLog("Abort scheme: " + self.schemeName + "\n")
-    print("-----------------------------------------")
     lastBatchJobId,lastJobFolder=self.parseSchemeLogFile()
-    print(self.commandSchemeAbrot)
-    self.writeToLog("==>" + self.commandSchemeAbrot)
+    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    self.writeToLog(" + Abort scheme: " + self.schemeName + "\n")
+    self.writeToLog(" + " + self.commandSchemeAbrot + "\n")
     p=run_command(self.commandSchemeAbrot)
-    print(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
+    self.writeToLog(" + " + self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId) + "\n")
     p=run_command(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
-    self.writeToLog("==>" + self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
+    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
     self.unlockScheme()
-    print("-----------------------------------------")
+    
  
   def resetScheme(self):
     print("-----------------------------------------")

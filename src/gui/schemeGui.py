@@ -40,6 +40,8 @@ class MainUI(QMainWindow):
        
         if (self.cbdat.args.autoGen or self.cbdat.args.skipSchemeEdit):
             self.makeJobTabsFromScheme()
+        
+        
     
     def initializeDataStrcuture(self,args):
         #custom varibales
@@ -177,26 +179,19 @@ class MainUI(QMainWindow):
         
         if self.checkBox_openRelionGui.isChecked():
             self.cbdat.pipeRunner.openRelionGui()
-        
         self.cbdat.pipeRunner.runScheme()
-        logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
-        print(logfile_path)
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
-        self.timer.start(2000)  # Update the log fil
         
-    
     def stopWorkflow(self):
        self.cbdat.pipeRunner.abortScheme()
-       print("stop")
+      
        
     def resetWorkflow(self):
        self.cbdat.pipeRunner.resetScheme()          
-       print("reset done")   
+         
     
     def unlockWorkflow(self):
        self.cbdat.pipeRunner.unlockScheme()          
-       print("unlock done")   
+       
     
     def view_log_file(self, log_file_path):
         """
@@ -219,15 +214,17 @@ class MainUI(QMainWindow):
         logOut,logError=self.cbdat.pipeRunner.getLastJobLogs()
         try:
             with open(logOut, 'r') as log_file:
-                log_content = log_file.read()
-                #self.textBrowserJobs.setText(log_content)
+                log_contentOut = log_file.read()
+                self.textBrowserJobsOut.setText(log_contentOut)
             with open(logError, 'r') as log_fileError:
-                log_content += log_fileError.read()
-                self.textBrowserJobs.setText(log_content)    
+                log_contentError = log_fileError.read()
+                if self.checkBox_jobErrroShowWarning.isChecked()==False:
+                    log_contentError = "\n".join(line for line in log_contentError.splitlines() if "warning" not in line.lower() and "warn" not in line.lower() )
+                self.textBrowserJobsError.setText(log_contentError)    
         except Exception as e:
-            self.textBrowserJobs.setText(f"Failed to read log file: {e}")
-        self.textBrowserJobs.moveCursor(QTextCursor.MoveOperation.End) 
-        
+            self.textBrowserJobsOut.setText(f"Failed to read log file: {e}")
+        self.textBrowserJobsOut.moveCursor(QTextCursor.MoveOperation.End) 
+        self.textBrowserJobsError.moveCursor(QTextCursor.MoveOperation.End)
     
     def loadPathMdocs(self):
         """
@@ -304,6 +301,11 @@ class MainUI(QMainWindow):
         pipeRunner.initProject()
         pipeRunner.writeScheme()
         self.cbdat.pipeRunner=pipeRunner
+        
+        logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
+        self.timer.start(2000)  # Update the log fil    
         
         
     def updateSchemeFromJobTabs(self,scheme,tabWidget):

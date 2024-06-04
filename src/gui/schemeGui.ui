@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>813</width>
-    <height>649</height>
+    <width>966</width>
+    <height>743</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -138,7 +138,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>781</width>
+          <width>941</width>
           <height>91</height>
          </rect>
         </property>
@@ -197,7 +197,7 @@
          <rect>
           <x>0</x>
           <y>100</y>
-          <width>781</width>
+          <width>941</width>
           <height>91</height>
          </rect>
         </property>
@@ -288,8 +288,8 @@
          <rect>
           <x>0</x>
           <y>200</y>
-          <width>781</width>
-          <height>321</height>
+          <width>941</width>
+          <height>351</height>
          </rect>
         </property>
         <property name="title">
@@ -299,20 +299,82 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>40</y>
+           <y>70</y>
            <width>301</width>
            <height>271</height>
           </rect>
          </property>
         </widget>
-        <widget class="QTextBrowser" name="textBrowserJobs">
+        <widget class="QTextBrowser" name="textBrowserJobsOut">
          <property name="geometry">
           <rect>
-           <x>340</x>
-           <y>40</y>
-           <width>381</width>
+           <x>320</x>
+           <y>70</y>
+           <width>301</width>
            <height>271</height>
           </rect>
+         </property>
+        </widget>
+        <widget class="QTextBrowser" name="textBrowserJobsError">
+         <property name="geometry">
+          <rect>
+           <x>630</x>
+           <y>70</y>
+           <width>301</width>
+           <height>271</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>50</y>
+           <width>54</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>WorFlow </string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_2">
+         <property name="geometry">
+          <rect>
+           <x>330</x>
+           <y>50</y>
+           <width>81</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Job output</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_3">
+         <property name="geometry">
+          <rect>
+           <x>640</x>
+           <y>50</y>
+           <width>60</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Job error</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="checkBox_jobErrroShowWarning">
+         <property name="geometry">
+          <rect>
+           <x>698</x>
+           <y>42</y>
+           <width>121</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>show Warnings</string>
          </property>
         </widget>
        </widget>
@@ -326,7 +388,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>813</width>
+     <width>966</width>
      <height>22</height>
     </rect>
    </property>
