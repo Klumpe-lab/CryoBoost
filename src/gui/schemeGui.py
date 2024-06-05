@@ -52,6 +52,7 @@ class MainUI(QMainWindow):
         cbdat.scheme=schemeMeta(cbdat.defaultSchemePath)
         cbdat.conf=cbconfig(cbdat.confPath)     
         cbdat.args=args
+        cbdat.pipeRunner= None
         
         return cbdat
     
@@ -177,6 +178,14 @@ class MainUI(QMainWindow):
 
     def startWorkflow(self):
         
+        if self.checkPipeRunner()==False:
+            return
+        
+        if self.cbdat.pipeRunner.checkForLock():
+            messageBox("lock exists","stop workflow first")
+            return
+        
+        
         if (self.cbdat.pipeRunner.checkForLock()):
             messageBox("lock exists","stop workflow first")
             return
@@ -187,6 +196,10 @@ class MainUI(QMainWindow):
         
     
     def stopWorkflow(self):
+        
+        if self.checkPipeRunner()==False:
+            return
+        
         reply = QMessageBox.question(self, 'Message',
                                  "Do you really want to stop the workflow?",
                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
@@ -195,6 +208,9 @@ class MainUI(QMainWindow):
   
        
     def resetWorkflow(self):
+       
+       if self.checkPipeRunner()==False:
+            return
        
        if (self.cbdat.pipeRunner.checkForLock()):
             messageBox("lock exists","stop workflow first")
@@ -209,8 +225,20 @@ class MainUI(QMainWindow):
          
     
     def unlockWorkflow(self):
-       self.cbdat.pipeRunner.unlockScheme()          
        
+       if self.checkPipeRunner()==False:
+            return
+       
+       self.cbdat.pipeRunner.unlockScheme()          
+    
+    def checkPipeRunner(self):
+        
+        if self.cbdat.pipeRunner is not None: 
+            return True    
+        else:
+            messageBox("No Project!","Generate a Project first")
+            return False 
+    
     
     def view_log_file(self, log_file_path):
         """

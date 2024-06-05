@@ -81,11 +81,8 @@ class pipe:
     print("-----------------------------------------")
  
   def runSchemeSync(self):
-    print("-----------------------------------------")
-    print(self.commandSchemeStart)
     p=run_command(self.commandSchemeStart)
-    print("-----------------------------------------")
- 
+   
   def abortScheme(self):
     lastBatchJobId,lastJobFolder=self.parseSchemeLogFile()
     self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
@@ -95,6 +92,7 @@ class pipe:
     self.writeToLog(" + " + self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId) + "\n")
     p=run_command(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
     self.writeToLog(" + " + self.commandSchemeUnlock + "\n")
+    self.writeToLog(" + Workflow aborted !\n")
     self.unlockScheme()
     self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
     
@@ -105,19 +103,22 @@ class pipe:
     return os.path.isfile(pathLock)
   
   def resetScheme(self):
-    print("-----------------------------------------")
-    print(self.commandSchemeReset)
+    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    self.writeToLog(" + Reset scheme: " + self.schemeName + "\n")
+    self.writeToLog(" + " + self.commandSchemeReset + "\n")
     p=run_command(self.commandSchemeReset)
-    print("-----------------------------------------")
- 
+    self.writeToLog(" + Scheme reset done !\n")
+    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+   
   def unlockScheme(self):
     pathLock=self.pathProject + os.path.sep + os.path.dirname(self.schemeLockFile)
     if os.path.isdir(pathLock):
-      print("-----------------------------------------") 
-      print(pathLock)
-      print(self.commandSchemeUnlock)
+      self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+      self.writeToLog(" + Unlock scheme: " + self.schemeName + "\n")
+      self.writeToLog(" + " + self.commandSchemeUnlock + "\n")
       p=run_command(self.commandSchemeUnlock)
-      print("-----------------------------------------")
+      self.writeToLog(" + Scheme unlocked !\n")
+      self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
  
   def openRelionGui(self):
     print("-----------------------------------------")
@@ -137,23 +138,30 @@ class pipe:
 
     """
     file_path = self.pathProject + os.path.sep + self.schemeName + ".log"
+    if (os.path.isfile(file_path) == False):
+        return None, None
     with open(file_path, 'r') as file:
         last_batch_job_id = None
         last_job_folder = None
         for line in file:
             re_res_last_batch_job = re.search("Submitted batch job", line)
             if re_res_last_batch_job:
-                last_batch_job_id = re_res_last_batch_job.string.split("job")[1]  # Assuming the format is "Submitted jobid"
+                last_batch_job_id = re_res_last_batch_job.string.split("job")[1].strip()  # Assuming the format is "Submitted jobid"
             re_res_last_job_folder = re.search("Creating new Job", line)
             if re_res_last_job_folder:
-                last_job_folder = re_res_last_job_folder.string.split("Job:")[1].split(" ")[1] 
+                last_job_folder = re_res_last_job_folder.string.split("Job:")[1].split(" ")[1].strip() 
 
-    return last_batch_job_id.strip(), last_job_folder.strip()    
+    return last_batch_job_id,last_job_folder    
                
   def getLastJobLogs(self):
       lastBatchJobId,lastJobFolder=self.parseSchemeLogFile()
-      jobOut=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.out"
-      jobErr=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.err"
+      if (lastJobFolder is not  None):
+        jobOut=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.out"
+        jobErr=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.err"
+      else:
+        print("no Logs found")
+        jobOut="No logs found"
+        jobErr="No logs found"  
       #TODO: check for ext Log
       return jobOut,jobErr               
   def writeToLog(self,text):
