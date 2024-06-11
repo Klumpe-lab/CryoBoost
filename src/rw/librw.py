@@ -242,6 +242,8 @@ from pathlib import Path
 from starfile import read as starread
 from starfile import write as starwrite
 import copy
+import os
+from datetime import datetime
 
 class starFileMeta:
   """_summary_
@@ -282,6 +284,56 @@ class starFileMeta:
         starwrite(self.df,starfilePath)
         return
     
+class dataImport():
+  """imports raw data
+  """
+  def __init__(self,targetPath,wkFrames,wkMdoc=None,prefix="auto"):  
+    self.targetPath=targetPath
+    self.wkFrames=wkFrames
+    self.wkMdoc=wkMdoc
+    if (prefix == "auto"):
+      current_datetime = datetime.now()
+      self.prefix=current_datetime.strftime("%Y-%m-%d-%H:%M:%S_")
+    else:
+      self.prefix=prefix
+    self.mdocLocalFold="mdoc/"
+    self.framesLocalFold="frames/"
+    frameTargetPattern=self.targetPath + "/" + self.framesLocalFold + os.path.basename(self.wkFrames)
+    self.existingFiles=[os.path.realpath(file) for file in glob.glob(frameTargetPattern)]
+
+    self.runImport()
+  
+  def runImport(self):   
+    os.makedirs(self.targetPath, exist_ok=True)
+    framesFold=os.path.join(self.targetPath,self.framesLocalFold)
+    os.makedirs(framesFold, exist_ok=True)
+    self.__chkFileExists(self.wkFrames)
+    self.__genLinks(self.wkFrames,framesFold)
+    
+    if self.wkMdoc is not None:
+      mdocFold=os.path.join(self.targetPath,self.mdocLocalFold)
+      os.makedirs(mdocFold, exist_ok=True)  
+      self.__genLinks(self.wkMdoc,mdocFold)
+    
+  def __genLinks(self,inputPattern,targetFold):  
+    
+    for file_path in glob.glob(inputPattern):
+       
+        file_name = os.path.basename(file_path)
+        tragetFileName = os.path.join(targetFold,self.prefix+file_name)
+        
+        try:
+            os.symlink(os.path.abspath(file_path),tragetFileName)
+            print(f"Created symlink: {tragetFileName} -> {file_path}")
+        except FileExistsError:
+            print(f"Symlink already exists: {tragetFileName} -> {file_path}")
+        except OSError as e:
+            print(f"Error creating symlink for {tragetFileName}: {e}")
+  def __chkFileExists(self,inputPattern):
+    
+    for file_path in glob.glob(inputPattern):
+      if os.path.abspath(file_path) in self.existingFiles:
+        raise FileExistsError(f"File already exists: {file_path}") 
 
 
 class schemeMeta:

@@ -38,6 +38,7 @@ class MainUI(QMainWindow):
         self.setCallbacks()
         self.genSchemeTable()
        
+        print(self.cbdat.args)
         if (self.cbdat.args.autoGen or self.cbdat.args.skipSchemeEdit):
             self.makeJobTabsFromScheme()
         
@@ -49,10 +50,16 @@ class MainUI(QMainWindow):
         cbdat.CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
         cbdat.defaultSchemePath=cbdat.CRYOBOOST_HOME + "/config/Schemes/relion_tomo_prep/"
         cbdat.confPath=cbdat.CRYOBOOST_HOME + "/config/conf.yaml"
-        cbdat.scheme=schemeMeta(cbdat.defaultSchemePath)
+        cbdat.pipeRunner= None
         cbdat.conf=cbconfig(cbdat.confPath)     
         cbdat.args=args
-        cbdat.pipeRunner= None
+        if os.path.exists(args.proj +  "/Schemes/relion_tomo_prep/scheme.star"):
+            cbdat.scheme=schemeMeta(args.proj +  "/Schemes/relion_tomo_prep/")
+            args.scheme=cbdat.scheme
+            cbdat.pipeRunner=pipe(args);
+            cbdat.args.skipSchemeEdit=True
+        else:    
+            cbdat.scheme=schemeMeta(cbdat.defaultSchemePath)
         
         return cbdat
     
@@ -71,6 +78,7 @@ class MainUI(QMainWindow):
         self.btn_stopWorkFlow.clicked.connect(self.stopWorkflow)
         self.btn_unlockWorkFlow.clicked.connect(self.unlockWorkflow)
         self.btn_resetWorkFlow.clicked.connect(self.resetWorkflow)
+        self.btn_resetWorkFlowHead.clicked.connect(self.resetWorkflowHead)
         self.dropDown_config.addItem("Choose Microscope Set-Up")
         for i in self.cbdat.conf.microscope_presets:
             self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
@@ -113,6 +121,10 @@ class MainUI(QMainWindow):
              
         # make groupBox_in_paths available so it can only be used after the tabs are created (--> can load in data)
         self.groupBox_in_paths.setEnabled(True)
+        logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
+        self.timer.start(2000)  # Update the log fil    
 
     def schemeJobToTab(self,job,conf,insertPosition):
         # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
@@ -184,16 +196,13 @@ class MainUI(QMainWindow):
         if self.cbdat.pipeRunner.checkForLock():
             messageBox("lock exists","stop workflow first")
             return
-        
-        
-        if (self.cbdat.pipeRunner.checkForLock()):
-            messageBox("lock exists","stop workflow first")
-            return
-              
+       
         if self.checkBox_openRelionGui.isChecked():
             self.cbdat.pipeRunner.openRelionGui()
         self.cbdat.pipeRunner.runScheme()
         
+        
+         
     
     def stopWorkflow(self):
         
@@ -223,6 +232,25 @@ class MainUI(QMainWindow):
        if reply == QMessageBox.StandardButton.Yes:
             self.cbdat.pipeRunner.resetScheme()          
          
+    def resetWorkflowHead(self):
+       
+       if self.checkPipeRunner()==False:
+            return
+       
+       if (self.cbdat.pipeRunner.checkForLock()):
+            messageBox("lock exists","stop workflow first")
+            return
+       
+       reply = QMessageBox.question(self, 'Reset',
+                                 "Do you really want to reset the workflow head?",
+                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
+       
+       if reply == QMessageBox.StandardButton.Yes:
+            self.cbdat.pipeRunner.setCurrentNodeScheme("WAIT")      
+    
+    
+    
+    
     
     def unlockWorkflow(self):
        
@@ -250,6 +278,9 @@ class MainUI(QMainWindow):
         Returns:
         None. The function updates the text in the text browser.
         """
+        if (self.cbdat.pipeRunner is None):
+            return
+        
         try:
             with open(log_file_path, 'r') as log_file:
                 log_content = log_file.read()
@@ -349,12 +380,11 @@ class MainUI(QMainWindow):
         pipeRunner.writeScheme()
         self.cbdat.pipeRunner=pipeRunner
         
-        logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
-        self.timer.start(2000)  # Update the log fil    
         
         
+    
+    
+    
     def updateSchemeFromJobTabs(self,scheme,tabWidget):
         
         for job_tab_index in range(1, len(scheme.jobs_in_scheme) + 1):

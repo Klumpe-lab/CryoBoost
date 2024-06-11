@@ -109,7 +109,18 @@ class pipe:
     p=run_command(self.commandSchemeReset)
     self.writeToLog(" + Scheme reset done !\n")
     self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
-   
+  
+  def setCurrentNodeScheme(self,NodeName):
+    
+    path_scheme = os.path.join(self.pathProject, self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName'])
+    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    self.writeToLog(" + Reset scheme to node: " + NodeName + "\n")
+    self.scheme.scheme_star.dict["scheme_general"]["rlnSchemeCurrentNodeName"]=NodeName
+    self.writeScheme()
+    self.writeToLog(" + Scheme reset done !\n")
+    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    
+        
   def unlockScheme(self):
     pathLock=self.pathProject + os.path.sep + os.path.dirname(self.schemeLockFile)
     if os.path.isdir(pathLock):

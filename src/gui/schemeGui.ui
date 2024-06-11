@@ -155,7 +155,7 @@
           </rect>
          </property>
         </widget>
-        <widget class="QPushButton" name="btn_updateProject">
+        <widget class="QPushButton" name="btn_importData">
          <property name="geometry">
           <rect>
            <x>201</x>
@@ -165,7 +165,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Update Project</string>
+          <string>Import Data</string>
          </property>
         </widget>
         <widget class="QSplitter" name="splitter">
@@ -240,7 +240,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Reset</string>
+          <string>Reset Full</string>
          </property>
         </widget>
         <widget class="QCheckBox" name="checkBox_openRelionGui">
@@ -280,6 +280,19 @@
          </property>
          <property name="text">
           <string>Unlock</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_resetWorkFlowHead">
+         <property name="geometry">
+          <rect>
+           <x>390</x>
+           <y>60</y>
+           <width>171</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Reset Head</string>
          </property>
         </widget>
        </widget>
