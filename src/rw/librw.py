@@ -299,41 +299,49 @@ class dataImport():
     self.mdocLocalFold="mdoc/"
     self.framesLocalFold="frames/"
     frameTargetPattern=self.targetPath + "/" + self.framesLocalFold + os.path.basename(self.wkFrames)
-    self.existingFiles=[os.path.realpath(file) for file in glob.glob(frameTargetPattern)]
-
+    mdocTargetPattern=self.targetPath + "/" + self.mdocLocalFold + os.path.basename(self.wkMdoc)
+    self.existingFrames=[os.path.realpath(file) for file in glob.glob(frameTargetPattern)]
+    self.existingMdoc=[os.path.realpath(file) for file in glob.glob(mdocTargetPattern)]
+    
     self.runImport()
   
   def runImport(self):   
     os.makedirs(self.targetPath, exist_ok=True)
     framesFold=os.path.join(self.targetPath,self.framesLocalFold)
     os.makedirs(framesFold, exist_ok=True)
-    self.__chkFileExists(self.wkFrames)
-    self.__genLinks(self.wkFrames,framesFold)
+    
+    self.__genLinks(self.wkFrames,framesFold,self.existingFrames)
     
     if self.wkMdoc is not None:
       mdocFold=os.path.join(self.targetPath,self.mdocLocalFold)
       os.makedirs(mdocFold, exist_ok=True)  
-      self.__genLinks(self.wkMdoc,mdocFold)
+      self.__genLinks(self.wkMdoc,mdocFold,self.existingMdoc)
     
-  def __genLinks(self,inputPattern,targetFold):  
+  def __genLinks(self,inputPattern,targetFold,existingFiles):  
     
     for file_path in glob.glob(inputPattern):
        
         file_name = os.path.basename(file_path)
         tragetFileName = os.path.join(targetFold,self.prefix+file_name)
         
-        try:
-            os.symlink(os.path.abspath(file_path),tragetFileName)
-            print(f"Created symlink: {tragetFileName} -> {file_path}")
-        except FileExistsError:
-            print(f"Symlink already exists: {tragetFileName} -> {file_path}")
-        except OSError as e:
-            print(f"Error creating symlink for {tragetFileName}: {e}")
-  def __chkFileExists(self,inputPattern):
+        if self.__chkFileExists(file_path,existingFiles)==False:
+          try:
+              os.symlink(os.path.abspath(file_path),tragetFileName)
+              print(f"Created symlink: {tragetFileName} -> {file_path}")
+          except FileExistsError:
+              print(f"Symlink already exists: {tragetFileName} -> {file_path}")
+          except OSError as e:
+              print(f"Error creating symlink for {tragetFileName}: {e}")
+              
+  def __chkFileExists(self,inputPattern,existingFiles):
     
-    for file_path in glob.glob(inputPattern):
-      if os.path.abspath(file_path) in self.existingFiles:
-        raise FileExistsError(f"File already exists: {file_path}") 
+    #for file_path in glob.glob(inputPattern):
+    if os.path.abspath(inputPattern) in existingFiles:
+        return True
+    
+    return False
+      
+        #raise FileExistsError(f"File already exists: {file_path}") 
 
 
 class schemeMeta:
