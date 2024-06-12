@@ -65,7 +65,7 @@ class MainUI(QMainWindow):
     
     def setCallbacks(self):
         self.btn_makeJobTabs.clicked.connect(self.makeJobTabsFromScheme)
-        self.groupBox_in_paths.setEnabled(False)
+        #self.groupBox_in_paths.setEnabled(False)
         self.line_path_movies.textChanged.connect(self.loadPathMovies)
         self.btn_browse_movies.clicked.connect(self.browsePathMovies)
         self.line_path_mdocs.textChanged.connect(self.loadPathMdocs)
@@ -120,7 +120,7 @@ class MainUI(QMainWindow):
              self.line_path_new_project.setText(self.cbdat.args.proj)
              
         # make groupBox_in_paths available so it can only be used after the tabs are created (--> can load in data)
-        self.groupBox_in_paths.setEnabled(True)
+        #self.groupBox_in_paths.setEnabled(True)
         logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
         self.timer = QTimer(self)
         self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
