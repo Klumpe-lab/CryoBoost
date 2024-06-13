@@ -1,4 +1,4 @@
-from src.rw.librw import cbconfig,importFolderBySymlink,schemeMeta
+from src.rw.librw import cbconfig,importFolderBySymlink,schemeMeta,dataImport 
 from src.misc.system import run_command,run_command_async
 import shutil
 import os,re 
@@ -60,13 +60,19 @@ class pipe:
     
       
   def initProject(self):
-    importFolderBySymlink(self.pathFrames, self.pathProject)
-    if (self.pathFrames!=self.pathMdoc):
-        importFolderBySymlink(self.pathMdoc, self.pathProject)
-    self.scheme.update_job_star_dict('importmovies','movie_files',os.path.basename(self.pathFrames.strip(os.path.sep)) + os.path.sep + "*.eer")
-    self.scheme.update_job_star_dict('importmovies','mdoc_files',os.path.basename(self.pathMdoc.strip(os.path.sep)) + os.path.sep + "*.mdoc")
+    #importFolderBySymlink(self.pathFrames, self.pathProject)
+    #if (self.pathFrames!=self.pathMdoc):
+    #    importFolderBySymlink(self.pathMdoc, self.pathProject)
+    os.makedirs(self.pathProject,exist_ok=True)
     shutil.copytree(os.getenv("CRYOBOOST_HOME") + "/config/qsub", self.pathProject + os.path.sep + "qsub",dirs_exist_ok=True)
     
+  def importData(self):#,wkFrames,wkMdoc): 
+    
+    dataImport(self.pathProject,self.pathFrames,self.pathMdoc)
+    print("frames/"+os.path.basename(self.pathFrames))
+    self.scheme.update_job_star_dict('importmovies','movie_files',"frames/"+os.path.basename(self.pathFrames))
+    self.scheme.update_job_star_dict('importmovies','mdoc_files',"mdoc/"+os.path.basename(self.pathMdoc))
+    #import movies and mdoc()  
       
   def writeScheme(self):
      path_scheme = os.path.join(self.pathProject, self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName'])
@@ -115,7 +121,10 @@ class pipe:
     path_scheme = os.path.join(self.pathProject, self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName'])
     self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
     self.writeToLog(" + Reset scheme to node: " + NodeName + "\n")
+    print(self.scheme.schemeFilePath)
+    self.scheme.read_scheme()
     self.scheme.scheme_star.dict["scheme_general"]["rlnSchemeCurrentNodeName"]=NodeName
+    print(self.scheme.scheme_star.dict["scheme_jobs"])
     self.writeScheme()
     self.writeToLog(" + Scheme reset done !\n")
     self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
@@ -131,6 +140,7 @@ class pipe:
       self.writeToLog(" + Scheme unlocked !\n")
       self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
  
+    
   def openRelionGui(self):
     print("-----------------------------------------")
     print(self.commandGui)

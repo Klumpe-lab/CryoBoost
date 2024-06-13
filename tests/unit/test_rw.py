@@ -20,7 +20,8 @@ def test_importData():
         with open(targetPath+"/inputFrames/"+file_name, "w") as file:
             pass
    with open(targetPath+"/inputMdoc/Position_1.mdoc", "w") as file:
-       pass
+       for file_name in file_names:
+          file.writelines("SubFramePath = \\offload\\umba-umba\\" + file_name + "\n")
    
    #run code
    dataImport(targetPath,wkFrames,wkMdoc)
@@ -30,6 +31,11 @@ def test_importData():
    #eval for assert
    assert len(fileFr)==len(file_names)
    assert len(fileMd)==1
+   
+   #test for adapted mdoc missing
+#    for file_name in fileFr:
+#         with open(targetPath+"/inputFrames/"+file_name, "w") as file:
+#             pass
    
    #test for duplicate import
    dataImport(targetPath,wkFrames,wkMdoc)

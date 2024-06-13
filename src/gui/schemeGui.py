@@ -66,14 +66,15 @@ class MainUI(QMainWindow):
     def setCallbacks(self):
         self.btn_makeJobTabs.clicked.connect(self.makeJobTabsFromScheme)
         #self.groupBox_in_paths.setEnabled(False)
-        self.line_path_movies.textChanged.connect(self.loadPathMovies)
+        self.line_path_movies.textChanged.connect(self.setPathMoviesToJobTap)
+        self.line_path_mdocs.textChanged.connect(self.setPathMdocsToJobTap)
         self.btn_browse_movies.clicked.connect(self.browsePathMovies)
-        self.line_path_mdocs.textChanged.connect(self.loadPathMdocs)
         self.btn_browse_mdocs.clicked.connect(self.browsePathMdocs)
         self.btn_use_movie_path.clicked.connect(self.mdocs_use_movie_path)
         self.dropDown_config.activated.connect(self.loadConfig)
         self.btn_browse_target.clicked.connect(self.browsePathTarget)
         self.btn_genProject.clicked.connect(self.generateProject)
+        self.btn_importData.clicked.connect(self.importData)
         self.btn_startWorkFlow.clicked.connect(self.startWorkflow)
         self.btn_stopWorkFlow.clicked.connect(self.stopWorkflow)
         self.btn_unlockWorkFlow.clicked.connect(self.unlockWorkflow)
@@ -159,19 +160,17 @@ class MainUI(QMainWindow):
         #self.table.setMinimumSize(1500, 400)            
         
 
-    def loadPathMovies(self):
+    def setPathMoviesToJobTap(self):
         """
         set the parameter path to files in the importmovies job to the link provided here. Then, look into the 
         header of the movies provided and copy the respective information to the respective parameters too.
         """
         # save the input of the field as variable
-        params_dict_movies = {"movie_files": self.line_path_movies.text() + "*.eer"}
-
+        params_dict_movies = {"movie_files": "frames/*" + os.path.splitext(self.line_path_movies.text())[1] }
+        print(params_dict_movies)
         for current_tab in self.cbdat.scheme.jobs_in_scheme:
             index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
             self.tabWidget.setCurrentIndex(index_import.item())
-            # find the  copy the text of the input field to the path to file, check for aliases of the field, and
-            # iterate over the parameters of the header to input them too
             table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
             change_values(table_widget, params_dict_movies, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
         # go back to setup tab
@@ -304,25 +303,18 @@ class MainUI(QMainWindow):
         self.textBrowserJobsOut.moveCursor(QTextCursor.MoveOperation.End) 
         self.textBrowserJobsError.moveCursor(QTextCursor.MoveOperation.End)
     
-    def loadPathMdocs(self):
+    def setPathMdocsToJobTap(self):
         """
         set the parameter path to mdoc in the importmovies job to the link provided here. Then, look into the 
         mdoc file and copy the respective information to the respective parameters too.
         """
         # save the input of the field as variable
-        params_dict_mdoc = {"mdoc_files": self.line_path_mdocs.text() + "*.mdoc"}
-        # look into the mdoc file and save all parameters as variables
-        try:
-            params_dict_mdoc.update(read_mdoc(params_dict_mdoc["mdoc_files"]))
-        except:
-            pass
-        # go to the importmovies tab by getting the index where importmovies is
-        # if mdoc also has parameters for other jobs, have to loop through here
+        params_dict_mdoc = {"mdoc_files": "mdoc/*" + os.path.splitext(self.line_path_mdocs.text())[1] }
+       
+        
         for current_tab in self.cbdat.scheme.jobs_in_scheme:
             index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
             self.tabWidget.setCurrentIndex(index_import.item())
-            # find the  copy the text of the input field to the path to file, check for aliases of the field, and
-            # iterate over the parameters of the header to input them too
             table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
             change_values(table_widget, params_dict_mdoc, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
         # go back to setup tab
@@ -378,12 +370,18 @@ class MainUI(QMainWindow):
         pipeRunner=pipe(args)
         pipeRunner.initProject()
         pipeRunner.writeScheme()
+        pipeRunner.scheme.schemeFilePath=args.proj +  "/Schemes/relion_tomo_prep/scheme.star"
+        #pipeRunner.scheme.pathScheme=self.cbdat.scheme.pathScheme
         self.cbdat.pipeRunner=pipeRunner
         
         
+    def importData(self):    
         
-    
-    
+        self.cbdat.pipeRunner.pathFrames=self.line_path_movies.text()
+        self.cbdat.pipeRunner.pathMdoc=self.line_path_mdocs.text()
+        self.cbdat.pipeRunner.importData()    
+        #scheme=self.updateSchemeFromJobTabs(scheme,self.tabWidget)
+        #self.cbdat.pipeRunner.writeScheme()
     
     def updateSchemeFromJobTabs(self,scheme,tabWidget):
         

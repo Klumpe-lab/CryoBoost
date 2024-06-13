@@ -293,7 +293,7 @@ class dataImport():
     self.wkMdoc=wkMdoc
     if (prefix == "auto"):
       current_datetime = datetime.now()
-      self.prefix=current_datetime.strftime("%Y-%m-%d-%H:%M:%S_")
+      self.prefix=current_datetime.strftime("%Y-%m-%d-%H-%M-%S_")
     else:
       self.prefix=prefix
     self.mdocLocalFold="mdoc/"
@@ -315,8 +315,32 @@ class dataImport():
     if self.wkMdoc is not None:
       mdocFold=os.path.join(self.targetPath,self.mdocLocalFold)
       os.makedirs(mdocFold, exist_ok=True)  
-      self.__genLinks(self.wkMdoc,mdocFold,self.existingMdoc)
+      self.__writeAdaptedMdoc(self.wkMdoc,mdocFold,self.existingMdoc)
+      #self.__genLinks(self.wkMdoc,mdocFold,self.existingMdoc)
+  
+  def __writeAdaptedMdoc(self,inputPattern,targetFold,existingFiles):
+     
+     for file_path in glob.glob(inputPattern):
+        file_name = os.path.basename(file_path)
+        tragetFileName = os.path.join(targetFold,self.prefix+file_name)
+        print("targetFileName:"+tragetFileName)
+        print("inputPatter:"+inputPattern)
+        if self.__chkFileExists(file_path,existingFiles)==False:
+            self.__adaptMdoc(self.prefix,file_path,tragetFileName)  
+          
+  def __adaptMdoc(self,prefix,inputMdoc,outputMdoc):
     
+    with open(inputMdoc, 'r') as file:
+      lines = file.readlines()
+      for i, line in enumerate(lines):
+        if 'SubFramePath' in line:
+            lineTmp=line.replace("SubFramePath = \\","")
+            lineTmp=os.path.basename(lineTmp.replace('\\',"/"))
+            lines[i] = "SubFramePath = " + prefix + lineTmp
+            
+      with open(outputMdoc, 'w') as file:
+        file.writelines(lines)
+  
   def __genLinks(self,inputPattern,targetFold,existingFiles):  
     
     for file_path in glob.glob(inputPattern):
