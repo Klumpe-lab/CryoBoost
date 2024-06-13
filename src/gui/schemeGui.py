@@ -68,6 +68,20 @@ class MainUI(QMainWindow):
         #self.groupBox_in_paths.setEnabled(False)
         self.line_path_movies.textChanged.connect(self.setPathMoviesToJobTap)
         self.line_path_mdocs.textChanged.connect(self.setPathMdocsToJobTap)
+        self.textEdit_pixelSize.textChanged.connect(self.setPixelSizeToJobTap)
+        self.textEdit_dosePerTilt.textChanged.connect(self.setdosePerTiltToJobTap)
+        
+        self.textEdit_nomTiltAxis.textChanged.connect(self.setTiltAxisToJobTap)
+        self.textEdit_invertHand.textChanged.connect(self.setInvertHandToJobTap)
+        self.textEdit_eerFractions.textChanged.connect(self.setEerFractionsToJobTap)
+        self.textEdit_areTomoSampleThick.textChanged.connect(self.setAreTomoSampleThickToJobTap)
+        self.textEdit_areTomoSampleThick.textChanged.connect(self.setAreTomoSampleThickToJobTap)
+        self.textEdit_ImodPatchSize.textChanged.connect(self.setImodPatchSizeToJobTap)
+        self.textEdit_imodPatchOverlap.textChanged.connect(self.setImodPatchOverlapToJobTap)
+        self.dropDown_tomoAlignProgram.activated.connect(self.setTomoAlignProgramToJobTap)
+               
+
+        
         self.btn_browse_movies.clicked.connect(self.browsePathMovies)
         self.btn_browse_mdocs.clicked.connect(self.browsePathMdocs)
         self.btn_use_movie_path.clicked.connect(self.mdocs_use_movie_path)
@@ -162,20 +176,113 @@ class MainUI(QMainWindow):
 
     def setPathMoviesToJobTap(self):
         """
-        set the parameter path to files in the importmovies job to the link provided here. Then, look into the 
-        header of the movies provided and copy the respective information to the respective parameters too.
-        """
-        # save the input of the field as variable
-        params_dict_movies = {"movie_files": "frames/*" + os.path.splitext(self.line_path_movies.text())[1] }
-        print(params_dict_movies)
-        for current_tab in self.cbdat.scheme.jobs_in_scheme:
-            index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
-            self.tabWidget.setCurrentIndex(index_import.item())
-            table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
-            change_values(table_widget, params_dict_movies, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
-        # go back to setup tab
-        self.tabWidget.setCurrentIndex(0)
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
 
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        
+        params_dict = {"movie_files": "frames/*" + os.path.splitext(self.line_path_movies.text())[1] }
+        self.setParamsDictToJobTap(params_dict)
+        
+    def setPathMdocsToJobTap(self):
+        """
+        Sets the parameters dictionary to the jobs in the tab widget for the mdoc files.
+
+        This function retrieves the file extension from the `line_path_mdocs` text field and constructs the `mdoc_files` parameter dictionary. The constructed dictionary is then passed to the `setParamsDictToJobTap` method.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+        
+        params_dict = {"mdoc_files": "mdoc/*" + os.path.splitext(self.line_path_mdocs.text())[1] }
+        self.setParamsDictToJobTap(params_dict)
+    
+    def setPixelSizeToJobTap(self):
+        params_dict = {"angpix": self.textEdit_pixelSize.toPlainText()} 
+        self.setParamsDictToJobTap(params_dict,["importmovies"])      
+     
+    def setdosePerTiltToJobTap(self):
+        params_dict = {"dose_rate": self.textEdit_dosePerTilt.toPlainText()} 
+        self.setParamsDictToJobTap(params_dict,["importmovies"])       
+    
+    def setTiltAxisToJobTap(self):
+        params_dict = {"tilt_axis_angle": self.textEdit_nomTiltAxis.toPlainText()} 
+        self.setParamsDictToJobTap(params_dict,["importmovies"]) 
+    
+    def setInvertHandToJobTap(self):
+        params_dict = {"flip_tiltseries_hand": self.textEdit_invertHand.toPlainText()} 
+        self.setParamsDictToJobTap(params_dict,["importmovies"]) 
+    
+    def setEerFractionsToJobTap(self):
+        params_dict = {"eer_grouping": self.textEdit_eerFractions.toPlainText()} 
+        self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+    
+    def setAreTomoSampleThickToJobTap(self):
+        params_dict = {"aretomo_thickness": self.textEdit_areTomoSampleThick.toPlainText()} 
+        self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
+    
+    def setAreTomoSampleThickToJobTap(self):
+        params_dict = {"aretomo_thickness": self.textEdit_areTomoSampleThick.toPlainText()} 
+        self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
+    
+    def setImodPatchSizeToJobTap(self):
+        params_dict = {"patch_size": self.textEdit_ImodPatchSize.toPlainText()} 
+        self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
+    
+    def setImodPatchOverlapToJobTap(self):
+        params_dict = {"patch_overlap": self.textEdit_imodPatchOverlap.toPlainText()} 
+        self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
+    
+    def setTomoAlignProgramToJobTap(self):
+        
+        programSelected=self.dropDown_tomoAlignProgram.currentText()
+        if (programSelected=="Imod"):
+            params_dictAre = {"do_aretomo": "No"}
+            params_dictImod = {"do_aretomo": "Yes"}
+        
+        if (programSelected=="Aretomo"):
+            params_dictAre = {"do_aretomo": "Yes"}
+            params_dictImod = {"do_aretomo": "No"}
+        
+        self.setParamsDictToJobTap(params_dictAre,["aligntilts"])
+        self.setParamsDictToJobTap(params_dictImod,["aligntilts"])
+        
+        
+    def setParamsDictToJobTap(self,params_dict,applyToJobs="all"):
+        """
+        A function that sets the parameters dictionary to the jobs in the tab widget based on the given parameters.
+
+        Args:
+            params_dict (dict): A dictionary containing the parameters to be set.
+            applyToJobs (str, optional): A List specifying which jobs to apply the parameters to. Defaults to "all".
+               
+        Returns:
+            None
+        """
+        if (applyToJobs == "all"):
+           applyToJobs = list(self.cbdat.scheme.jobs_in_scheme)
+           
+        for current_tab in self.cbdat.scheme.jobs_in_scheme:
+            print(current_tab in applyToJobs)
+            if current_tab in applyToJobs:
+                index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
+                self.tabWidget.setCurrentIndex(index_import.item())
+                table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
+                change_values(table_widget, params_dict, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
+        self.tabWidget.setCurrentIndex(0)
+    
+    
+    
+    
+    
     def browsePathMovies(self):
         browse_dirs(self.line_path_movies)
         
@@ -303,24 +410,8 @@ class MainUI(QMainWindow):
         self.textBrowserJobsOut.moveCursor(QTextCursor.MoveOperation.End) 
         self.textBrowserJobsError.moveCursor(QTextCursor.MoveOperation.End)
     
-    def setPathMdocsToJobTap(self):
-        """
-        set the parameter path to mdoc in the importmovies job to the link provided here. Then, look into the 
-        mdoc file and copy the respective information to the respective parameters too.
-        """
-        # save the input of the field as variable
-        params_dict_mdoc = {"mdoc_files": "mdoc/*" + os.path.splitext(self.line_path_mdocs.text())[1] }
-       
-        
-        for current_tab in self.cbdat.scheme.jobs_in_scheme:
-            index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
-            self.tabWidget.setCurrentIndex(index_import.item())
-            table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
-            change_values(table_widget, params_dict_mdoc, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
-        # go back to setup tab
-        self.tabWidget.setCurrentIndex(0)
-        
-
+    
+    
     def loadConfig(self):
         """
         go through all parameters of all tabs and see whether any parameter is in the config_microscopes file
@@ -384,6 +475,16 @@ class MainUI(QMainWindow):
         #self.cbdat.pipeRunner.writeScheme()
     
     def updateSchemeFromJobTabs(self,scheme,tabWidget):
+        """
+        Updates the given scheme by iterating over each job tab in the given tab widget and updating the corresponding job's star file based on the table widget's contents.
+
+        Parameters:
+            scheme (Scheme): The scheme object to be updated.
+            tabWidget (QTabWidget): The tab widget containing the job tabs.
+
+        Returns:
+            Scheme: The updated scheme object.
+        """
         
         for job_tab_index in range(1, len(scheme.jobs_in_scheme) + 1):
             tabWidget.setCurrentIndex(job_tab_index)
