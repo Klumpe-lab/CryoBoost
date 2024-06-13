@@ -299,11 +299,25 @@ class dataImport():
     self.mdocLocalFold="mdoc/"
     self.framesLocalFold="frames/"
     frameTargetPattern=self.targetPath + "/" + self.framesLocalFold + os.path.basename(self.wkFrames)
-    mdocTargetPattern=self.targetPath + "/" + self.mdocLocalFold + os.path.basename(self.wkMdoc)
     self.existingFrames=[os.path.realpath(file) for file in glob.glob(frameTargetPattern)]
-    self.existingMdoc=[os.path.realpath(file) for file in glob.glob(mdocTargetPattern)]
+    self.existingMdoc=self.__getexistingMdoc()
     
     self.runImport()
+  
+  def __getexistingMdoc(self):
+    
+    existingMdoc=[]
+    mdocTargetPattern=self.targetPath + "/" + self.mdocLocalFold + os.path.basename(self.wkMdoc)
+    print("mdocTargetPattern: " + mdocTargetPattern)
+    for fileName in glob.glob(mdocTargetPattern):
+      with open(fileName, 'r') as file:
+        lines = file.readlines()
+        for i, line in enumerate(lines):
+          if 'CryoBoost_RootMdocPath' in line:
+            existingMdoc.append(line.replace("CryoBoost_RootMdocPath = ",""))
+    
+    print(existingMdoc)  
+    return existingMdoc  
   
   def runImport(self):   
     os.makedirs(self.targetPath, exist_ok=True)
@@ -337,7 +351,8 @@ class dataImport():
             lineTmp=line.replace("SubFramePath = \\","")
             lineTmp=os.path.basename(lineTmp.replace('\\',"/"))
             lines[i] = "SubFramePath = " + prefix + lineTmp
-            
+      #lines.append("[CryoBoost Bookkeeping]\n")
+      lines.append("CryoBoost_RootMdocPath = " + os.path.abspath(inputMdoc) + "\n")       
       with open(outputMdoc, 'w') as file:
         file.writelines(lines)
   
@@ -348,7 +363,7 @@ class dataImport():
         file_name = os.path.basename(file_path)
         tragetFileName = os.path.join(targetFold,self.prefix+file_name)
         
-        if self.__chkFileExists(file_path,existingFiles)==False:
+        if self.__chkFileExists(os.path.abspath(file_path),existingFiles)==False:
           try:
               os.symlink(os.path.abspath(file_path),tragetFileName)
               print(f"Created symlink: {tragetFileName} -> {file_path}")
@@ -360,7 +375,7 @@ class dataImport():
   def __chkFileExists(self,inputPattern,existingFiles):
     
     #for file_path in glob.glob(inputPattern):
-    if os.path.abspath(inputPattern) in existingFiles:
+    if inputPattern in existingFiles:
         return True
     
     return False

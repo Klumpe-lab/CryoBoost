@@ -10,8 +10,9 @@ from src.pipe.libpipe import pipe
 def parse_arguments():
     parser = argparse.ArgumentParser(description="scheme gui")
     parser.add_argument("--scheme", "-s", required=False,default="relion_tomo_prep" ,help="path to scheme folder")
-    parser.add_argument("--movies", "-mov", required=False,default="None",help="Input input movie dir")
-    parser.add_argument("--mdocs", "-m", required=False,default="None",help="Input input mdocs dir")
+    parser.add_argument("--movies", "-mov", required=False,default="None",help="Input movie dir")
+    parser.add_argument("--mdocs", "-m", required=False,default="None",help="Input mdocs dir")
+    parser.add_argument("--impPrefix", "-iP", required=False,default="auto",help="Input prefix")
     parser.add_argument("--proj", "-p", required=False, help="Output output project dir")
     parser.add_argument("--noGui", "-nG", required=False,action='store_true',help="do not open cryoboost gui")
     parser.add_argument("--autoGen", "-aG", required=False, action='store_true', help="gen Project and scheme")

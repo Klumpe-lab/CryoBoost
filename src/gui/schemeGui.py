@@ -371,7 +371,6 @@ class MainUI(QMainWindow):
         pipeRunner.initProject()
         pipeRunner.writeScheme()
         pipeRunner.scheme.schemeFilePath=args.proj +  "/Schemes/relion_tomo_prep/scheme.star"
-        #pipeRunner.scheme.pathScheme=self.cbdat.scheme.pathScheme
         self.cbdat.pipeRunner=pipeRunner
         
         
@@ -379,6 +378,7 @@ class MainUI(QMainWindow):
         
         self.cbdat.pipeRunner.pathFrames=self.line_path_movies.text()
         self.cbdat.pipeRunner.pathMdoc=self.line_path_mdocs.text()
+        self.cbdat.pipeRunner.importPrefix=self.line_path_crImportPrefix.text()
         self.cbdat.pipeRunner.importData()    
         #scheme=self.updateSchemeFromJobTabs(scheme,self.tabWidget)
         #self.cbdat.pipeRunner.writeScheme()

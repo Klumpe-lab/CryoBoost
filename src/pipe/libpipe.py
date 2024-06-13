@@ -30,6 +30,7 @@ class pipe:
     self.args=args
     self.pathMdoc=args.mdocs
     self.pathFrames=args.movies
+    self.importPrefix=args.impPrefix
     self.pathProject=args.proj
     headNode=self.conf.confdata['submission'][0]['HeadNode']
     sshStr=sub=self.conf.confdata['submission'][0]['SshCommand']
@@ -68,7 +69,7 @@ class pipe:
     
   def importData(self):#,wkFrames,wkMdoc): 
     
-    dataImport(self.pathProject,self.pathFrames,self.pathMdoc)
+    dataImport(self.pathProject,self.pathFrames,self.pathMdoc,self.importPrefix)
     print("frames/"+os.path.basename(self.pathFrames))
     self.scheme.update_job_star_dict('importmovies','movie_files',"frames/"+os.path.basename(self.pathFrames))
     self.scheme.update_job_star_dict('importmovies','mdoc_files',"mdoc/"+os.path.basename(self.pathMdoc))
