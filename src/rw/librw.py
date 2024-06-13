@@ -351,7 +351,7 @@ class dataImport():
             lineTmp=line.replace("SubFramePath = \\","")
             lineTmp=os.path.basename(lineTmp.replace('\\',"/"))
             lines[i] = "SubFramePath = " + prefix + lineTmp
-      #lines.append("[CryoBoost Bookkeeping]\n")
+      
       lines.append("CryoBoost_RootMdocPath = " + os.path.abspath(inputMdoc) + "\n")       
       with open(outputMdoc, 'w') as file:
         file.writelines(lines)

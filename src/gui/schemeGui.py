@@ -386,7 +386,6 @@ class MainUI(QMainWindow):
     def updateSchemeFromJobTabs(self,scheme,tabWidget):
         
         for job_tab_index in range(1, len(scheme.jobs_in_scheme) + 1):
-           
             tabWidget.setCurrentIndex(job_tab_index)
             table_widget = tabWidget.currentWidget().findChild(QTableWidget)
             jobName = scheme.jobs_in_scheme[job_tab_index]

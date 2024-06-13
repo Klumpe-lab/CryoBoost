@@ -26,16 +26,25 @@ def test_importData():
    #run code
    dataImport(targetPath,wkFrames,wkMdoc)
    
-   fileFr=[fileFr for fileFr in glob.glob(targetPath + "/frames/*.eer")]
-   fileMd=[fileMd for fileMd in glob.glob(targetPath + "/mdoc/*.mdoc")]
+   fileFr=[fileFr for fileFr in glob.glob(targetPath + "frames/*.eer")]
+   fileMd=[fileMd for fileMd in glob.glob(targetPath + "mdoc/*.mdoc")]
    #eval for assert
    assert len(fileFr)==len(file_names)
    assert len(fileMd)==1
    
    #test for adapted mdoc missing
-#    for file_name in fileFr:
-#         with open(targetPath+"/inputFrames/"+file_name, "w") as file:
-#             pass
+   framePath=[]
+   for file_name in fileMd:
+      with open(file_name, "r") as file:
+         lines = file.readlines()
+         for i, line in enumerate(lines):
+            if 'SubFramePath' in line:
+               framePath.append(targetPath + "frames/"  + line.replace("SubFramePath = ","").replace('\n',''))
+   
+   fileFr.sort()
+   framePath.sort()
+                
+   assert fileFr==framePath
    
    #test for duplicate import
    dataImport(targetPath,wkFrames,wkMdoc)
