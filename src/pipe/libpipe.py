@@ -143,7 +143,8 @@ class pipe:
     self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
     
   def getCurrentNodeScheme(self):
-   
+   #self.scheme=schemeMeta(self.defaultSchemePath)
+   self.scheme.read_scheme()
    return self.scheme.scheme_star.dict["scheme_general"]["rlnSchemeCurrentNodeName"]
         
   def unlockScheme(self):

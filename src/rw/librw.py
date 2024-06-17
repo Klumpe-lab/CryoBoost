@@ -5,7 +5,7 @@ import os
 import starfile
 import subprocess
 import glob
-
+import tempfile
 
 #from lib.functions import calculate_dose_rate_per_pixel, extract_eer_from_header
 class cbconfig:
@@ -244,6 +244,7 @@ from starfile import write as starwrite
 import copy
 import os
 from datetime import datetime
+import time
 
 class starFileMeta:
   """_summary_
@@ -269,7 +270,11 @@ class starFileMeta:
     
     
   def readStar(self):
-    self.dict = starread(self.starfilePath, always_dict = self.always_dict)
+    tmpTargetPath=tempfile.gettempdir() + os.path.sep + "tmpPointer.tmp" + str(time.time())
+    os.symlink(os.path.abspath(self.starfilePath),tmpTargetPath)
+    #self.dict = starread(self.starfilePath, always_dict = self.always_dict)
+    self.dict = starread(tmpTargetPath)
+    os.remove(tmpTargetPath)
     if (len(self.dict.keys())==1):
       self.df=self.dict[next(iter(self.dict.keys()))]
     else:
@@ -342,14 +347,20 @@ class dataImport():
       #self.__genLinks(self.wkMdoc,mdocFold,self.existingMdoc)
   
   def __writeAdaptedMdoc(self,inputPattern,targetFold,existingFiles):
-     
-     for file_path in glob.glob(inputPattern):
+    
+    nrFilesAlreadyImported=len(glob.glob(targetFold + "/*" + os.path.splitext(inputPattern)[1])); 
+    for file_path in glob.glob(inputPattern):
         file_name = os.path.basename(file_path)
         tragetFileName = os.path.join(targetFold,self.prefix+file_name)
         print("targetFileName:"+tragetFileName)
         print("inputPatter:"+inputPattern)
         if self.__chkFileExists(file_path,existingFiles)==False:
-            self.__adaptMdoc(self.prefix,file_path,tragetFileName)  
+            self.__adaptMdoc(self.prefix,file_path,tragetFileName)
+    
+    nrFilesTotalImported=len(glob.glob(targetFold + "/*" + os.path.splitext(inputPattern)[1]));
+    nrFilesNewImported=nrFilesTotalImported-nrFilesAlreadyImported
+    self.__writeLog("info","Total number of mdocs imported: " + str(nrFilesTotalImported) )
+    self.__writeLog("info","Number of new mdoc imported: " + str(nrFilesNewImported) )        
           
   def __adaptMdoc(self,prefix,inputMdoc,outputMdoc):
     
@@ -383,8 +394,8 @@ class dataImport():
     nrFilesTotalImported=len(glob.glob(targetFold + "/*" + os.path.splitext(inputPattern)[1]));
     nrFilesNewImported=nrFilesTotalImported-nrFilesAlreadyImported
     
-    self.__writeLog("info","Total number of files imported: " + str(nrFilesTotalImported) )
-    self.__writeLog("info","Number of new files imported: " + str(nrFilesNewImported) )
+    self.__writeLog("info","Total number of tilts imported: " + str(nrFilesTotalImported) )
+    self.__writeLog("info","Number of new tilts imported: " + str(nrFilesNewImported) )
     
               
   def __writeLog(self,type,message):
@@ -533,12 +544,15 @@ class schemeMeta:
 
   
   def write_scheme(self,schemeFolderPath):
+     self.schemeFilePath =  schemeFolderPath+os.path.sep+"scheme.star"
+     self.schemeFolderPath =  schemeFolderPath
      os.makedirs(schemeFolderPath, exist_ok=True)
      self.scheme_star.writeStar(schemeFolderPath+os.path.sep+"scheme.star")
 
+    
     # repeat for all jobs, creating a job.star file in these directories
      for job in self.jobs_in_scheme:
-        jobFold = schemeFolderPath+os.path.sep+job
+        jobFold = schemeFolderPath+os.path.sep+job 
         os.makedirs(jobFold, exist_ok=True)
         job_star = self.job_star[job]
         job_star.writeStar(jobFold+os.path.sep+"job.star")

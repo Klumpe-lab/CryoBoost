@@ -327,6 +327,7 @@ class MainUI(QMainWindow):
         if self.cbdat.pipeRunner.checkForLock():
             messageBox("lock exists","stop workflow first")
             return
+        print(self.cbdat.pipeRunner.getCurrentNodeScheme())
         
         if self.cbdat.pipeRunner.getCurrentNodeScheme()=="EXIT":
             reply = QMessageBox.question(self, 'Workflow has finished!',
