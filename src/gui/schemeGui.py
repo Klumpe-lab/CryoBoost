@@ -12,6 +12,7 @@ import aiofiles
 import yaml
 from PyQt6.QtCore import QTimer
 from qasync import QEventLoop, asyncSlot
+import datetime
 
 current_dir = os.path.dirname(os.path.abspath(__name__))
 # change the path to be until src
@@ -19,7 +20,7 @@ root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
 
 #from lib.functions import get_value_from_tab
-from src.gui.libGui import browse_dirs, change_values, change_bckgrnd,get_inputNodesFromSchemeTable,messageBox 
+from src.gui.libGui import externalTextViewer,browse_dirs,browse_files,change_values,change_bckgrnd,get_inputNodesFromSchemeTable,messageBox 
 from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
 
@@ -38,7 +39,9 @@ class MainUI(QMainWindow):
         self.setCallbacks()
         self.genSchemeTable()
        
-        print(self.cbdat.args)
+        self.groupBox_WorkFlow.setEnabled(False)
+        self.groupBox_Setup.setEnabled(False)
+        self.groupBox_Project.setEnabled(False)
         if (self.cbdat.args.autoGen or self.cbdat.args.skipSchemeEdit):
             self.makeJobTabsFromScheme()
         
@@ -68,22 +71,27 @@ class MainUI(QMainWindow):
         #self.groupBox_in_paths.setEnabled(False)
         self.line_path_movies.textChanged.connect(self.setPathMoviesToJobTap)
         self.line_path_mdocs.textChanged.connect(self.setPathMdocsToJobTap)
+        self.line_path_gain.textChanged.connect(self.setPathGainToJobTap)
+        self.dropDown_gainRot.activated.connect(self.setGainRotToJobTap)
+        self.dropDown_gainFlip.activated.connect(self.setGainFlipJobTap)
         self.textEdit_pixelSize.textChanged.connect(self.setPixelSizeToJobTap)
         self.textEdit_dosePerTilt.textChanged.connect(self.setdosePerTiltToJobTap)
-        
         self.textEdit_nomTiltAxis.textChanged.connect(self.setTiltAxisToJobTap)
         self.textEdit_invertHand.textChanged.connect(self.setInvertHandToJobTap)
         self.textEdit_eerFractions.textChanged.connect(self.setEerFractionsToJobTap)
         self.textEdit_areTomoSampleThick.textChanged.connect(self.setAreTomoSampleThickToJobTap)
-        self.textEdit_areTomoSampleThick.textChanged.connect(self.setAreTomoSampleThickToJobTap)
         self.textEdit_ImodPatchSize.textChanged.connect(self.setImodPatchSizeToJobTap)
         self.textEdit_imodPatchOverlap.textChanged.connect(self.setImodPatchOverlapToJobTap)
         self.dropDown_tomoAlignProgram.activated.connect(self.setTomoAlignProgramToJobTap)
-               
-
-        
+        self.btn_openWorkFlowLog.clicked.connect(self.openExtLogViewerWorkFlow)
+        self.btn_openWorkFlowLog.clicked.connect(self.openExtLogViewerWorkFlow)
+        self.btn_openJobOutpuLog.clicked.connect(self.openExtLogViewerJobOutput)
+        self.btn_openJobErrorLog.clicked.connect(self.openExtLogViewerJobError)
+        #self.textBrowser_workFlow.clicked.connect(self.openExtLogViewer) 
         self.btn_browse_movies.clicked.connect(self.browsePathMovies)
         self.btn_browse_mdocs.clicked.connect(self.browsePathMdocs)
+        self.btn_browse_gain.clicked.connect(self.browsePathGain)
+        self.btn_browse_autoPrefix.clicked.connect(self.generatePrefix)
         self.btn_use_movie_path.clicked.connect(self.mdocs_use_movie_path)
         self.dropDown_config.activated.connect(self.loadConfig)
         self.btn_browse_target.clicked.connect(self.browsePathTarget)
@@ -134,8 +142,10 @@ class MainUI(QMainWindow):
         if (self.cbdat.args.proj != None):
              self.line_path_new_project.setText(self.cbdat.args.proj)
              
-        # make groupBox_in_paths available so it can only be used after the tabs are created (--> can load in data)
-        #self.groupBox_in_paths.setEnabled(True)
+        self.groupBox_WorkFlow.setEnabled(True)
+        self.groupBox_Setup.setEnabled(True)
+        self.groupBox_Project.setEnabled(True)
+        
         logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
         self.timer = QTimer(self)
         self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
@@ -217,12 +227,23 @@ class MainUI(QMainWindow):
         params_dict = {"tilt_axis_angle": self.textEdit_nomTiltAxis.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 
     
+    def setPathGainToJobTap(self):
+        params_dict = {"fn_gain_ref": self.line_path_gain.text()} 
+        self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+    
+    def setGainRotToJobTap(self):
+        params_dict = {"gain_rot": self.dropDown_gainRot.currentText()} 
+        self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+    
+    def setGainFlipJobTap(self):
+        params_dict = {"gain_flip": self.dropDown_gainFlip.currentText()} 
+        self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
     def setInvertHandToJobTap(self):
         params_dict = {"flip_tiltseries_hand": self.textEdit_invertHand.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 
     
     def setEerFractionsToJobTap(self):
-        params_dict = {"eer_grouping": self.textEdit_eerFractions.toPlainText()} 
+        params_dict = {"eer_grouping": self.textEdit_eerFractions.toPlainText()}
         self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
     
     def setAreTomoSampleThickToJobTap(self):
@@ -262,7 +283,8 @@ class MainUI(QMainWindow):
 
         Args:
             params_dict (dict): A dictionary containing the parameters to be set.
-            applyToJobs (str, optional): A List specifying which jobs to apply the parameters to. Defaults to "all".
+            applyToJobs (str, optional): A List specifying which jobs to apply the p
+            arameters to. Defaults to "all".
                
         Returns:
             None
@@ -280,17 +302,20 @@ class MainUI(QMainWindow):
         self.tabWidget.setCurrentIndex(0)
     
     
-    
-    
-    
     def browsePathMovies(self):
-        browse_dirs(self.line_path_movies)
+        browse_files(self.line_path_movies)
         
-
     def browsePathMdocs(self):
-        browse_dirs(self.line_path_mdocs)
+        browse_files(self.line_path_mdocs)
 
-
+    def browsePathGain(self):
+        browse_files(self.line_path_gain)
+    
+    def generatePrefix(self):
+       current_datetime = datetime.datetime.now()
+       prefix=current_datetime.strftime("%Y-%m-%d-%H-%M-%S_")
+       self.line_path_crImportPrefix.setText(prefix)
+        
     def mdocs_use_movie_path(self):
         self.line_path_mdocs.setText(self.line_path_movies.text())
 
@@ -302,7 +327,18 @@ class MainUI(QMainWindow):
         if self.cbdat.pipeRunner.checkForLock():
             messageBox("lock exists","stop workflow first")
             return
+        
+        if self.cbdat.pipeRunner.getCurrentNodeScheme()=="EXIT":
+            reply = QMessageBox.question(self, 'Workflow has finished!',
+                                 "WorkFlow has finished. To run it again on new data you need to reset the workflow head. Do you want to reset the workflow head?",
+                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
        
+            if reply == QMessageBox.StandardButton.Yes:
+                self.cbdat.pipeRunner.setCurrentNodeScheme("WAIT")
+            else:
+                return    
+                
+        
         if self.checkBox_openRelionGui.isChecked():
             self.cbdat.pipeRunner.openRelionGui()
         self.cbdat.pipeRunner.runScheme()
@@ -355,9 +391,6 @@ class MainUI(QMainWindow):
             self.cbdat.pipeRunner.setCurrentNodeScheme("WAIT")      
     
     
-    
-    
-    
     def unlockWorkflow(self):
        
        if self.checkPipeRunner()==False:
@@ -365,13 +398,42 @@ class MainUI(QMainWindow):
        
        self.cbdat.pipeRunner.unlockScheme()          
     
-    def checkPipeRunner(self):
+    def checkPipeRunner(self,warnProjectExists=False):
         
         if self.cbdat.pipeRunner is not None: 
+            if (warnProjectExists):
+                messageBox("Project!","You have already a Project")
             return True    
         else:
-            messageBox("No Project!","Generate a Project first")
+            if (warnProjectExists==False):
+                messageBox("No Project!","Generate a Project first")
             return False 
+    
+    def openExtLogViewerWorkFlow(self):
+        
+        logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
+        self.viewer = externalTextViewer(logfile_path)
+        self.viewer.show()
+        
+    def openExtLogViewerJobOutput(self):
+        
+        if (self.cbdat.pipeRunner is  None):
+            return
+        
+        logOut,logError=self.cbdat.pipeRunner.getLastJobLogs()
+        logfile_path=logOut
+        self.viewer = externalTextViewer(logfile_path)
+        self.viewer.show()
+    
+    def openExtLogViewerJobError(self):
+        
+        if (self.cbdat.pipeRunner is  None):
+            return
+        
+        logOut,logError=self.cbdat.pipeRunner.getLastJobLogs()
+        logfile_path=logError
+        self.viewer = externalTextViewer(logfile_path)
+        self.viewer.show()
     
     
     def view_log_file(self, log_file_path):
@@ -396,6 +458,7 @@ class MainUI(QMainWindow):
         self.textBrowser_workFlow.moveCursor(QTextCursor.MoveOperation.End)    
         
         logOut,logError=self.cbdat.pipeRunner.getLastJobLogs()
+        
         try:
             with open(logOut, 'r') as log_file:
                 log_contentOut = log_file.read()
@@ -448,6 +511,10 @@ class MainUI(QMainWindow):
         it if there is) and then writing the value into the df for the job.star file at the same position as it 
         is in the table (table is created based on this df so it should always be the same position and name). 
         """
+        
+        if self.checkPipeRunner(warnProjectExists=True):
+            return
+        
         scheme=self.cbdat.scheme
         scheme=self.updateSchemeFromJobTabs(scheme,self.tabWidget)
         self.cbdat.scheme=scheme
@@ -464,9 +531,12 @@ class MainUI(QMainWindow):
         pipeRunner.scheme.schemeFilePath=args.proj +  "/Schemes/relion_tomo_prep/scheme.star"
         self.cbdat.pipeRunner=pipeRunner
         
+    
         
     def importData(self):    
         
+        if self.checkPipeRunner()==False:
+            return
         self.cbdat.pipeRunner.pathFrames=self.line_path_movies.text()
         self.cbdat.pipeRunner.pathMdoc=self.line_path_mdocs.text()
         self.cbdat.pipeRunner.importPrefix=self.line_path_crImportPrefix.text()

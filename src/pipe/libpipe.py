@@ -65,17 +65,27 @@ class pipe:
     #if (self.pathFrames!=self.pathMdoc):
     #    importFolderBySymlink(self.pathMdoc, self.pathProject)
     os.makedirs(self.pathProject,exist_ok=True)
+    os.makedirs(self.pathProject + "/" + "Logs",exist_ok=True)
+    self.generatCrJobLog("initProject","generting: " + self.pathProject + "\n")
+    self.generatCrJobLog("initProject","generting: " + self.pathProject + "/Logs" + "\n")
+    self.generatCrJobLog("initProject","copying: " + os.getenv("CRYOBOOST_HOME") + "/config/qsub" + "\n")
+    self.writeToLog(" + Project: " + self.pathProject + " --> Logs/initProject" "\n")
     shutil.copytree(os.getenv("CRYOBOOST_HOME") + "/config/qsub", self.pathProject + os.path.sep + "qsub",dirs_exist_ok=True)
     
   def importData(self):#,wkFrames,wkMdoc): 
+    self.writeToLog(" + ImportData: --> Logs/importData" "\n")
+    self.writeToLog("    " + self.pathFrames + " --> frames" +"\n")
+    self.writeToLog("    " + self.pathMdoc + " --> mdoc" +"\n")
     
-    dataImport(self.pathProject,self.pathFrames,self.pathMdoc,self.importPrefix)
+    logDir=self.pathProject + os.path.sep + "Logs" + os.path.sep + "importData"
+    dataImport(self.pathProject,self.pathFrames,self.pathMdoc,self.importPrefix,logDir=logDir)
     print("frames/"+os.path.basename(self.pathFrames))
     self.scheme.update_job_star_dict('importmovies','movie_files',"frames/"+os.path.basename(self.pathFrames))
     self.scheme.update_job_star_dict('importmovies','mdoc_files',"mdoc/"+os.path.basename(self.pathMdoc))
     #import movies and mdoc()  
       
   def writeScheme(self):
+     
      path_scheme = os.path.join(self.pathProject, self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName'])
      nodes = {i: job for i, job in enumerate(self.scheme.jobs_in_scheme)}
      self.scheme.filterSchemeByNodes(nodes) #to correct for input output mismatch within the scheme
@@ -96,8 +106,10 @@ class pipe:
     self.writeToLog(" + Abort scheme: " + self.schemeName + "\n")
     self.writeToLog(" + " + self.commandSchemeAbrot + "\n")
     p=run_command(self.commandSchemeAbrot)
-    self.writeToLog(" + " + self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId) + "\n")
-    p=run_command(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
+    if lastBatchJobId != None:
+      self.writeToLog(" + " + self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId) + "\n")
+      p=run_command(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
+    
     self.writeToLog(" + " + self.commandSchemeUnlock + "\n")
     self.writeToLog(" + Workflow aborted !\n")
     self.unlockScheme()
@@ -130,6 +142,9 @@ class pipe:
     self.writeToLog(" + Scheme reset done !\n")
     self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
     
+  def getCurrentNodeScheme(self):
+   
+   return self.scheme.scheme_star.dict["scheme_general"]["rlnSchemeCurrentNodeName"]
         
   def unlockScheme(self):
     pathLock=self.pathProject + os.path.sep + os.path.dirname(self.schemeLockFile)
@@ -172,7 +187,11 @@ class pipe:
             re_res_last_job_folder = re.search("Creating new Job", line)
             if re_res_last_job_folder:
                 last_job_folder = re_res_last_job_folder.string.split("Job:")[1].split(" ")[1].strip() 
-
+            re_res_last_job_folder = re.search(' --> Logs/', line)
+            if re_res_last_job_folder:
+                last_job_folder = re_res_last_job_folder.string.split("-->")[1].split(" ")[1].strip()
+                print(last_job_folder) 
+            
     return last_batch_job_id,last_job_folder    
                
   def getLastJobLogs(self):
@@ -180,6 +199,7 @@ class pipe:
       if (lastJobFolder is not  None):
         jobOut=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.out"
         jobErr=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.err"
+        print(jobOut)
       else:
         print("no Logs found")
         jobOut="No logs found"
@@ -190,4 +210,15 @@ class pipe:
       logFile=self.pathProject+os.path.sep+self.schemeName+".log"
       with open(logFile, "a") as myfile:
           myfile.write(text)
-          
+  
+  def generatCrJobLog(self,jobName,text,type="out"):
+      
+      os.makedirs(self.pathProject + "/Logs/" + jobName,exist_ok=True)
+      logFile=self.pathProject+ "/Logs/" + jobName+ "/run.out"
+      print("logFileFF:" + logFile)
+      with open(logFile, "a") as myfile:
+          myfile.write(text)
+      
+      logFile=self.pathProject+ "/Logs/" + jobName+ "/run.err"
+      with open(logFile, "a") as myfile:
+        pass            

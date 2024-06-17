@@ -4,6 +4,10 @@ import os
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QTableWidgetItem, QTabWidget, QFileDialog
 from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMainWindow,QApplication, QWidget, QVBoxLayout, QTextEdit, QScrollBar
+from PyQt6.QtCore import Qt
+
+
 
 current_dir = os.path.dirname(os.path.abspath(__name__))
 # change the path to be until src
@@ -56,6 +60,13 @@ def browse_dirs(target_field):
     current_dir = os.path.dirname(__file__)
     dir_name = QFileDialog.getExistingDirectory(None, "Navigate to Directory", current_dir)
     target_field.setText(dir_name + "/")
+
+def browse_files(target_field):
+    
+    current_dir = os.path.dirname(os.getcwd())
+    filepath,_=QFileDialog.getOpenFileName(None, "Select File", current_dir)
+    target_field.setText(filepath)
+
 
 
 def change_bckgrnd(table_widget, row_index, col_index, colour = (QColor(200, 200, 200))):
@@ -115,8 +126,26 @@ def change_values(table_widget, param_val_dict, job_names,conf):
                 break
 
 
-
-
-
 def read_header():
     pass
+
+class externalTextViewer(QMainWindow):
+       def __init__(self, file_path):
+           super().__init__()
+           self.setWindowTitle("Text File Viewer")
+           self.setGeometry(100, 100, 600, 400)
+
+           self.text_edit = QTextEdit(self)
+           self.setCentralWidget(self.text_edit)
+           print("file_path",file_path) 
+           self.load_file(file_path)
+           
+           
+
+       def load_file(self, file_path):
+           try:
+               with open(file_path, 'r') as file:
+                   content = file.read()
+                   self.text_edit.setText(content)
+           except Exception as e:
+               self.text_edit.setText(f"Failed to load file: {str(e)}")

@@ -285,9 +285,8 @@ class starFileMeta:
         return
     
 class dataImport():
-  """imports raw data
-  """
-  def __init__(self,targetPath,wkFrames,wkMdoc=None,prefix="auto"):  
+  
+  def __init__(self,targetPath,wkFrames,wkMdoc=None,prefix="auto",logDir=None):  
     self.targetPath=targetPath
     self.wkFrames=wkFrames
     self.wkMdoc=wkMdoc
@@ -301,8 +300,19 @@ class dataImport():
     frameTargetPattern=self.targetPath + "/" + self.framesLocalFold + os.path.basename(self.wkFrames)
     self.existingFrames=[os.path.realpath(file) for file in glob.glob(frameTargetPattern)]
     self.existingMdoc=self.__getexistingMdoc()
-    
+    self.logDir=logDir
+    self.logToConsole=False
+    if (logDir is not None):  
+      os.makedirs(logDir, exist_ok=True)
+      self.logErrorFile=open(os.path.join(logDir,"run.err"),'a')
+      self.logInfoFile=open(os.path.join(logDir,"run.out"),'a')
+      
     self.runImport()
+  
+  def __del__(self):
+    if self.logDir is not None:
+      self.logErrorFile.close()
+      self.logInfoFile.close()
   
   def __getexistingMdoc(self):
     
@@ -316,7 +326,6 @@ class dataImport():
           if 'CryoBoost_RootMdocPath' in line:
             existingMdoc.append(line.replace("CryoBoost_RootMdocPath = ",""))
     
-    print(existingMdoc)  
     return existingMdoc  
   
   def runImport(self):   
@@ -358,30 +367,46 @@ class dataImport():
   
   def __genLinks(self,inputPattern,targetFold,existingFiles):  
     
+    #print("targetWk:" + targetFold + "/*." + os.path.splitext(inputPattern)[1])
+    nrFilesAlreadyImported=len(glob.glob(targetFold + "/*" + os.path.splitext(inputPattern)[1]));
     for file_path in glob.glob(inputPattern):
-       
         file_name = os.path.basename(file_path)
         tragetFileName = os.path.join(targetFold,self.prefix+file_name)
-        
         if self.__chkFileExists(os.path.abspath(file_path),existingFiles)==False:
           try:
-              os.symlink(os.path.abspath(file_path),tragetFileName)
-              print(f"Created symlink: {tragetFileName} -> {file_path}")
+             os.symlink(os.path.abspath(file_path),tragetFileName)
+             self.__writeLog("info","Created symlink: " + tragetFileName + " -> " + file_path)
           except FileExistsError:
-              print(f"Symlink already exists: {tragetFileName} -> {file_path}")
+             self.__writeLog("info","Symlink already exists: " + tragetFileName + " -> " + file_path)
           except OSError as e:
-              print(f"Error creating symlink for {tragetFileName}: {e}")
+             self.__writeLog("error","Error creating symlink for " + tragetFileName + ": " + str(e))
+    nrFilesTotalImported=len(glob.glob(targetFold + "/*" + os.path.splitext(inputPattern)[1]));
+    nrFilesNewImported=nrFilesTotalImported-nrFilesAlreadyImported
+    
+    self.__writeLog("info","Total number of files imported: " + str(nrFilesTotalImported) )
+    self.__writeLog("info","Number of new files imported: " + str(nrFilesNewImported) )
+    
               
+  def __writeLog(self,type,message):
+    
+    if self.logDir is not None:
+      if type=="error":
+        self.logErrorFile.write("Error: " + message + "\n")
+      elif type=="info":
+        self.logInfoFile.write(message + "\n")
+      
+      if (self.logToConsole): 
+        print(message)            
+    
+    
   def __chkFileExists(self,inputPattern,existingFiles):
     
-    #for file_path in glob.glob(inputPattern):
     if inputPattern in existingFiles:
         return True
     
     return False
       
-        #raise FileExistsError(f"File already exists: {file_path}") 
-
+       
 
 class schemeMeta:
   """

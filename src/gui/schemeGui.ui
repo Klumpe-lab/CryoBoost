@@ -33,7 +33,10 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="1" rowspan="3" colspan="2">
-         <widget class="QGroupBox" name="groupBox_3">
+         <widget class="QGroupBox" name="groupBox_Setup">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="title">
            <string>Setup</string>
           </property>
@@ -235,7 +238,7 @@
               </property>
              </item>
             </widget>
-            <widget class="QComboBox" name="dropDown_gainFilp">
+            <widget class="QComboBox" name="dropDown_gainFlip">
              <property name="geometry">
               <rect>
                <x>220</x>
@@ -758,7 +761,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <attribute name="title">
         <string>Start Relion</string>
        </attribute>
-       <widget class="QGroupBox" name="groupBox">
+       <widget class="QGroupBox" name="groupBox_Project">
         <property name="geometry">
          <rect>
           <x>0</x>
@@ -817,7 +820,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </widget>
         </widget>
        </widget>
-       <widget class="QGroupBox" name="groupBox_2">
+       <widget class="QGroupBox" name="groupBox_WorkFlow">
         <property name="geometry">
          <rect>
           <x>0</x>
@@ -1013,6 +1016,45 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </property>
          <property name="text">
           <string>show Warnings</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_openWorkFlowLog">
+         <property name="geometry">
+          <rect>
+           <x>219</x>
+           <y>45</y>
+           <width>91</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>open</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_openJobOutpuLog">
+         <property name="geometry">
+          <rect>
+           <x>528</x>
+           <y>45</y>
+           <width>91</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>open</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_openJobErrorLog">
+         <property name="geometry">
+          <rect>
+           <x>840</x>
+           <y>45</y>
+           <width>91</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>open</string>
          </property>
         </widget>
        </widget>
