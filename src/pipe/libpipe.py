@@ -86,34 +86,37 @@ class pipe:
       
   def writeScheme(self):
      
+     self.generatCrJobLog("initProject","writing Scheme to: " + self.pathProject + "/Schemes" + "\n")
      path_scheme = os.path.join(self.pathProject, self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName'])
      nodes = {i: job for i, job in enumerate(self.scheme.jobs_in_scheme)}
      self.scheme.filterSchemeByNodes(nodes) #to correct for input output mismatch within the scheme
      self.scheme.write_scheme(path_scheme)
   
   def runScheme(self):
-    print("-----------------------------------------")
-    print(self.commandSchemeStart)
+    self.generatCrJobLog("manageWorkflow","starting workflow:" + "\n")
+    self.generatCrJobLog("manageWorkflow","  " + self.commandSchemeStart + "\n")
     p=run_command_async(self.commandSchemeStart)
-    print("-----------------------------------------")
+   
  
   def runSchemeSync(self):
     p=run_command(self.commandSchemeStart)
    
   def abortScheme(self):
     lastBatchJobId,lastJobFolder=self.parseSchemeLogFile()
-    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
-    self.writeToLog(" + Abort scheme: " + self.schemeName + "\n")
-    self.writeToLog(" + " + self.commandSchemeAbrot + "\n")
+    self.writeToLog(" + Abort Workflow: --> Logs/manageWorkflow" + "\n")
+    self.writeToLog("   Name: " + self.schemeName + "\n")
+    self.generatCrJobLog("manageWorkflow","stopping workflow:" + "\n")
+    self.generatCrJobLog("manageWorkflow"," + " + self.commandSchemeAbrot + "\n")
     p=run_command(self.commandSchemeAbrot)
     if lastBatchJobId != None:
-      self.writeToLog(" + " + self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId) + "\n")
+      self.generatCrJobLog("manageWorkflow","killing job:" + "\n")
+      self.generatCrJobLog("manageWorkflow",self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId) +"\n")                     
       p=run_command(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
-    
-    self.writeToLog(" + " + self.commandSchemeUnlock + "\n")
+    self.generatCrJobLog("manageWorkflow","unlocking \n")
+    self.generatCrJobLog("manageWorkflow"," + " + self.commandSchemeUnlock + "\n")
     self.writeToLog(" + Workflow aborted !\n")
     self.unlockScheme()
-    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    
     
   def checkForLock(self):  
     pathLock=self.pathProject + os.path.sep + self.schemeLockFile
@@ -122,25 +125,24 @@ class pipe:
     return os.path.isfile(pathLock)
   
   def resetScheme(self):
-    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
-    self.writeToLog(" + Reset scheme: " + self.schemeName + "\n")
-    self.writeToLog(" + " + self.commandSchemeReset + "\n")
+    self.writeToLog(" + Reset Workflow --> Logs/manageWorkflow \n")
+    self.generatCrJobLog("manageWorkflow","  " + self.commandSchemeReset + "\n")
     p=run_command(self.commandSchemeReset)
-    self.writeToLog(" + Scheme reset done !\n")
-    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    self.generatCrJobLog("manageWorkflow",self.commandSchemeReset +"\n")
+    self.writeToLog(" + Workflow  reset done !\n")
+  
   
   def setCurrentNodeScheme(self,NodeName):
     
     path_scheme = os.path.join(self.pathProject, self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName'])
-    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
-    self.writeToLog(" + Reset scheme to node: " + NodeName + "\n")
+    self.writeToLog(" + Reset Workflow to node: " + NodeName + " --> Logs/manageWorkflow"  + "\n")
     print(self.scheme.schemeFilePath)
     self.scheme.read_scheme()
     self.scheme.scheme_star.dict["scheme_general"]["rlnSchemeCurrentNodeName"]=NodeName
     print(self.scheme.scheme_star.dict["scheme_jobs"])
     self.writeScheme()
-    self.writeToLog(" + Scheme reset done !\n")
-    self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    self.writeToLog(" + Workflow reset done !\n")
+    
     
   def getCurrentNodeScheme(self):
    #self.scheme=schemeMeta(self.defaultSchemePath)
@@ -150,14 +152,10 @@ class pipe:
   def unlockScheme(self):
     pathLock=self.pathProject + os.path.sep + os.path.dirname(self.schemeLockFile)
     if os.path.isdir(pathLock):
-      self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
-      self.writeToLog(" + Unlock scheme: " + self.schemeName + "\n")
-      self.writeToLog(" + " + self.commandSchemeUnlock + "\n")
+      self.writeToLog(" + Unlock Workflow: \n")
+      self.generatCrJobLog("manageWorkflow" ," + " + self.commandSchemeUnlock + "\n")
       p=run_command(self.commandSchemeUnlock)
-      self.writeToLog(" + Scheme unlocked !\n")
-      self.writeToLog("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
- 
-    
+        
   def openRelionGui(self):
     print("-----------------------------------------")
     print(self.commandGui)

@@ -96,6 +96,7 @@ class MainUI(QMainWindow):
         self.dropDown_config.activated.connect(self.loadConfig)
         self.btn_browse_target.clicked.connect(self.browsePathTarget)
         self.btn_genProject.clicked.connect(self.generateProject)
+        self.btn_updateWorkFlow.clicked.connect(self.updateWorkflow)    
         self.btn_importData.clicked.connect(self.importData)
         self.btn_startWorkFlow.clicked.connect(self.startWorkflow)
         self.btn_stopWorkFlow.clicked.connect(self.stopWorkflow)
@@ -351,7 +352,6 @@ class MainUI(QMainWindow):
         
         if self.checkPipeRunner()==False:
             return
-        
         reply = QMessageBox.question(self, 'Message',
                                  "Do you really want to stop the workflow?",
                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
@@ -371,7 +371,6 @@ class MainUI(QMainWindow):
        reply = QMessageBox.question(self, 'Message',
                                  "Do you really want to reset the workflow?",
                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
-       
        if reply == QMessageBox.StandardButton.Yes:
             self.cbdat.pipeRunner.resetScheme()          
          
@@ -396,7 +395,6 @@ class MainUI(QMainWindow):
        
        if self.checkPipeRunner()==False:
             return
-       
        self.cbdat.pipeRunner.unlockScheme()          
     
     def checkPipeRunner(self,warnProjectExists=False):
@@ -532,7 +530,15 @@ class MainUI(QMainWindow):
         pipeRunner.scheme.schemeFilePath=args.proj +  "/Schemes/relion_tomo_prep/scheme.star"
         self.cbdat.pipeRunner=pipeRunner
         
-    
+    def updateWorkflow(self):
+        
+        if self.checkPipeRunner()==False:
+            return
+        scheme=self.cbdat.scheme
+        scheme=self.updateSchemeFromJobTabs(scheme,self.tabWidget)
+        self.cbdat.scheme=scheme
+        self.cbdat.pipeRunner.scheme=scheme
+        self.cbdat.pipeRunner.writeScheme()
         
     def importData(self):    
         

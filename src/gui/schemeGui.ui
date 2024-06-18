@@ -271,7 +271,7 @@
              <x>0</x>
              <y>350</y>
              <width>861</width>
-             <height>291</height>
+             <height>301</height>
             </rect>
            </property>
            <property name="title">
@@ -280,10 +280,10 @@
            <widget class="QGroupBox" name="groupBox_6">
             <property name="geometry">
              <rect>
-              <x>3</x>
-              <y>22</y>
+              <x>0</x>
+              <y>20</y>
               <width>851</width>
-              <height>91</height>
+              <height>71</height>
              </rect>
             </property>
             <property name="title">
@@ -292,9 +292,9 @@
             <widget class="QLabel" name="label_7">
              <property name="geometry">
               <rect>
-               <x>430</x>
-               <y>32</y>
-               <width>101</width>
+               <x>252</x>
+               <y>36</y>
+               <width>51</width>
                <height>16</height>
               </rect>
              </property>
@@ -305,8 +305,8 @@
             <widget class="QLabel" name="label_5">
              <property name="geometry">
               <rect>
-               <x>10</x>
-               <y>32</y>
+               <x>18</x>
+               <y>34</y>
                <width>54</width>
                <height>20</height>
               </rect>
@@ -318,10 +318,10 @@
             <widget class="QTextEdit" name="textEdit_pixelSize">
              <property name="geometry">
               <rect>
-               <x>90</x>
+               <x>70</x>
                <y>32</y>
-               <width>91</width>
-               <height>21</height>
+               <width>35</width>
+               <height>25</height>
               </rect>
              </property>
              <property name="html">
@@ -332,16 +332,16 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2.95&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;2.95&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
             <widget class="QTextEdit" name="textEdit_nomTiltAxis">
              <property name="geometry">
               <rect>
-               <x>470</x>
-               <y>30</y>
-               <width>111</width>
-               <height>21</height>
+               <x>299</x>
+               <y>31</y>
+               <width>35</width>
+               <height>25</height>
               </rect>
              </property>
              <property name="html">
@@ -352,16 +352,16 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;-85&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;-85&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
             <widget class="QLabel" name="label_6">
              <property name="geometry">
               <rect>
-               <x>200</x>
-               <y>32</y>
-               <width>100</width>
-               <height>16</height>
+               <x>110</x>
+               <y>33</y>
+               <width>111</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -371,10 +371,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
             <widget class="QLabel" name="label_8">
              <property name="geometry">
               <rect>
-               <x>610</x>
-               <y>32</y>
-               <width>101</width>
-               <height>16</height>
+               <x>343</x>
+               <y>33</y>
+               <width>80</width>
+               <height>20</height>
               </rect>
              </property>
              <property name="text">
@@ -384,8 +384,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
             <widget class="QLabel" name="label_9">
              <property name="geometry">
               <rect>
-               <x>10</x>
-               <y>60</y>
+               <x>483</x>
+               <y>33</y>
                <width>81</width>
                <height>20</height>
               </rect>
@@ -397,10 +397,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
             <widget class="QTextEdit" name="textEdit_dosePerTilt">
              <property name="geometry">
               <rect>
-               <x>310</x>
-               <y>32</y>
-               <width>110</width>
-               <height>21</height>
+               <x>210</x>
+               <y>31</y>
+               <width>35</width>
+               <height>25</height>
               </rect>
              </property>
              <property name="html">
@@ -411,16 +411,16 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;3&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;3&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
             <widget class="QTextEdit" name="textEdit_eerFractions">
              <property name="geometry">
               <rect>
-               <x>90</x>
-               <y>60</y>
-               <width>91</width>
-               <height>21</height>
+               <x>564</x>
+               <y>31</y>
+               <width>41</width>
+               <height>25</height>
               </rect>
              </property>
              <property name="html">
@@ -431,16 +431,16 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;32&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;32&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
             <widget class="QTextEdit" name="textEdit_invertHand">
              <property name="geometry">
               <rect>
-               <x>700</x>
-               <y>30</y>
-               <width>111</width>
-               <height>21</height>
+               <x>421</x>
+               <y>31</y>
+               <width>50</width>
+               <height>25</height>
               </rect>
              </property>
              <property name="html">
@@ -451,7 +451,7 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;True&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;True&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </widget>
@@ -459,9 +459,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
             <property name="geometry">
              <rect>
               <x>2</x>
-              <y>110</y>
+              <y>100</y>
               <width>851</width>
-              <height>91</height>
+              <height>101</height>
              </rect>
             </property>
             <property name="title">
@@ -511,8 +511,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
               <rect>
                <x>320</x>
                <y>30</y>
-               <width>71</width>
-               <height>21</height>
+               <width>51</width>
+               <height>25</height>
               </rect>
              </property>
              <property name="html">
@@ -523,7 +523,7 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;200&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;200&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
             <widget class="QComboBox" name="dropDown_tomoAlignProgram">
@@ -563,9 +563,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
              <property name="geometry">
               <rect>
                <x>320</x>
-               <y>60</y>
-               <width>71</width>
-               <height>21</height>
+               <y>59</y>
+               <width>51</width>
+               <height>25</height>
               </rect>
              </property>
              <property name="html">
@@ -576,15 +576,15 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;200&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;200&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
             <widget class="QLabel" name="label_16">
              <property name="geometry">
               <rect>
-               <x>410</x>
+               <x>382</x>
                <y>62</y>
-               <width>131</width>
+               <width>101</width>
                <height>16</height>
               </rect>
              </property>
@@ -595,10 +595,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
             <widget class="QTextEdit" name="textEdit_imodPatchOverlap">
              <property name="geometry">
               <rect>
-               <x>530</x>
-               <y>60</y>
-               <width>71</width>
-               <height>21</height>
+               <x>480</x>
+               <y>58</y>
+               <width>41</width>
+               <height>25</height>
               </rect>
              </property>
              <property name="html">
@@ -609,7 +609,7 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;50&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;50&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </widget>
@@ -818,6 +818,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <string>Generate Project</string>
           </property>
          </widget>
+        </widget>
+        <widget class="QPushButton" name="btn_updateWorkFlow">
+         <property name="geometry">
+          <rect>
+           <x>560</x>
+           <y>46</y>
+           <width>120</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Update WorkFlow</string>
+         </property>
         </widget>
        </widget>
        <widget class="QGroupBox" name="groupBox_WorkFlow">

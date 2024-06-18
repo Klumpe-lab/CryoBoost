@@ -270,6 +270,7 @@ class starFileMeta:
     
     
   def readStar(self):
+    #Hack to avoid caching
     tmpTargetPath=tempfile.gettempdir() + os.path.sep + "tmpPointer.tmp" + str(time.time())
     os.symlink(os.path.abspath(self.starfilePath),tmpTargetPath)
     #self.dict = starread(self.starfilePath, always_dict = self.always_dict)
