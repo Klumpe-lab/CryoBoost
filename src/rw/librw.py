@@ -274,7 +274,7 @@ class starFileMeta:
     tmpTargetPath=tempfile.gettempdir() + os.path.sep + "tmpPointer.tmp" + str(time.time())
     os.symlink(os.path.abspath(self.starfilePath),tmpTargetPath)
     #self.dict = starread(self.starfilePath, always_dict = self.always_dict)
-    self.dict = starread(tmpTargetPath)
+    self.dict = starread(tmpTargetPath,always_dict = self.always_dict)
     os.remove(tmpTargetPath)
     if (len(self.dict.keys())==1):
       self.df=self.dict[next(iter(self.dict.keys()))]
