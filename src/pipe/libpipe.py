@@ -1,4 +1,4 @@
-from src.rw.librw import cbconfig,importFolderBySymlink,schemeMeta,dataImport 
+from src.rw.librw import cbconfig,importFolderBySymlink,schemeMeta,dataImport,starFileMeta   
 from src.misc.system import run_command,run_command_async
 import shutil
 import os,re 
@@ -37,7 +37,7 @@ class pipe:
     schemeName=self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName']
     schemeName=os.path.basename(schemeName.strip(os.path.sep)) #remove path from schemeName
     schemeLockFile=".relion_lock_scheme_" + schemeName + os.path.sep  + "lock_scheme"
-    relSchemeStart="relion_schemer --scheme " + schemeName  + " --run"
+    relSchemeStart="relion_schemer --scheme " + schemeName  + " --run --verb 2"
     self.schemeLockFile=schemeLockFile
     self.schemeName=schemeName
     
@@ -112,11 +112,29 @@ class pipe:
       self.generatCrJobLog("manageWorkflow","killing job:" + "\n")
       self.generatCrJobLog("manageWorkflow",self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId) +"\n")                     
       p=run_command(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
+    self.setLastRunningJobToFailed()
     self.generatCrJobLog("manageWorkflow","unlocking \n")
     self.generatCrJobLog("manageWorkflow"," + " + self.commandSchemeUnlock + "\n")
     self.writeToLog(" + Workflow aborted !\n")
     self.unlockScheme()
     
+  def setLastRunningJobToFailed(self):
+      defPipePath=self.pathProject+os.path.sep+"default_pipeline.star"
+      
+      if os.path.isfile(defPipePath):
+        try:
+          st=starFileMeta(defPipePath)
+          df=st.dict["pipeline_processes"]
+          hit=df.rlnPipeLineProcessName[df.index[df['rlnPipeLineProcessStatusLabel'] == 'Running']]
+          fold=str(hit.values[0])
+          if os.path.isfile(fold + os.path.sep + "RELION_JOB_EXIT_SUCCESS")==False:
+            df.loc[df['rlnPipeLineProcessStatusLabel'] == 'Running', 'rlnPipeLineProcessStatusLabel'] = 'Failed'
+            st.writeStar(defPipePath)
+        except:
+          fold=None
+        return fold
+      else:
+        return None
     
   def checkForLock(self):  
     pathLock=self.pathProject + os.path.sep + self.schemeLockFile
@@ -183,18 +201,28 @@ class pipe:
             re_res_last_batch_job = re.search("Submitted batch job", line)
             if re_res_last_batch_job:
                 last_batch_job_id = re_res_last_batch_job.string.split("job")[1].strip()  # Assuming the format is "Submitted jobid"
-            re_res_last_job_folder = re.search("Creating new Job", line)
+            
+            #re_res_last_job_folder = re.search("Creating new Job", line) #buggy should be "Executing Job:" but it doesn't work gets only upadted when job is finished
+            re_res_last_job_folder = re.search("Executing Job:", line)
             if re_res_last_job_folder:
                 last_job_folder = re_res_last_job_folder.string.split("Job:")[1].split(" ")[1].strip() 
+            
             re_res_last_job_folder = re.search(' --> Logs/', line)
             if re_res_last_job_folder:
                 last_job_folder = re_res_last_job_folder.string.split("-->")[1].split(" ")[1].strip()
-                print(last_job_folder) 
+            
+            print(last_job_folder) 
             
     return last_batch_job_id,last_job_folder    
                
   def getLastJobLogs(self):
-      lastBatchJobId,lastJobFolder=self.parseSchemeLogFile()
+      lastBatchJobId,lastJobFolderScheme=self.parseSchemeLogFile()
+      lastJobFolderPipe=self.getRunningJob()
+      if (lastJobFolderPipe is  None):
+        lastJobFolder=lastJobFolderScheme
+      else:
+        lastJobFolder=lastJobFolderPipe
+      
       if (lastJobFolder is not  None):
         jobOut=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.out"
         jobErr=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.err"
@@ -205,6 +233,24 @@ class pipe:
         jobErr="No logs found"  
       #TODO: check for ext Log
       return jobOut,jobErr               
+  
+  def getRunningJob(self):
+      defPipePath=self.pathProject+os.path.sep+"default_pipeline.star"
+      
+      if os.path.isfile(defPipePath):
+        try:
+          st=starFileMeta(defPipePath)
+          df=st.dict["pipeline_processes"]
+          hit=df.rlnPipeLineProcessName[df.index[df['rlnPipeLineProcessStatusLabel'] == 'Running']]
+          fold=str(hit.values[0])
+        except:
+          fold=None
+        return fold
+      else:
+        return None
+        
+      
+  
   def writeToLog(self,text):
       logFile=self.pathProject+os.path.sep+self.schemeName+".log"
       with open(logFile, "a") as myfile:
