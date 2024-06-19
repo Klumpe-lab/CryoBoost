@@ -48,7 +48,7 @@ class pipe:
     relSchemeReset="relion_schemer --scheme " + schemeName  + " --reset"
     relSchemeUnlock="rm " + schemeLockFile + ";rmdir "+ os.path.dirname(schemeLockFile)
     relGuiStart="relion --tomo --do_projdir "
-   
+    relGuiUpdate="relion_pipeliner --RunJobs "
     envStr="module load RELION/5.0-beta-3;"
     logStr=" > " + schemeName + ".log 2>&1 " 
     logStrAdd=" >> " + schemeName + ".log 2>&1 "
@@ -58,7 +58,7 @@ class pipe:
     self.commandSchemeReset=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeReset + logStrAdd + '"'
     self.commandGui=sshStr + " " + headNode + ' "'  + envStr + chFold + relGuiStart  + '"'
     self.commandSchemeUnlock=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeUnlock + logStrAdd + '"'
-    
+    self.commandGuiUpdate=sshStr + " " + headNode + ' "'  + envStr + chFold + relGuiUpdate + '"' 
       
   def initProject(self):
     #importFolderBySymlink(self.pathFrames, self.pathProject)
@@ -113,6 +113,7 @@ class pipe:
       self.generatCrJobLog("manageWorkflow",self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId) +"\n")                     
       p=run_command(self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId))
     self.setLastRunningJobToFailed()
+    p=run_command(self.commandGuiUpdate)
     self.generatCrJobLog("manageWorkflow","unlocking \n")
     self.generatCrJobLog("manageWorkflow"," + " + self.commandSchemeUnlock + "\n")
     self.writeToLog(" + Workflow aborted !\n")
@@ -129,8 +130,10 @@ class pipe:
           fold=str(hit.values[0])
           if os.path.isfile(fold + os.path.sep + "RELION_JOB_EXIT_SUCCESS")==False:
             df.loc[df['rlnPipeLineProcessStatusLabel'] == 'Running', 'rlnPipeLineProcessStatusLabel'] = 'Failed'
+            print("resetting pipe!")
             st.writeStar(defPipePath)
         except:
+          print("error resetting pipe!")
           fold=None
         return fold
       else:
@@ -175,11 +178,9 @@ class pipe:
       p=run_command(self.commandSchemeUnlock)
         
   def openRelionGui(self):
-    print("-----------------------------------------")
     print(self.commandGui)
     p=run_command_async(self.commandGui)
-    print("-----------------------------------------") 
-  
+   
   def parseSchemeLogFile(self):
     """
     Parses the scheme log file to extract the last batch job ID and job folder.

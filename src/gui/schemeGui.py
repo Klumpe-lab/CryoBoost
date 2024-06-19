@@ -99,6 +99,7 @@ class MainUI(QMainWindow):
         self.btn_updateWorkFlow.clicked.connect(self.updateWorkflow)    
         self.btn_importData.clicked.connect(self.importData)
         self.btn_startWorkFlow.clicked.connect(self.startWorkflow)
+        self.checkBox_openRelionGui.stateChanged.connect(self.openRelionGui)
         self.btn_stopWorkFlow.clicked.connect(self.stopWorkflow)
         self.btn_unlockWorkFlow.clicked.connect(self.unlockWorkflow)
         self.btn_resetWorkFlow.clicked.connect(self.resetWorkflow)
@@ -341,11 +342,13 @@ class MainUI(QMainWindow):
                 return    
                 
         
-        if self.checkBox_openRelionGui.isChecked():
-            self.cbdat.pipeRunner.openRelionGui()
+        # if self.checkBox_openRelionGui.isChecked():
+        #     self.cbdat.pipeRunner.openRelionGui()
         self.cbdat.pipeRunner.runScheme()
         
-        
+    def openRelionGui(self):
+        if self.checkBox_openRelionGui.isChecked():
+            self.cbdat.pipeRunner.openRelionGui()    
          
     
     def stopWorkflow(self):
