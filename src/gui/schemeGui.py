@@ -105,6 +105,11 @@ class MainUI(QMainWindow):
         self.btn_resetWorkFlow.clicked.connect(self.resetWorkflow)
         self.btn_resetWorkFlowHead.clicked.connect(self.resetWorkflowHead)
         self.dropDown_config.addItem("Choose Microscope Set-Up")
+        self.dropDown_nrNodes.activated.connect(self.setNrNodesToJobTap)
+        self.dropDown_partitionName.activated.connect(self.setNrNodesToJobTap)
+        self.dropDown_nrNodes.setCurrentIndex(2)
+        self.dropDown_jobSize.setCurrentIndex(1)
+        self.dropDown_jobSize.activated.connect(self.setNrNodesFromJobSize)
         for i in self.cbdat.conf.microscope_presets:
             self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
     
@@ -264,6 +269,10 @@ class MainUI(QMainWindow):
         params_dict = {"patch_overlap": self.textEdit_imodPatchOverlap.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
     
+    def setNrNodesFromJobSize(self):
+        if (self.dropDown_jobSize.currentText()=="small"):
+            self.dropDown_tomoAlignProgram.setCurrentText("1")
+            
     def setTomoAlignProgramToJobTap(self):
         
         programSelected=self.dropDown_tomoAlignProgram.currentText()
@@ -278,7 +287,16 @@ class MainUI(QMainWindow):
         self.setParamsDictToJobTap(params_dictAre,["aligntilts"])
         self.setParamsDictToJobTap(params_dictImod,["aligntilts"])
         
-        
+    def setNrNodesToJobTap(self):
+       
+        nrNodes=int(self.dropDown_nrNodes.currentText())
+        partion=self.dropDown_partitionName.currentText()
+        for job in self.cbdat.scheme.jobs_in_scheme:
+            req = {"nr_nodes": nrNodes} 
+            comDict=self.cbdat.conf.getJobComputingParams([job,nrNodes,partion])
+            if (comDict is not None):
+                self.setParamsDictToJobTap(comDict,applyToJobs=job)
+         
     def setParamsDictToJobTap(self,params_dict,applyToJobs="all"):
         """
         A function that sets the parameters dictionary to the jobs in the tab widget based on the given parameters.

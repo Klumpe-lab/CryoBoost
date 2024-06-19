@@ -9,34 +9,24 @@ submission:
     
 aliases:
 
-  - Job: importmovies
-    Parameter: Cs
-    Alias: Spherical aberration
-
-  - Job: importmovies
-    Parameter: angpix
-    Alias: Pixel in A
-
-  - Job: importmovies
-    Parameter: movie_files
-    Alias: Path to movies
-
-  - Job: motioncorr
-    Parameter: eer_grouping
-    Alias: eer grouping    
-
-  - Job: reconstruction
-    Parameter: xdim
-    Alias: x dimensions 
-
-  - Job: reconstruction
-    Parameter: ydim
-    Alias: y dimensions
-
   - Job: all
     Parameter: qsubscript
-    Alias: q Submission Script
-
+    Alias: Submission Script
+  - Job: all
+    Parameter: qsub_extra1
+    Alias: NrNodes 
+  - Job: all
+    Parameter: qsub_extra2
+    Alias: MPIperNode
+  - Job: all
+    Parameter: qsub_extra3
+    Alias: PartionName  
+  - Job: all
+    Parameter: qsub_extra4
+    Alias: NrGPU
+  - Job: all
+    Parameter: qsub_extra5
+    Alias: MemoryRAM  
 
 # parameters have different names in header/mdoc than in Relion --> make compatible
 # key = parameter name in header/mdoc file
@@ -65,24 +55,7 @@ microscopes:
       - Spherical aberration: 2.7
       - kV: 300
       - q Submission Script: ../../../01-Data/relion/qsub_gpu_Relion5.sh
-      
     
-      # Camera =
-
-  - Microscope: Titan Krios 5
-    Parameters:
-      # microscope = Titan Krios:
-      - Spherical aberration: fun
-      - kV: test
-      - q Submission Script: ho-ho-ho
-      # Camera =
-   
-  - Microscope: Titan Krios 2
-    Parameters:
-      # microscope = Titan Krios:
-      - Spherical aberration: 2.8
-      - kV: 330
-      - q Submission Script: mySub
 
 star_file:
 
@@ -92,3 +65,35 @@ star_file:
   analysetilts: feature_analysis/feature_analysis.star
   filtertilts: filtertilts/tiltseries_filtered.star
   aligntilts: aligntilts/aligned_tilt_series.star        
+
+computing:
+   
+  QueSize: 
+      large: 5
+      medium: 3
+      small: 1
+   
+  p.hpcl8:
+      NrGPU: 2
+      NrCPU: 24
+      RAM: 384
+  
+  p.hpcl9:
+      NrGPU: 4
+      NrCPU: 72
+      RAM: 1024
+
+  p.hpcl93:
+      NrGPU: 4
+      NrCPU: 128
+      RAM: 768  
+
+  JOBTypes:
+      CPU-MPI:
+       - motioncorr
+       - ctffind
+       - reconstruction
+      GPU: 
+        - aligntilts
+      GPUThreadsOneNode:      
+        - filtertilts    

@@ -26,7 +26,37 @@ class cbconfig:
     """
     with open(self.configPath) as f:
       self.confdata = yaml.load(f, Loader=yaml.FullLoader)
-      
+  
+  def getJobComputingParams(self,comReq):    
+       self.confdata["computing"]["JOBTypes"]
+       confComp=self.confdata["computing"]
+       jobType=None
+       for entry in confComp["JOBTypes"]:
+         for job in confComp["JOBTypes"][entry]:
+            if job == comReq[0]:
+              jobType=entry
+              break
+       
+       if (jobType == None):
+         compParams=None
+         return compParams 
+       
+       partionSetup= self.confdata["computing"][comReq[2]]
+       
+       compParams={}
+       if (jobType == "CPU-MPI"):
+         kMPIperNode=self.get_alias_reverse(comReq[0],"MPIperNode")
+         compParams[kMPIperNode]=partionSetup["NrCPU"]
+         compParams["nr_mpi"]=partionSetup["NrCPU"]*comReq[1]  
+         kNrGPU=self.get_alias_reverse(comReq[0],"NrGPU")
+         compParams[kNrGPU]=0
+         kNrNodes=self.get_alias_reverse(comReq[0],"NrNodes")
+         compParams[kNrNodes]=comReq[1] 
+         kPartName=self.get_alias_reverse(comReq[0],"PartionName")
+         compParams[kPartName]=comReq[2] 
+         compParams["nr_threads"]=1
+              
+       return compParams 
         
   def get_alias(self,job, parameter):
     """
