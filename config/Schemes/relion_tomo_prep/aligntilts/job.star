@@ -29,8 +29,8 @@ other_args         ""
 patch_overlap         50 
 patch_size        100 
       qsub     sbatch 
-qsub_extra1          3 
-qsub_extra2          2 
+qsub_extra1          1 
+qsub_extra2          1 
 qsub_extra3    p.hpcl8 
 qsub_extra4      2 
 qsubscript   qsub/qsub_hpcl89.sh 

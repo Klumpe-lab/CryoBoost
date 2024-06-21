@@ -42,19 +42,46 @@ class cbconfig:
          return compParams 
        
        partionSetup= self.confdata["computing"][comReq[2]]
-       
+       kMPIperNode=self.get_alias_reverse(comReq[0],"MPIperNode")
+       kNrGPU=self.get_alias_reverse(comReq[0],"NrGPU")
+       kNrNodes=self.get_alias_reverse(comReq[0],"NrNodes")
+       kPartName=self.get_alias_reverse(comReq[0],"PartionName")
        compParams={}
+       compParams[kPartName]=comReq[2]
+       gpuIDString=":".join(str(i) for i in range(0,partionSetup["NrGPU"]))
+      
        if (jobType == "CPU-MPI"):
-         kMPIperNode=self.get_alias_reverse(comReq[0],"MPIperNode")
          compParams[kMPIperNode]=partionSetup["NrCPU"]
          compParams["nr_mpi"]=partionSetup["NrCPU"]*comReq[1]  
-         kNrGPU=self.get_alias_reverse(comReq[0],"NrGPU")
          compParams[kNrGPU]=0
-         kNrNodes=self.get_alias_reverse(comReq[0],"NrNodes")
          compParams[kNrNodes]=comReq[1] 
-         kPartName=self.get_alias_reverse(comReq[0],"PartionName")
-         compParams[kPartName]=comReq[2] 
          compParams["nr_threads"]=1
+       
+       if (jobType == "CPU-2MPIThreads"):
+         compParams[kMPIperNode]=2
+         compParams["nr_mpi"]=compParams[kMPIperNode]*comReq[1]  
+         compParams[kNrGPU]=0
+         compParams[kNrNodes]=comReq[1] 
+         compParams["nr_threads"]=round(partionSetup["NrCPU"]/2)
+       
+       if (jobType == "GPU-OneProcess"):
+         compParams[kMPIperNode]=1
+         compParams["nr_mpi"]=1  
+         compParams[kNrGPU]=partionSetup["NrGPU"]
+         compParams[kNrNodes]=1
+         compParams["nr_threads"]=1
+         compParams["gpu_ids"]=gpuIDString
+       
+       if (jobType == "GPU-ThreadsOneNode"):
+         compParams[kMPIperNode]=1
+         compParams["nr_mpi"]=1  
+         compParams[kNrGPU]=partionSetup["NrGPU"]
+         compParams[kNrNodes]=1 
+         compParams["nr_threads"]=round(partionSetup["NrCPU"]/1)
+       
+       
+       
+       
               
        return compParams 
         

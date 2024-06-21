@@ -92,8 +92,12 @@ computing:
       CPU-MPI:
        - motioncorr
        - ctffind
-       - reconstruction
-      GPU: 
+      GPU-OneProcess: 
         - aligntilts
-      GPUThreadsOneNode:      
+        - denoise
+      GPU-ThreadsOneNode:      
         - filtertilts    
+      CPU-2MPIThreads:
+        - reconstruction 
+  JOBMaxNoes:
+        motioncorr:3         

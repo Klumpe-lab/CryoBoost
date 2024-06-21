@@ -270,8 +270,15 @@ class MainUI(QMainWindow):
         self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
     
     def setNrNodesFromJobSize(self):
-        if (self.dropDown_jobSize.currentText()=="small"):
-            self.dropDown_tomoAlignProgram.setCurrentText("1")
+       
+       if self.dropDown_jobSize.currentText().strip()=="small":
+            self.dropDown_nrNodes.setCurrentText("1")
+       if self.dropDown_jobSize.currentText().strip()=="medium":
+            self.dropDown_nrNodes.setCurrentText("3") 
+       if self.dropDown_jobSize.currentText().strip()=="large":
+            self.dropDown_nrNodes.setCurrentText("5") 
+       
+       self.setNrNodesToJobTap() 
             
     def setTomoAlignProgramToJobTap(self):
         
