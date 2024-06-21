@@ -99,5 +99,6 @@ computing:
         - filtertilts    
       CPU-2MPIThreads:
         - reconstruction 
-  JOBMaxNoes:
-        motioncorr:3         
+  JOBMaxNodes:
+        motioncorr:
+         - 4          

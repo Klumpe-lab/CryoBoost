@@ -49,7 +49,11 @@ class cbconfig:
        compParams={}
        compParams[kPartName]=comReq[2]
        gpuIDString=":".join(str(i) for i in range(0,partionSetup["NrGPU"]))
-      
+       maxNodes= self.confdata["computing"]["JOBMaxNodes"]
+       if (comReq[0] in maxNodes.keys()):  
+          if (comReq[1]>maxNodes[comReq[0]][0]):
+              comReq[1]=maxNodes[comReq[0]][0]
+       
        if (jobType == "CPU-MPI"):
          compParams[kMPIperNode]=partionSetup["NrCPU"]
          compParams["nr_mpi"]=partionSetup["NrCPU"]*comReq[1]  
@@ -78,6 +82,8 @@ class cbconfig:
          compParams[kNrGPU]=partionSetup["NrGPU"]
          compParams[kNrNodes]=1 
          compParams["nr_threads"]=round(partionSetup["NrCPU"]/1)
+        
+       
               
        return compParams 
         
