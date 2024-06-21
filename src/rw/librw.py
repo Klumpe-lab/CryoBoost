@@ -46,10 +46,13 @@ class cbconfig:
        kNrGPU=self.get_alias_reverse(comReq[0],"NrGPU")
        kNrNodes=self.get_alias_reverse(comReq[0],"NrNodes")
        kPartName=self.get_alias_reverse(comReq[0],"PartionName")
+       kMemory=self.get_alias_reverse(comReq[0],"MemoryRAM")
        compParams={}
        compParams[kPartName]=comReq[2]
+       compParams[kMemory]=partionSetup["RAM"]
        gpuIDString=":".join(str(i) for i in range(0,partionSetup["NrGPU"]))
        maxNodes= self.confdata["computing"]["JOBMaxNodes"]
+       
        if (comReq[0] in maxNodes.keys()):  
           if (comReq[1]>maxNodes[comReq[0]][0]):
               comReq[1]=maxNodes[comReq[0]][0]

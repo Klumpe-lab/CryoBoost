@@ -33,7 +33,8 @@ class pipe:
     self.importPrefix=args.impPrefix
     self.pathProject=args.proj
     headNode=self.conf.confdata['submission'][0]['HeadNode']
-    sshStr=sub=self.conf.confdata['submission'][0]['SshCommand']
+    sshStr=self.conf.confdata['submission'][0]['SshCommand']
+    envRel=self.conf.confdata['submission'][0]['Environment']
     schemeName=self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName']
     schemeName=os.path.basename(schemeName.strip(os.path.sep)) #remove path from schemeName
     schemeLockFile=".relion_lock_scheme_" + schemeName + os.path.sep  + "lock_scheme"
@@ -49,7 +50,7 @@ class pipe:
     relSchemeUnlock="rm " + schemeLockFile + ";rmdir "+ os.path.dirname(schemeLockFile)
     relGuiStart="relion --tomo --do_projdir "
     relGuiUpdate="relion_pipeliner --RunJobs "
-    envStr="module load RELION/5.0-beta-3;"
+    envStr=envRel + ";"
     logStr=" > " + schemeName + ".log 2>&1 " 
     logStrAdd=" >> " + schemeName + ".log 2>&1 "
     self.commandSchemeStart=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeStart + logStrAdd + '"'

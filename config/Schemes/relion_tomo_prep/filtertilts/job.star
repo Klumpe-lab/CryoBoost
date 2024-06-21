@@ -51,6 +51,7 @@ qsub_extra1          1
 qsub_extra2          1 
 qsub_extra3    p.hpcl8 
 qsub_extra4      2 
+qsub_extra5      370G
 qsubscript    qsub/qsub_hpcl89.sh 
  queuename    openmpi 
  

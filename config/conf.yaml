@@ -6,7 +6,8 @@
 submission:
   - HeadNode: hpcl8001
     SshCommand: "ssh -X "
-    
+    Environment: "module load RELION/5.0-beta-3NC"
+
 aliases:
 
   - Job: all
@@ -76,17 +77,17 @@ computing:
   p.hpcl8:
       NrGPU: 2
       NrCPU: 24
-      RAM: 384
+      RAM: 370G
   
   p.hpcl9:
       NrGPU: 4
       NrCPU: 72
-      RAM: 1024
+      RAM: 970G
 
   p.hpcl93:
       NrGPU: 4
       NrCPU: 128
-      RAM: 768  
+      RAM: 740G  
 
   JOBTypes:
       CPU-MPI:

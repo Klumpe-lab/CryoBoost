@@ -16,7 +16,7 @@
 #SBATCH --gres=gpu:XXXextra4XXX
 #
 #SBATCH --mail-type=none
-#SBATCH --mem 378880
+#SBATCH --mem XXXextra5XXX
 #
 # Wall clock limit:
 #SBATCH --time=168:00:00
@@ -28,7 +28,7 @@ module load impi/2018.4
 module load IMOD/4.11.1
 module load ARETOMO/1.3.4
 #module load ANACONDA/3/2023.09
-module load RELION/5.0-beta-3
+module load RELION/5.0-beta-3NC
 export CRYOBOOST_HOME=/fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/
 
 module list
