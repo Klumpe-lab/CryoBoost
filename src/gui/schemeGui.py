@@ -299,7 +299,6 @@ class MainUI(QMainWindow):
         nrNodes=int(self.dropDown_nrNodes.currentText())
         partion=self.dropDown_partitionName.currentText()
         for job in self.cbdat.scheme.jobs_in_scheme:
-            req = {"nr_nodes": nrNodes} 
             comDict=self.cbdat.conf.getJobComputingParams([job,nrNodes,partion])
             if (comDict is not None):
                 self.setParamsDictToJobTap(comDict,applyToJobs=job)
@@ -372,6 +371,11 @@ class MainUI(QMainWindow):
         self.cbdat.pipeRunner.runScheme()
         
     def openRelionGui(self):
+        
+        if self.checkPipeRunner()==False:
+            self.checkBox_openRelionGui.setChecked(False)
+            return
+        
         if self.checkBox_openRelionGui.isChecked():
             self.cbdat.pipeRunner.openRelionGui()    
          

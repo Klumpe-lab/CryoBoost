@@ -78,10 +78,6 @@ class cbconfig:
          compParams[kNrGPU]=partionSetup["NrGPU"]
          compParams[kNrNodes]=1 
          compParams["nr_threads"]=round(partionSetup["NrCPU"]/1)
-       
-       
-       
-       
               
        return compParams 
         
