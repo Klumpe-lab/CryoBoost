@@ -107,6 +107,7 @@ class MainUI(QMainWindow):
         self.dropDown_config.addItem("Choose Microscope Set-Up")
         self.dropDown_nrNodes.activated.connect(self.setNrNodesToJobTap)
         self.dropDown_partitionName.activated.connect(self.setNrNodesToJobTap)
+        self.checkBox_shareNodes.stateChanged.connect(self.setNrNodesToJobTap)
         self.dropDown_nrNodes.setCurrentIndex(2)
         self.dropDown_jobSize.setCurrentIndex(1)
         self.dropDown_jobSize.activated.connect(self.setNrNodesFromJobSize)
@@ -298,8 +299,9 @@ class MainUI(QMainWindow):
        
         nrNodes=int(self.dropDown_nrNodes.currentText())
         partion=self.dropDown_partitionName.currentText()
+        shareNodes=self.checkBox_shareNodes.isChecked()
         for job in self.cbdat.scheme.jobs_in_scheme:
-            comDict=self.cbdat.conf.getJobComputingParams([job,nrNodes,partion])
+            comDict=self.cbdat.conf.getJobComputingParams([job,nrNodes,partion],shareNodes)
             if (comDict is not None):
                 self.setParamsDictToJobTap(comDict,applyToJobs=job)
          

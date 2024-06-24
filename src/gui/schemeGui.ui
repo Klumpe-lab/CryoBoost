@@ -796,6 +796,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </property>
             </item>
            </widget>
+           <widget class="QCheckBox" name="checkBox_shareNodes">
+            <property name="geometry">
+             <rect>
+              <x>269</x>
+              <y>51</y>
+              <width>121</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>share Nodes</string>
+            </property>
+           </widget>
           </widget>
          </widget>
         </item>

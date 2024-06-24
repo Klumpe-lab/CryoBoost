@@ -88,6 +88,12 @@ computing:
       NrGPU: 4
       NrCPU: 128
       RAM: 740G  
+  
+  NODE-Sharing:
+    CPU-PerGPU: 6
+    ApplyTo:
+     - p.hpcl9
+     - p.hpcl93
 
   JOBTypes:
       CPU-MPI:

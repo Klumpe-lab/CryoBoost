@@ -27,7 +27,7 @@ class cbconfig:
     with open(self.configPath) as f:
       self.confdata = yaml.load(f, Loader=yaml.FullLoader)
   
-  def getJobComputingParams(self,comReq):    
+  def getJobComputingParams(self,comReq,doNodeSharing):    
        self.confdata["computing"]["JOBTypes"]
        confComp=self.confdata["computing"]
        jobType=None
@@ -50,9 +50,13 @@ class cbconfig:
        compParams={}
        compParams[kPartName]=comReq[2]
        compParams[kMemory]=partionSetup["RAM"]
+       NodeSharing= self.confdata["computing"]["NODE-Sharing"]
+       if (doNodeSharing and (comReq[2] in NodeSharing["ApplyTo"])):
+         compParams[kMemory]=str(round(int(partionSetup["RAM"][:-1])/2))+"G"
        gpuIDString=":".join(str(i) for i in range(0,partionSetup["NrGPU"]))
        maxNodes= self.confdata["computing"]["JOBMaxNodes"]
        
+      
        if (comReq[0] in maxNodes.keys()):  
           if (comReq[1]>maxNodes[comReq[0]][0]):
               comReq[1]=maxNodes[comReq[0]][0]
@@ -63,13 +67,18 @@ class cbconfig:
          compParams[kNrGPU]=0
          compParams[kNrNodes]=comReq[1] 
          compParams["nr_threads"]=1
-       
+         if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
+            compParams[kMPIperNode]=partionSetup["NrCPU"]-(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"]) 
+            compParams["nr_mpi"]=compParams[kMPIperNode]*comReq[1]
+            
        if (jobType == "CPU-2MPIThreads"):
          compParams[kMPIperNode]=2
          compParams["nr_mpi"]=compParams[kMPIperNode]*comReq[1]  
          compParams[kNrGPU]=0
          compParams[kNrNodes]=comReq[1] 
          compParams["nr_threads"]=round(partionSetup["NrCPU"]/2)
+         if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
+            compParams["nr_threads"]=compParams["nr_threads"]-round(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"]/2)
        
        if (jobType == "GPU-OneProcess"):
          compParams[kMPIperNode]=1
@@ -85,8 +94,10 @@ class cbconfig:
          compParams[kNrGPU]=partionSetup["NrGPU"]
          compParams[kNrNodes]=1 
          compParams["nr_threads"]=round(partionSetup["NrCPU"]/1)
-        
+         if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
+            compParams["nr_threads"]=compParams["nr_threads"]-round(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"])
        
+        
               
        return compParams 
         
