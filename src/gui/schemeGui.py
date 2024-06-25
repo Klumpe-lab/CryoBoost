@@ -157,7 +157,7 @@ class MainUI(QMainWindow):
         logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
         self.timer = QTimer(self)
         self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
-        self.timer.start(2000)  # Update the log fil    
+        self.timer.start(3200)  # Update the log fil    
 
     def schemeJobToTab(self,job,conf,insertPosition):
         # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
@@ -493,9 +493,17 @@ class MainUI(QMainWindow):
         logOut,logError=self.cbdat.pipeRunner.getLastJobLogs()
         
         try:
+            log_contentOut=[]
             with open(logOut, 'r') as log_file:
-                log_contentOut = log_file.read()
-                self.textBrowserJobsOut.setText(log_contentOut)
+                for line in log_file:
+                   cleaned_line = self.process_backspaces(line).strip()
+                   if (cleaned_line):
+                        log_contentOut.append(cleaned_line)
+                   
+                #log_contentOut = log_file.read()
+                log_contentOutStr= "\n".join(log_contentOut)
+                self.textBrowserJobsOut.setText(log_contentOutStr)
+                print("aft")           
             with open(logError, 'r') as log_fileError:
                 log_contentError = log_fileError.read()
                 if self.checkBox_jobErrroShowWarning.isChecked()==False:
@@ -506,6 +514,17 @@ class MainUI(QMainWindow):
         self.textBrowserJobsOut.moveCursor(QTextCursor.MoveOperation.End) 
         self.textBrowserJobsError.moveCursor(QTextCursor.MoveOperation.End)
     
+    
+    def process_backspaces(self,line):
+        
+        result = []
+        for char in line:
+            if char == '\b':  # '\b' is the backspace character in Python
+                if result:
+                    result.pop()  # Remove the last character in the result
+            else:
+                result.append(char)
+        return ''.join(result)
     
     
     def loadConfig(self):

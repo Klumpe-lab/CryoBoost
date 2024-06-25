@@ -16,11 +16,11 @@ def idfn(test_input,context):
                          [(("ctffind",2,"p.hpcl8",{'qsub_extra2': 24, 'nr_mpi': 48, 'qsub_extra4': 0, 'qsub_extra1': 2, 'qsub_extra3': 'p.hpcl8', 'nr_threads': 1} )), 
                           ],
                            ids=lambda val: idfn(val, {'function_name': 'cbconfig'}))
-@pytest.mark.filter_tests
+@pytest.mark.test_cbconfig
 def test_cbconfigGetJobComputingParams(test_input):
     cbHOME=os.getenv("CRYOBOOST_HOME")
     conf=cbconfig(cbHOME+"/config/conf.yaml")
-    compParams=conf.getJobComputingParams(test_input)
-    
-    
+    compParams=conf.getJobComputingParams(test_input,True)
+    print(compParams)
+    #assert 1==1
     assert compParams==test_input[3]   

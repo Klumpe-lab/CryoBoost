@@ -65,7 +65,10 @@ star_file:
   ctffind: ctffind/tilt_series_ctf.star
   analysetilts: feature_analysis/feature_analysis.star
   filtertilts: filtertilts/tiltseries_filtered.star
-  aligntilts: aligntilts/aligned_tilt_series.star        
+  aligntilts: aligntilts/aligned_tilt_series.star
+  reconstruction: reconstruction/tomograms.star
+  denoisetrain:   reconstruction/tomograms.star   #is not the result but the reconstruction is used as result   
+  denoisepredict: denoise/denoised_tilt_series.star #maybe switch to reconstruction
 
 computing:
    
@@ -101,7 +104,9 @@ computing:
        - ctffind
       GPU-OneProcess: 
         - aligntilts
-        - denoise
+      GPU-OneProcessOneGPU:
+        - denoisetrain
+        - denoisepredict
       GPU-ThreadsOneNode:      
         - filtertilts    
       CPU-2MPIThreads:

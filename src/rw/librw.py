@@ -80,13 +80,17 @@ class cbconfig:
          if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
             compParams["nr_threads"]=compParams["nr_threads"]-round(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"]/2)
        
-       if (jobType == "GPU-OneProcess"):
+       if (jobType == "GPU-OneProcess") or (jobType == "GPU-OneProcessOneGPU"):
          compParams[kMPIperNode]=1
          compParams["nr_mpi"]=1  
          compParams[kNrGPU]=partionSetup["NrGPU"]
          compParams[kNrNodes]=1
          compParams["nr_threads"]=1
          compParams["gpu_ids"]=gpuIDString
+       
+       if (jobType == "GPU-OneProcessOneGPU"):
+         compParams["gpu_ids"]=0
+         compParams[kNrGPU]=1
        
        if (jobType == "GPU-ThreadsOneNode"):
          compParams[kMPIperNode]=1
@@ -98,7 +102,6 @@ class cbconfig:
             compParams["nr_threads"]=compParams["nr_threads"]-round(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"])
        
         
-              
        return compParams 
         
   def get_alias(self,job, parameter):
@@ -546,6 +549,9 @@ class schemeMeta:
              ind=df.rlnJobOptionVariable=="in_tiltseries" 
           if not any(ind):
              ind=df.rlnJobOptionVariable=="in_mic"
+          if not any(ind):
+             ind=df.rlnJobOptionVariable=="in_tomoset"
+          
           if not any(ind):
              raise Exception("nether input_star_mics nor in_tiltseries found")
           

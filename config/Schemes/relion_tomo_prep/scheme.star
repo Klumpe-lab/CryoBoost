@@ -50,7 +50,9 @@ filtertilts filtertilts   continue            0
 importmovies importmovies   continue            0 
 motioncorr motioncorr   continue            0 
 reconstruction reconstruction   continue            0 
- 
+denoisetrain    denoisetrain    continue        0      
+denoisepredict    denoisepredict    continue        0 
+
 # version 50001
 
 data_scheme_edges
@@ -68,5 +70,6 @@ motioncorr    ctffind            0  undefined  undefined
    ctffind filtertilts            0  undefined  undefined 
 filtertilts aligntilts            0  undefined  undefined 
 aligntilts reconstruction            0  undefined  undefined 
-reconstruction       EXIT            0  undefined  undefined 
- 
+reconstruction  denoisetrain            0  undefined  undefined 
+denoisetrain    denoisepredict                    0 undefined
+denoisepredict    EXIT                    0 undefined
