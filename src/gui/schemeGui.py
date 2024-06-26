@@ -1,6 +1,7 @@
 import sys
 import os
 import pandas as pd
+import glob,random  
 from PyQt6 import QtWidgets
 from PyQt6.QtGui import QTextCursor
 from PyQt6.uic import loadUi
@@ -71,6 +72,7 @@ class MainUI(QMainWindow):
         #self.groupBox_in_paths.setEnabled(False)
         self.line_path_movies.textChanged.connect(self.setPathMoviesToJobTap)
         self.line_path_mdocs.textChanged.connect(self.setPathMdocsToJobTap)
+        self.line_path_mdocs.textChanged.connect(self.updateTomogramsForTraining)
         self.line_path_gain.textChanged.connect(self.setPathGainToJobTap)
         self.dropDown_gainRot.activated.connect(self.setGainRotToJobTap)
         self.dropDown_gainFlip.activated.connect(self.setGainFlipJobTap)
@@ -82,6 +84,7 @@ class MainUI(QMainWindow):
         self.textEdit_areTomoSampleThick.textChanged.connect(self.setAreTomoSampleThickToJobTap)
         self.textEdit_ImodPatchSize.textChanged.connect(self.setImodPatchSizeToJobTap)
         self.textEdit_imodPatchOverlap.textChanged.connect(self.setImodPatchOverlapToJobTap)
+        
         self.dropDown_tomoAlignProgram.activated.connect(self.setTomoAlignProgramToJobTap)
         self.btn_openWorkFlowLog.clicked.connect(self.openExtLogViewerWorkFlow)
         self.btn_openWorkFlowLog.clicked.connect(self.openExtLogViewerWorkFlow)
@@ -90,6 +93,9 @@ class MainUI(QMainWindow):
         #self.textBrowser_workFlow.clicked.connect(self.openExtLogViewer) 
         self.btn_browse_movies.clicked.connect(self.browsePathMovies)
         self.btn_browse_mdocs.clicked.connect(self.browsePathMdocs)
+        self.btn_browse_denoisingModel.clicked.connect(self.browseDenoisingModel)
+        self.textEdit_tomoForDenoiseTrain.textChanged.connect(self.setTomoForDenoiseTrainToJobTap)
+        self.textEdit_pathDenoiseModel.textChanged.connect(self.setPathDenoiseModelToJobTap)
         self.btn_browse_gain.clicked.connect(self.browsePathGain)
         self.btn_browse_autoPrefix.clicked.connect(self.generatePrefix)
         self.btn_use_movie_path.clicked.connect(self.mdocs_use_movie_path)
@@ -154,6 +160,12 @@ class MainUI(QMainWindow):
         self.groupBox_Setup.setEnabled(True)
         self.groupBox_Project.setEnabled(True)
         
+        if "denoisetrain" in self.cbdat.scheme.jobs_in_scheme.values  or "denoisepredict" in self.cbdat.scheme.jobs_in_scheme.values:
+            params_dict = {"generate_split_tomograms": "Yes" }
+            self.setParamsDictToJobTap(params_dict)
+        
+            
+            
         logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
         self.timer = QTimer(self)
         self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
@@ -222,6 +234,33 @@ class MainUI(QMainWindow):
         
         params_dict = {"mdoc_files": "mdoc/*" + os.path.splitext(self.line_path_mdocs.text())[1] }
         self.setParamsDictToJobTap(params_dict)
+    #self.textEdit_tomoForDenoiseTrain.textChanged.connect(self.setTomoForDenoiseTrainToJobTap)
+    #self.textEdit_pathDenoiseModel.textChanged.connect(self.setPathDenoiseModelToJobTap)
+       
+    def setTomoForDenoiseTrainToJobTap(self):
+  
+        params_dict = {"tomograms_for_training": self.textEdit_tomoForDenoiseTrain.toPlainText() }
+        self.setParamsDictToJobTap(params_dict)
+    
+    def setPathDenoiseModelToJobTap(self):
+  
+        params_dict = {"care_denoising_model": self.textEdit_pathDenoiseModel.toPlainText() }
+        self.setParamsDictToJobTap(params_dict)
+    
+    
+    def updateTomogramsForTraining(self):
+        wk_mdocs=self.line_path_mdocs.text()
+        mdocList=glob.glob(wk_mdocs)
+        tomoNames=[os.path.splitext(os.path.basename(path))[0] for path in mdocList]
+        if len(tomoNames)<3:
+            nTomo=len(tomoNames)
+        else:
+            nTomo=3
+        tomoNamesSub=random.sample(tomoNames, k=nTomo)
+        tomoStr=":".join(tomoNamesSub)
+        self.textEdit_tomoForDenoiseTrain.setText(tomoStr)
+       
+
     
     def setPixelSizeToJobTap(self):
         params_dict = {"angpix": self.textEdit_pixelSize.toPlainText()} 
@@ -338,6 +377,10 @@ class MainUI(QMainWindow):
 
     def browsePathGain(self):
         browse_files(self.line_path_gain)
+    
+    def browseDenoisingModel(self):
+        browse_files(self.textEdit_pathDenoiseModel)
+    
     
     def generatePrefix(self):
        current_datetime = datetime.datetime.now()
