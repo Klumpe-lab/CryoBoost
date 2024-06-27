@@ -12,7 +12,7 @@ def filterTiltsDL(ts,model,clmethod,outputfolder,plot=None,threads=24):
     if (clmethod=="oneclass"):    
         assert("not implemented yet")
     
-    plotFilterTiltsResults(ts,outputfolder,plot)
+    #plotFilterTiltsResults(ts,outputfolder,plot)
     filterParams = {"cryoBoostDlLabel": ("good")}
     ts.filterTilts(filterParams)
     

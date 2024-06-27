@@ -781,19 +781,43 @@ class tiltSeriesMeta:
       dfTmp = self.all_tilts_df
 
       for param, thresholds in fitlterParams.items():
-          if isinstance(thresholds[0], str):
-              v = dfTmp[param] == thresholds
-          else:
-              vParamRange = (dfTmp[param] > thresholds[0]) & (dfTmp[param] < thresholds[1])
-              vTiltRange = (dfTmp[pTilt] > thresholds[2]) & (dfTmp[pTilt] < thresholds[3])
-              # Tiltrange defines for which tilts the filter gets applied
-              v = vParamRange | (vTiltRange == False)
+          
+          if isinstance(thresholds, set):
+              v = dfTmp[param].isin(thresholds)
+          else:    
+              if isinstance(thresholds[0], str):
+                  v = dfTmp[param] == thresholds
+              else:
+                  vParamRange = (dfTmp[param] > thresholds[0]) & (dfTmp[param] < thresholds[1])
+                  vTiltRange = (dfTmp[pTilt] > thresholds[2]) & (dfTmp[pTilt] < thresholds[3])
+                  # Tiltrange defines for which tilts the filter gets applied
+                  v = vParamRange | (vTiltRange == False)
 
           dfTmp = dfTmp[v]
 
       dfTmp.reset_index(drop=True, inplace=True)
       self.all_tilts_df = dfTmp
-
+      
+      ts_df = self.all_tilts_df[self.tilt_series_df.columns].copy()
+      ts_df.drop_duplicates(inplace=True)
+      self.tilt_series_df=ts_df
+      self.nrTomo=len(self.tilt_series_df)
+      
+    def reduceToNonOverlab(self,tsSubset):
+      tomoNamesSub=set(tsSubset.tilt_series_df["rlnTomoName"])
+      tomoNamesFull=set(self.tilt_series_df["rlnTomoName"])
+      tomoNamesDiff=tomoNamesFull-tomoNamesSub
+      self.filterTilts({"rlnTomoName": tomoNamesDiff})
+    
+    def mergeTiltSeries(self,tsToAdd):
+      
+      self.all_tilts_df=pd.concat([self.all_tilts_df,tsToAdd.all_tilts_df],axis=0)
+      self.all_tilts_df.reset_index(drop=True, inplace=True)
+      ts_df = self.all_tilts_df[self.tilt_series_df.columns].copy()
+      ts_df.drop_duplicates(inplace=True)
+      self.tilt_series_df=ts_df
+      self.nrTomo=len(self.tilt_series_df) 
+      
     def filterTiltSeries(self,minNumTilts,fitlterParams):
       pass 
     
