@@ -28,6 +28,8 @@ from PIL import Image
 from skimage.transform import resize
 import numpy as np
 import pandas as pd
+from src.deepLearning.modelClasses import SmallSimpleCNN
+import pickle
 
 def mrc_to_pil_image(mrc_path,sz):
     """
@@ -137,7 +139,7 @@ def predictPilImageStack(pilImageStack,learn):
     return pred_labels,pred_probs
     
 
-def predict_tilts(ts,model,sz=384,batchSize=50,gpu=3,max_workers=20):
+def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,max_workers=20):
     """
     Predict the class of a PIL image stack using a fastai learner.
 
@@ -148,9 +150,13 @@ def predict_tilts(ts,model,sz=384,batchSize=50,gpu=3,max_workers=20):
     Returns:
     tuple: A tuple containing the predicted labels and probabilities.
     """
+    
     torch.cuda.set_device(gpu) 
     print("loading model:",model)
-    learn =load_learner(model)
+    #learn =load_learner(model)
+    
+    with open(model, 'rb') as f:
+        learn = pickle.load(f)
     _=learn.model.eval()
     #print("reading:",tilseriesStar)
     #tiltspath,nrTomo=getTiltImagePathFromTiltStar(tilseriesStar,relionProj)

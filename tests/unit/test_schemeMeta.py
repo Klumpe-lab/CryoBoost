@@ -6,7 +6,7 @@ def test_readScheme():
     sc=schemeMeta(inputScheme)
     assert (sc.jobs_in_scheme == ['importmovies', 'motioncorr', 
                                  'ctffind','filtertilts', 
-                                 'aligntilts', 'reconstruction']).all()
+                                 'aligntilts', 'reconstruction','denoisetrain','denoisepredict']).all()
 
 def test_writeScheme():
     inputScheme='config/Schemes/relion_tomo_prep/'

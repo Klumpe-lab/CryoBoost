@@ -163,9 +163,7 @@ class MainUI(QMainWindow):
         if "denoisetrain" in self.cbdat.scheme.jobs_in_scheme.values  or "denoisepredict" in self.cbdat.scheme.jobs_in_scheme.values:
             params_dict = {"generate_split_tomograms": "Yes" }
             self.setParamsDictToJobTap(params_dict)
-        
-            
-            
+              
         logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
         self.timer = QTimer(self)
         self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))

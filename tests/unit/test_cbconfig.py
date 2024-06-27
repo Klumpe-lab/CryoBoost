@@ -13,7 +13,7 @@ def idfn(test_input,context):
     return f"{context['function_name']} {key}-{value}"
 
 @pytest.mark.parametrize("test_input", 
-                         [(("ctffind",2,"p.hpcl8",{'qsub_extra2': 24, 'nr_mpi': 48, 'qsub_extra4': 0, 'qsub_extra1': 2, 'qsub_extra3': 'p.hpcl8', 'nr_threads': 1} )), 
+                         [(("ctffind",2,"p.hpcl8",{'qsub_extra2': 24, 'nr_mpi': 48, 'qsub_extra4': 0, 'qsub_extra1': 2, 'qsub_extra3': 'p.hpcl8','qsub_extra5': '370G', 'nr_threads': 1} )), 
                           ],
                            ids=lambda val: idfn(val, {'function_name': 'cbconfig'}))
 @pytest.mark.test_cbconfig
