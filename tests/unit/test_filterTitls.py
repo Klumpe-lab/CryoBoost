@@ -1,6 +1,7 @@
 from src.filterTilts.filterTiltsDL import filterTiltsDL
 from src.filterTilts.filterTiltsRule import filterTiltsRule
 from src.filterTilts.libFilterTilts import filterTitls
+from src.filterTilts.libFilterTilts import plotFilterTiltsResults
 from starfile import read as starread
 from src.rw.librw import tiltSeriesMeta
 import pandas as pd
@@ -32,7 +33,20 @@ def test_fitlerTiltsDL_binaryWithModel():
     ts=filterTiltsDL(ts,model,'binary','data/tmp/')
     assert (ts.all_tilts_df.cryoBoostTestLabel=="good").all()
     
+def test_plotFitlerTilts():
     
+    outputFold="tmpOut/testPlotFilterTilts"
+    os.makedirs("tmpOut", exist_ok=True)
+    os.makedirs(outputFold, exist_ok=True)
+    inputTs="data/tilts/tilt_series_ctf.star"
+    ts=tiltSeriesMeta(inputTs)
+   
+    if (os.path.exists(outputFold+"/logfile.pdf")):
+        os.remove(outputFold+"/logfile.pdf")
+    
+    plotFilterTiltsResults(ts,outputFold,classLabelName="cryoBoostTestLabel",predScoreLabelName=None,plot=1)
+    
+    assert os.path.exists(outputFold+"/logfile.pdf")        
 
 @pytest.mark.parametrize("test_input", 
                          [({"rlnCtfMaxResolution": (1,20,-70,70)}), 

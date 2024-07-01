@@ -1,7 +1,7 @@
 import os
 from src.filterTilts.libFilterTilts import plotFilterTiltsResults
 
-def filterTiltsDL(ts,model,clmethod,outputfolder,plot=None,threads=24):
+def filterTiltsDL(ts,model,clmethod,outputFolder,plot=None,threads=24):
     
     if (clmethod=="binary"):
         from src.deepLearning.predictTilts_Binary import predict_tilts
@@ -12,7 +12,7 @@ def filterTiltsDL(ts,model,clmethod,outputfolder,plot=None,threads=24):
     if (clmethod=="oneclass"):    
         assert("not implemented yet")
     
-    #plotFilterTiltsResults(ts,outputfolder,plot)
+    plotFilterTiltsResults(ts,outputFolder,classLabelName="cryoBoostDlLabel",predScoreLabelName="cryoBoostDlProbability",titlNameLabel="cryoBoostKey",plot=1)
     filterParams = {"cryoBoostDlLabel": ("good")}
     ts.filterTilts(filterParams)
     
