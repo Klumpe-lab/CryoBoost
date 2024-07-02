@@ -13,7 +13,7 @@ Welcome to CryoTheraPy's documentation!
    extdocs/setup/setup
    extdocs/tutorial/tutorial
    extdocs/intern/intern
-   
+   modules
    
    
 Indices and tables
