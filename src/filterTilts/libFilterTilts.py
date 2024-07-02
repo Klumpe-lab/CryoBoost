@@ -55,7 +55,6 @@ def plotFilterTiltsResults(ts,outputFolder,classLabelName=None,predScoreLabelNam
     
     titlspath=ts.getMicrographMovieNameFull()
    
-    
     from matplotlib import pyplot as plt
     import numpy as np
     maxRows=150

@@ -3,7 +3,7 @@ from src.filterTilts.libFilterTilts import plotFilterTiltsResults
 
 def filterTiltsRule(ts,filterParamRule,outputFolder,plot=None):
    
-    plotFilterTiltsResults(ts,outputFolder,plot)    
+    #plotFilterTiltsResults(ts,outputFolder,plot)    
     ts.filterTilts(filterParamRule)
     return ts
     
