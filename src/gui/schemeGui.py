@@ -8,9 +8,11 @@ from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QDialog, QComboBox, QTabWidget, QWidget, QCheckBox, QAbstractItemView
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
+from src.misc.system import run_command_async
 import asyncio
 import aiofiles  
 import yaml
+import subprocess
 from PyQt6.QtCore import QTimer
 from qasync import QEventLoop, asyncSlot
 import datetime
@@ -108,6 +110,7 @@ class MainUI(QMainWindow):
         self.btn_updateWorkFlow.clicked.connect(self.updateWorkflow)    
         self.btn_importData.clicked.connect(self.importData)
         self.btn_startWorkFlow.clicked.connect(self.startWorkflow)
+        self.btn_showClusterStatus.clicked.connect(self.showClusterStatus)
         self.checkBox_openRelionGui.stateChanged.connect(self.openRelionGui)
         self.btn_stopWorkFlow.clicked.connect(self.stopWorkflow)
         self.btn_unlockWorkFlow.clicked.connect(self.unlockWorkflow)
@@ -237,6 +240,24 @@ class MainUI(QMainWindow):
         self.setParamsDictToJobTap(params_dict)
     #self.textEdit_tomoForDenoiseTrain.textChanged.connect(self.setTomoForDenoiseTrainToJobTap)
     #self.textEdit_pathDenoiseModel.textChanged.connect(self.setPathDenoiseModelToJobTap)
+    
+    def showClusterStatus(self):
+        
+        sshStr=self.cbdat.conf.confdata['submission'][0]['SshCommand']
+        headNode=self.cbdat.conf.confdata['submission'][0]['HeadNode']
+        command=sshStr + " " + headNode + ' "' + "sinfo -o '%P %.6D %.6t' | sort -k3 | grep -v 'PAR'" + '"'
+        print(command)
+        import subprocess
+        proc=subprocess.Popen(command,shell=True ,stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        stdout, stderr = proc.communicate()
+        
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setWindowTitle('Information')
+        msg_box.setText(stdout)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg_box.resize(2000, 400) 
+        msg_box.exec()
        
     def setTomoForDenoiseTrainToJobTap(self):
   
@@ -427,10 +448,7 @@ class MainUI(QMainWindow):
                 self.cbdat.pipeRunner.setCurrentNodeScheme("WAIT")
             else:
                 return    
-                
         
-        # if self.checkBox_openRelionGui.isChecked():
-        #     self.cbdat.pipeRunner.openRelionGui()
         self.cbdat.pipeRunner.runScheme()
         
     def openRelionGui(self):

@@ -966,7 +966,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </property>
             </item>
            </widget>
-           <widget class="QPushButton" name="btn_browse_gain_2">
+           <widget class="QPushButton" name="btn_showClusterStatus">
             <property name="geometry">
              <rect>
               <x>690</x>
