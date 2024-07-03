@@ -36,10 +36,10 @@ param3_label      ctfMaxResolution
 param3_value      0,50,-70,70 
 param4_label      driftInAng
 param4_value      1,90000,-70,70    
-param5_label         "" 
-param5_value         "" 
-param6_label         "" 
-param6_value         "" 
+param5_label      probThreshold
+param5_value         0.70 
+param6_label      probThrAction 
+param6_value         assignToGood 
 param7_label         "" 
 param7_value         "" 
 param8_label         "" 

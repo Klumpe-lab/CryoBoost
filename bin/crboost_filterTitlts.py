@@ -17,6 +17,8 @@ def parse_arguments():
     parser.add_argument("--defocusInAng", "-defocus",dest="rlnDefocusU" ,required=False, default=None, help="threshold defocus")
     parser.add_argument("--ctfMaxResolution", "-resolution",dest="rlnCtfMaxResolution" ,required=False, default=None, help="threshold resolution")
     parser.add_argument("--model", "-mod",dest="model" ,required=False, default=None, help="model for prediction")
+    parser.add_argument("--probThreshold", "-pThr",dest="probThr" ,required=False, default=0.1, help="threshold for uncert. assignment")
+    parser.add_argument("--probThrAction", "-pAct",dest="probAct" ,required=False, default="assingToGood", help="action for uncert. assignment")
     parser.add_argument("--j", "-nr_threads",dest="threads" ,required=False, default=None, help="Nr of threads used. Ignore!")
     args,unkArgs=parser.parse_known_args()
     return args,unkArgs
@@ -31,7 +33,7 @@ def main():
         if ((arg == 'rlnAccumMotionTotal') | (arg == 'rlnDefocusU') | (arg == 'rlnCtfMaxResolution')):
             filterParams[arg] = [float(num) for num in value.split(',')]   
     
-    filterTitls(args.in_mics,relionProj='',pramRuleFilter=filterParams,model=args.model,plot=None,outputFolder=args.out_dir,threads=args.threads)
+    filterTitls(args.in_mics,relionProj='',pramRuleFilter=filterParams,model=args.model,plot=None,outputFolder=args.out_dir,probThr=args.probThr,probAction=args.probAct,threads=args.threads)
     print("filtering done")
     successName=args.out_dir + "/RELION_JOB_EXIT_SUCCESS"
     with open(successName, 'a'):

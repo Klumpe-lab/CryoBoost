@@ -96,10 +96,13 @@ class MainUI(QMainWindow):
         self.btn_browse_denoisingModel.clicked.connect(self.browseDenoisingModel)
         self.textEdit_tomoForDenoiseTrain.textChanged.connect(self.setTomoForDenoiseTrainToJobTap)
         self.textEdit_pathDenoiseModel.textChanged.connect(self.setPathDenoiseModelToJobTap)
+        self.textEdit_modelForFilterTilts.textChanged.connect(self.setmodelForFilterTiltsToJobTap)
+        self.textEdit_probThr.textChanged.connect(self.setProbThrToJobTap)
         self.btn_browse_gain.clicked.connect(self.browsePathGain)
         self.btn_browse_autoPrefix.clicked.connect(self.generatePrefix)
         self.btn_use_movie_path.clicked.connect(self.mdocs_use_movie_path)
         self.dropDown_config.activated.connect(self.loadConfig)
+        self.dropDown_probThrBehave.activated.connect(self.setProbBehaveToJobTab)
         self.btn_browse_target.clicked.connect(self.browsePathTarget)
         self.btn_genProject.clicked.connect(self.generateProject)
         self.btn_updateWorkFlow.clicked.connect(self.updateWorkflow)    
@@ -245,6 +248,21 @@ class MainUI(QMainWindow):
         params_dict = {"care_denoising_model": self.textEdit_pathDenoiseModel.toPlainText() }
         self.setParamsDictToJobTap(params_dict)
     
+    def setmodelForFilterTiltsToJobTap(self):
+        
+        params_dict = {"param1_value": self.textEdit_modelForFilterTilts.toPlainText() }
+        self.setParamsDictToJobTap(params_dict,applyToJobs="filtertilts")
+    
+    def setProbThrToJobTap(self):
+        
+        params_dict = {"param5_value": self.textEdit_probThr.toPlainText() }
+        self.setParamsDictToJobTap(params_dict,applyToJobs="filtertilts")
+    
+    def setProbBehaveToJobTab(self):
+        
+        params_dict = {"param6_value": self.dropDown_probThrBehave.currentText() }
+        self.setParamsDictToJobTap(params_dict,applyToJobs="filtertilts")
+    
     
     def updateTomogramsForTraining(self):
         wk_mdocs=self.line_path_mdocs.text()
@@ -386,7 +404,9 @@ class MainUI(QMainWindow):
        self.line_path_crImportPrefix.setText(prefix)
         
     def mdocs_use_movie_path(self):
-        self.line_path_mdocs.setText(self.line_path_movies.text())
+        movieP=self.line_path_movies.text()
+        mpRoot,ext= os.path.splitext(movieP)
+        self.line_path_mdocs.setText(mpRoot+".mdoc")
 
     def startWorkflow(self):
         

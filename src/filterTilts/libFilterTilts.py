@@ -1,7 +1,7 @@
 from src.rw.librw import tiltSeriesMeta
 import os
 
-def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None,threads=24):
+def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None,probThr=0.1,probAction="assingToGood",threads=24):
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
     if os.path.exists(outputFolder+"tiltseries_filtered.star"):
          tsExist=tiltSeriesMeta(outputFolder+"tiltseries_filtered.star")
@@ -19,7 +19,7 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
 
     if (model!=None):
         from src.filterTilts.filterTiltsDL import filterTiltsDL
-        ts=filterTiltsDL(ts,model,'binary',outputFolder,plot,threads)
+        ts=filterTiltsDL(ts,model,'binary',outputFolder,plot,probThr,probAction,threads)
     
     if os.path.exists(outputFolder+"tiltseries_filtered.star"):
         tsExist.mergeTiltSeries(ts)

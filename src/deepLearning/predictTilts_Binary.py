@@ -139,7 +139,7 @@ def predictPilImageStack(pilImageStack,learn):
     return pred_labels,pred_probs
     
 
-def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,max_workers=20):
+def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,probThr=0.1,probAction="assingToGood",max_workers=20):
     """
     Predict the class of a PIL image stack using a fastai learner.
 
@@ -158,8 +158,7 @@ def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,max_workers=20):
     with open(model, 'rb') as f:
         learn = pickle.load(f)
     _=learn.model.eval()
-    #print("reading:",tilseriesStar)
-    #tiltspath,nrTomo=getTiltImagePathFromTiltStar(tilseriesStar,relionProj)
+   
     tiltspath=ts.getMicrographMovieNameFull()
     print("found:",str(len(tiltspath)),"tilts from",str(ts.nrTomo),'tomograms')
     
@@ -177,6 +176,13 @@ def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,max_workers=20):
         pLables,pProb=predictPilImageStack(pilImageBatch,learn)
         all_pLabels.extend(pLables)
         all_pProb.extend(pProb)
+    
+    for i, p in enumerate(all_pProb):
+        if (p < float(probThr)):
+            if (probAction=="assignToGood"):
+                all_pLabels[i] = "good"
+            else:
+                all_pLabels[i] = "bad"    
         
     df = pd.DataFrame({
     'cryoBoostDlLabel': all_pLabels,
