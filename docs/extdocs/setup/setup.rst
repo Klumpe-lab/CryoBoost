@@ -15,6 +15,7 @@ install Miniconda
 Install dependencies
 ====================
 .. code-block:: bash
+   
    conda create -n cryoboost python=3.11.5
    conda activate cryoboost
    conda install nvidia/label/cuda-11.8.0::cuda-toolkit
@@ -32,6 +33,7 @@ Install dependencies
 Install cryoboost
 ====================
 .. code-block:: bash
+   
    cd /path/to/my/installationFolder/
    git clone https://github.com/FlorianBeckOle/CryoBoost.git
    cd cryoboost
@@ -41,13 +43,14 @@ Install cryoboost
 Test torch installation
 ====================
 .. code-block:: bash
+   
    python -c 'import torch; print(torch.cuda.is_available())'
 
 Test fastai installation
 ====================
 .. code-block:: bash
+   
    python -c 'import fastai; print(fastai.__version__)'
-
 
 
 generate documentation
