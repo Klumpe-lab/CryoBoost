@@ -9,9 +9,9 @@ from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplic
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
 from src.misc.system import run_command_async
-import asyncio
-import aiofiles  
-import yaml
+#import asyncio
+#import aiofiles  
+#import yaml
 import subprocess
 from PyQt6.QtCore import QTimer
 from qasync import QEventLoop, asyncSlot
@@ -59,7 +59,7 @@ class MainUI(QMainWindow):
         cbdat.pipeRunner= None
         cbdat.conf=cbconfig(cbdat.confPath)     
         cbdat.args=args
-        if os.path.exists(args.proj +  "/Schemes/relion_tomo_prep/scheme.star"):
+        if os.path.exists(str(args.proj) +  "/Schemes/relion_tomo_prep/scheme.star"):
             cbdat.scheme=schemeMeta(args.proj +  "/Schemes/relion_tomo_prep/")
             args.scheme=cbdat.scheme
             cbdat.pipeRunner=pipe(args);
@@ -247,7 +247,6 @@ class MainUI(QMainWindow):
         headNode=self.cbdat.conf.confdata['submission'][0]['HeadNode']
         command=sshStr + " " + headNode + ' "' + "sinfo -o '%P %.6D %.6t' | sort -k3 | grep -v 'PAR'" + '"'
         print(command)
-        import subprocess
         proc=subprocess.Popen(command,shell=True ,stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         stdout, stderr = proc.communicate()
         

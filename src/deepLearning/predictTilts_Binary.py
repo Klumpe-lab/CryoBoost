@@ -23,8 +23,6 @@ import mrcfile
 from PIL import Image
 import os
 from concurrent.futures import ProcessPoolExecutor
-import mrcfile
-from PIL import Image
 from skimage.transform import resize
 import numpy as np
 import pandas as pd
