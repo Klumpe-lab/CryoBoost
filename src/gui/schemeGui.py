@@ -123,6 +123,7 @@ class MainUI(QMainWindow):
         self.dropDown_nrNodes.setCurrentIndex(2)
         self.dropDown_jobSize.setCurrentIndex(1)
         self.dropDown_jobSize.activated.connect(self.setNrNodesFromJobSize)
+        self.line_path_crImportPrefix.textChanged.connect(self.updateTomogramsForTraining)
         for i in self.cbdat.conf.microscope_presets:
             self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
     
@@ -173,7 +174,7 @@ class MainUI(QMainWindow):
         logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
         self.timer = QTimer(self)
         self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
-        self.timer.start(3200)  # Update the log fil    
+        self.timer.start(2000)  # Update the log fil    
 
     def schemeJobToTab(self,job,conf,insertPosition):
         # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
@@ -287,13 +288,16 @@ class MainUI(QMainWindow):
     def updateTomogramsForTraining(self):
         wk_mdocs=self.line_path_mdocs.text()
         mdocList=glob.glob(wk_mdocs)
-        tomoNames=[os.path.splitext(os.path.basename(path))[0] for path in mdocList]
+        pref=self.line_path_crImportPrefix.text()
+        mdocList=[mdoc for mdoc in mdocList]# if pref in mdoc]
+        tomoNames=[pref+os.path.splitext(os.path.basename(path))[0] for path in mdocList]
         if len(tomoNames)<3:
             nTomo=len(tomoNames)
         else:
             nTomo=3
         tomoNamesSub=random.sample(tomoNames, k=nTomo)
         tomoStr=":".join(tomoNamesSub)
+        print("updating...")
         self.textEdit_tomoForDenoiseTrain.setText(tomoStr)
        
 
