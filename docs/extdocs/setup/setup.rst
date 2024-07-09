@@ -2,7 +2,7 @@
 Setup
 =========
 
-install Miniconda
+Install Miniconda
 =================
 .. code-block:: bash
 
@@ -30,6 +30,15 @@ Install dependencies
    #for local documentation use
    conda install sphinx sphinx_rtd_theme
 
+
+Test torch,fastai installation
+===============================
+.. code-block:: bash
+   
+   python -c 'import torch; print(torch.cuda.is_available())'
+   python -c 'import fastai; print(fastai.__version__)'
+
+
 Install cryoboost
 ====================
 .. code-block:: bash
@@ -38,22 +47,19 @@ Install cryoboost
    git clone https://github.com/FlorianBeckOle/CryoBoost.git
    cd cryoboost
    #adapt shebang wrapper for python iterperte needd
-    
+to start cryoboost you need to set PATH,PYTHONPATH and CRYOBOOST_HOME
 
-Test torch installation
+Example ENV
 ====================
-.. code-block:: bash
+.. code-block:: bash   
    
-   python -c 'import torch; print(torch.cuda.is_available())'
+   DIRECTORY=/fs/pool/pool-bmapps/hpcl5S15/app/soft/CRYOBOOST/0.1
+   export PATH=$DIRECTORY/CryoBoost/bin
+   export CRYOBOOST_HOME=$DIRECTORY/CryoBoost
+   export PYTHONPATH=$CRYOBOOST_HOME
+   export CRYOBOOST_PYTHON_PATH=$DIRECTORY/conda3/envs/cryoboost/bin/python
 
-Test fastai installation
-====================
-.. code-block:: bash
-   
-   python -c 'import fastai; print(fastai.__version__)'
-
-
-generate documentation
+Generate documentation
 ======================
 .. code-block:: bash
    

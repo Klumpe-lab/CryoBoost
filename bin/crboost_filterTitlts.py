@@ -1,4 +1,4 @@
-#!/fs/pool/pool-fbeck/projects/4TomoPipe/trainClassifyer/softFastAI/conda3/bin/python 
+#!/usr/bin/env crboost_python 
 import argparse
 import os
 import sys

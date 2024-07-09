@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo $CRYOBOOST_PYTHON_PATH
+$CRYOBOOST_PYTHON_PATH "$@"
