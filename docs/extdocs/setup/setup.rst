@@ -6,7 +6,7 @@ Install Miniconda
 =================
 .. code-block:: bash
 
-   targetFolder=/path/to/my/installationFolder
+   targetFolder=/path/to/my/pythonInstall
    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
    ./Miniconda3-latest-Linux-x86_64.sh -b -p $targetFold/conda3
    export PATH=$targetFold/conda3/bin/:$PATH
@@ -43,21 +43,19 @@ Install cryoboost
 ====================
 .. code-block:: bash
    
-   cd /path/to/my/installationFolder/
+   cd /path/to/my/Folder/
    git clone https://github.com/FlorianBeckOle/CryoBoost.git
-   cd cryoboost
-   #adapt shebang wrapper for python iterperte needd
-to start cryoboost you need to set PATH,PYTHONPATH and CRYOBOOST_HOME
+   
+to start cryoboost you need to set PATH,PYTHONPATH,CRYOBOOST_PYTHON_PATH(python intepreter) and CRYOBOOST_HOME
 
 Example ENV
 ====================
 .. code-block:: bash   
    
-   DIRECTORY=/fs/pool/pool-bmapps/hpcl5S15/app/soft/CRYOBOOST/0.1
-   export PATH=$DIRECTORY/CryoBoost/bin
-   export CRYOBOOST_HOME=$DIRECTORY/CryoBoost
+   export CRYOBOOST_HOME=/path/to/my/Folder/CryoBoost/
+   export PATH=$CRYOBOOST_HOME/bin:$PATH
    export PYTHONPATH=$CRYOBOOST_HOME
-   export CRYOBOOST_PYTHON_PATH=$DIRECTORY/conda3/envs/cryoboost/bin/python
+   export CRYOBOOST_PYTHON_PATH=/path/to/my/pythonInstall/conda3/envs/cryoboost/bin/python
 
 Generate documentation
 ======================

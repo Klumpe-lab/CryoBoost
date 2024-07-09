@@ -213,7 +213,7 @@ class pipe:
             if re_res_last_job_folder:
                 last_job_folder = re_res_last_job_folder.string.split("-->")[1].split(" ")[1].strip()
             
-            print(last_job_folder) 
+            
             
     return last_batch_job_id,last_job_folder    
                
@@ -228,7 +228,7 @@ class pipe:
       if (lastJobFolder is not  None):
         jobOut=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.out"
         jobErr=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.err"
-        print(jobOut)
+        
       else:
         print("no Logs found")
         jobOut="No logs found"
@@ -262,7 +262,7 @@ class pipe:
       
       os.makedirs(self.pathProject + "/Logs/" + jobName,exist_ok=True)
       logFile=self.pathProject+ "/Logs/" + jobName+ "/run.out"
-      print("logFileFF:" + logFile)
+     
       with open(logFile, "a") as myfile:
           myfile.write(text)
       

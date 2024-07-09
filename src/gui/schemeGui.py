@@ -9,12 +9,8 @@ from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplic
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
 from src.misc.system import run_command_async
-#import asyncio
-#import aiofiles  
-#import yaml
 import subprocess
 from PyQt6.QtCore import QTimer
-from qasync import QEventLoop, asyncSlot
 import datetime
 
 current_dir = os.path.dirname(os.path.abspath(__name__))
@@ -400,7 +396,7 @@ class MainUI(QMainWindow):
            applyToJobs = list(self.cbdat.scheme.jobs_in_scheme)
            
         for current_tab in self.cbdat.scheme.jobs_in_scheme:
-            print(current_tab in applyToJobs)
+            #print(current_tab in applyToJobs)
             if current_tab in applyToJobs:
                 index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
                 self.tabWidget.setCurrentIndex(index_import.item())
@@ -585,7 +581,7 @@ class MainUI(QMainWindow):
                 #log_contentOut = log_file.read()
                 log_contentOutStr= "\n".join(log_contentOut)
                 self.textBrowserJobsOut.setText(log_contentOutStr)
-                print("aft")           
+                           
             with open(logError, 'r') as log_fileError:
                 log_contentError = log_fileError.read()
                 if self.checkBox_jobErrroShowWarning.isChecked()==False:
