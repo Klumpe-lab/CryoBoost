@@ -16,7 +16,7 @@ loop_
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
   do_queue         Yes 
-    fn_exe /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/bin/crboost_filterTitlts.py
+    fn_exe         crboost_filterTitlts.py
   in_3dref         "" 
  in_coords         "" 
    in_mask         "" 

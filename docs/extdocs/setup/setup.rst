@@ -50,7 +50,7 @@ To start cryoboost you need to set PATH,PYTHONPATH,CRYOBOOST_PYTHON_PATH(python 
 the easiest is to adapt the /path/to/my/Folder/CryoBoost/.cbenv file and source it befor usage
 Also adapt the Environtmet in the /path/to/my/Folder/CryoBoost/conf/conf.yaml to enable remote execution
 
-Configure /path/to/my/Folder/CryoBoost/conf.yaml
+Configure /path/to/my/Folder/CryoBoost/config/conf.yaml
 ================================================
 .. code-block:: yaml
    

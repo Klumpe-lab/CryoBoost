@@ -6,7 +6,7 @@
 submission:
   - HeadNode: hpcl8001
     SshCommand: "ssh -X "
-    Environment: "module load RELION/5.0-beta-3NC;source /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/.env"
+    Environment: "module load RELION/5.0-beta-3NC;source /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/.cbenv"
     CalusterStatus: sinfo
 
 aliases:
