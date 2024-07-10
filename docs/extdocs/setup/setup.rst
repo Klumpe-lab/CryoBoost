@@ -46,15 +46,23 @@ Install cryoboost
    cd /path/to/my/Folder/
    git clone https://github.com/FlorianBeckOle/CryoBoost.git
    
-to start cryoboost you need to set PATH,PYTHONPATH,CRYOBOOST_PYTHON_PATH(python intepreter) and CRYOBOOST_HOME
+To start cryoboost you need to set PATH,PYTHONPATH,CRYOBOOST_PYTHON_PATH(python intepreter) and CRYOBOOST_HOME
+the easiest is to adapt the /path/to/my/Folder/CryoBoost/.cbenv file and source it befor usage
+Also adapt the Environtmet in the /path/to/my/Folder/CryoBoost/conf/conf.yaml to enable remote execution
 
-Example ENV
-====================
+Configure /path/to/my/Folder/CryoBoost/conf.yaml
+================================================
+.. code-block:: yaml
+   
+   Environment: "module load RELION/5.0-beta-3NC;source /path/to/my/Folder/CryoBoost/.cbenv"
+
+Adapt /path/to/my/Folder/CryoBoost/.cbenv
+==========================================
 .. code-block:: bash   
    
    export CRYOBOOST_HOME=/path/to/my/Folder/CryoBoost/
-   export PATH=$CRYOBOOST_HOME/bin:$PATH
    export PYTHONPATH=$CRYOBOOST_HOME
+   export PATH=$CRYOBOOST_HOME/bin:$PATH
    export CRYOBOOST_PYTHON_PATH=/path/to/my/pythonInstall/conda3/envs/cryoboost/bin/python
 
 Generate documentation

@@ -228,7 +228,6 @@ class pipe:
       if (lastJobFolder is not  None):
         jobOut=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.out"
         jobErr=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.err"
-        
       else:
         print("no Logs found")
         jobOut="No logs found"
