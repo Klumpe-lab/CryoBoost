@@ -1,5 +1,6 @@
 export CRYOBOOST_HOME=/fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost
+export CRYOBOOST_PYTHON_PATH=/fs/pool/pool-fbeck/projects/4TomoPipe/trainClassifyer/softFastAI/conda3/bin/python
 export PYTHONPATH=$CRYOBOOST_HOME
 export PATH=$CRYOBOOST_HOME/bin:$PATH
-export CRYOBOOST_PYTHON_PATH=/fs/pool/pool-fbeck/projects/4TomoPipe/trainClassifyer/softFastAI/conda3/bin/python
+
 

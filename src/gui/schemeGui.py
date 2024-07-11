@@ -8,6 +8,7 @@ from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QDialog, QComboBox, QTabWidget, QWidget, QCheckBox, QAbstractItemView
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
+from src.rw.librw import starFileMeta
 from src.misc.system import run_command_async
 import subprocess
 from PyQt6.QtCore import QTimer
@@ -158,6 +159,8 @@ class MainUI(QMainWindow):
              self.line_path_movies.setText(self.cbdat.args.movies)
         if (self.cbdat.args.proj != None):
              self.line_path_new_project.setText(self.cbdat.args.proj)
+        if (self.cbdat.args.pixS != None):
+             self.textEdit_pixelSize.setText(self.cbdat.args.pixS)
              
         self.groupBox_WorkFlow.setEnabled(True)
         self.groupBox_Setup.setEnabled(True)
@@ -667,6 +670,7 @@ class MainUI(QMainWindow):
             return
         scheme=self.cbdat.scheme
         scheme=self.updateSchemeFromJobTabs(scheme,self.tabWidget)
+        scheme.scheme_star=starFileMeta(self.cbdat.pipeRunner.scheme.schemeFilePath)
         self.cbdat.scheme=scheme
         self.cbdat.pipeRunner.scheme=scheme
         self.cbdat.pipeRunner.writeScheme()

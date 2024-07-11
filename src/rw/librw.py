@@ -678,22 +678,7 @@ class tiltSeriesMeta:
         self.readTiltSeries()
 
     def readTiltSeries(self):
-        """
-        Reads the tilt series star file and its associated tilt series files.
-
-        Args:
-            self (tiltSeriesMeta): An instance of the tiltSeriesMeta class.
-
-        Returns:
-            pd.DataFrame: A pandas DataFrame containing the tilt series information.
-
-        Raises:
-            FileNotFoundError: If any of the required star files are not found.
-
-        Example:
-            >>> ts = tiltSeriesMeta("/path/to/tilt_series_star_file", "/path/to/rel_proj_path")
-            >>> tilt_series_df = ts.readTiltSeries()
-        """
+        
         print("Reading: " + self.tiltseriesStarFile)
         tilt_series=starFileMeta(self.tiltseriesStarFile)
         #tilt_series_df =tilt_series.dict[next(iter(tilt_series.dict.keys()))] 
@@ -836,7 +821,7 @@ class tiltSeriesMeta:
 
       Args:
       - columns_df (DataFrame): A pandas DataFrame containing the columns to be added to `all_tilts_df`. 
-        It must include a 'cryoBoostKey' column for the merge operation.
+         It must include a 'cryoBoostKey' column for the merge operation.
 
       Returns:
       - None. The method updates `all_tilts_df` in place by adding the new columns from `columns_df`.
