@@ -38,13 +38,14 @@ class pipe:
     schemeName=self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName']
     schemeName=os.path.basename(schemeName.strip(os.path.sep)) #remove path from schemeName
     schemeLockFile=".relion_lock_scheme_" + schemeName + os.path.sep  + "lock_scheme"
-    relSchemeStart="relion_schemer --scheme " + schemeName  + " --run --verb 2"
+    relSchemeStart="(relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid)'
     self.schemeLockFile=schemeLockFile
     self.schemeName=schemeName
     
     chFold="cd " + os.path.abspath(self.pathProject) + ";"
     #relSchemeAbrot="relion_schemer --scheme " + schemeName  + " --abort; + pkill -f """ + 
-    relSchemeAbrot="pkill -f \'relion_schemer --scheme " + schemeName + "\'" 
+    #relSchemeAbrot="pkill -f \'relion_schemer --scheme " + schemeName + "\'" 
+    relSchemeAbrot="kill XXXPIDXXX"
     relStopLastJob="scancel XXXJOBIDXXX"
     relSchemeReset="relion_schemer --scheme " + schemeName  + " --reset"
     relSchemeUnlock="rm " + schemeLockFile + ";rmdir "+ os.path.dirname(schemeLockFile)
@@ -94,6 +95,7 @@ class pipe:
      self.scheme.write_scheme(path_scheme)
   
   def runScheme(self):
+    
     self.generatCrJobLog("manageWorkflow","starting workflow:" + "\n")
     self.generatCrJobLog("manageWorkflow","  " + self.commandSchemeStart + "\n")
     p=run_command_async(self.commandSchemeStart)
@@ -106,9 +108,17 @@ class pipe:
     lastBatchJobId,lastJobFolder=self.parseSchemeLogFile()
     self.writeToLog(" + Abort Workflow: --> Logs/manageWorkflow" + "\n")
     self.writeToLog("   Name: " + self.schemeName + "\n")
+    pidFile=self.pathProject + '/Schemes/'+ self.schemeName + '/scheme.pid'
+    try:
+      with open(pidFile, 'r') as file:
+           pid = int(file.read().strip())
+    except FileNotFoundError:
+      print(f"PID file {pidFile} does not exist.") 
+
+    cSchemeAbroat=self.commandSchemeAbrot.replace("XXXPIDXXX",str(pid))
     self.generatCrJobLog("manageWorkflow","stopping workflow:" + "\n")
-    self.generatCrJobLog("manageWorkflow"," + " + self.commandSchemeAbrot + "\n")
-    p=run_command(self.commandSchemeAbrot)
+    self.generatCrJobLog("manageWorkflow"," + " + cSchemeAbroat + "\n")
+    p=run_command(cSchemeAbroat)
     if lastBatchJobId != None:
       self.generatCrJobLog("manageWorkflow","killing job:" + "\n")
       self.generatCrJobLog("manageWorkflow",self.commandSchemeJobAbrot.replace("XXXJOBIDXXX",lastBatchJobId) +"\n")                     
