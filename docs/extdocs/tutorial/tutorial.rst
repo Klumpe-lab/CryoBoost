@@ -2,6 +2,18 @@
 Tutorial
 =========
 
+Requiremets
+=================
+
+* check if you can login to the submission node without password
+
+.. code-block:: bash
+   
+   ssh hpcl8001
+
+* no other version of Relion is in your .bashrc
+
+
 Open CryoBoost
 =================
 
@@ -10,7 +22,7 @@ Open CryoBoost
    module load CRYOBOOST
    # or
    source /path/to/my/Folder/CryoBoost/.cbenv
-   crboost_pipe.py -mov '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/frames/*.eer' -m '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/mdoc/*.mdoc' --proj testProj/copia
+   crboost_pipe.py -mov '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/frames/*.eer' -m '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/mdoc/*.mdoc' --proj testProj/copia --pixS 2.95
    #or without arguments
    crboost_pipe.py 
 
