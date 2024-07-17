@@ -8,7 +8,11 @@ Open CryoBoost
 .. code-block:: bash
 
    module load CRYOBOOST
+   # or
+   source /path/to/my/Folder/CryoBoost/.cbenv
    crboost_pipe.py -mov '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/frames/*.eer' -m '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/mdoc/*.mdoc' --proj testProj/copia
+   #or without arguments
+   crboost_pipe.py 
 
 Adapt Parameters
 =================

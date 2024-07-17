@@ -5,13 +5,13 @@ import glob,random
 from PyQt6 import QtWidgets
 from PyQt6.QtGui import QTextCursor
 from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QDialog, QComboBox, QTabWidget, QWidget, QCheckBox, QAbstractItemView
+from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QDialog, QComboBox, QTabWidget, QWidget,QScrollArea ,QCheckBox, QAbstractItemView
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
 from src.rw.librw import starFileMeta
 from src.misc.system import run_command_async
 import subprocess
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import QTimer 
 import datetime
 
 current_dir = os.path.dirname(os.path.abspath(__name__))
@@ -41,11 +41,11 @@ class MainUI(QMainWindow):
        
         self.groupBox_WorkFlow.setEnabled(False)
         self.groupBox_Setup.setEnabled(False)
-        self.groupBox_Project.setEnabled(False)
+        #self.groupBox_Project.setEnabled(False)
         if (self.cbdat.args.autoGen or self.cbdat.args.skipSchemeEdit):
             self.makeJobTabsFromScheme()
         
-        
+       
     
     def initializeDataStrcuture(self,args):
         #custom varibales
