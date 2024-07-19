@@ -12,7 +12,13 @@ def filterTiltsDL(ts,model,clmethod,outputFolder,plot=None,probThr=0.1,probActio
     if (clmethod=="oneclass"):    
         assert("not implemented yet")
     
-    plotFilterTiltsResults(ts,outputFolder,classLabelName="cryoBoostDlLabel",predScoreLabelName="cryoBoostDlProbability",titlNameLabel="cryoBoostKey",plot=1)
+    try:
+        plotFilterTiltsResults(ts,outputFolder,classLabelName="cryoBoostDlLabel",predScoreLabelName="cryoBoostDlProbability",titlNameLabel="cryoBoostKey",plot=1,threads=threads)
+    except Exception as exc:
+        print("error plotting filter tilts result")
+        print(exc)
+    
+    
     filterParams = {"cryoBoostDlLabel": ("good")}
     ts.filterTilts(filterParams)
     

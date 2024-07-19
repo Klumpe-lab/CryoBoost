@@ -1,4 +1,5 @@
 from src.rw.librw import tiltSeriesMeta
+from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageStackParallel
 import os
 
 def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None,probThr=0.1,probAction="assingToGood",threads=24):
@@ -38,11 +39,12 @@ def plotTiltStat(ts,outputFolder,plot=None):
     pass
     
     
-def plotFilterTiltsResults(ts,outputFolder,classLabelName=None,predScoreLabelName=None,titlNameLabel=None,plot=False):
+def plotFilterTiltsResults(ts,outputFolder,classLabelName=None,predScoreLabelName=None,titlNameLabel=None,plot=False,threads=24):
     if (plot==False):
         return
     
-    from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageStackParallel   
+    print("generting:" + outputFolder + "/logfile.pdf")
+       
     #from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageS  
     
     pred_lables=ts.all_tilts_df[classLabelName]
@@ -57,43 +59,49 @@ def plotFilterTiltsResults(ts,outputFolder,classLabelName=None,predScoreLabelNam
    
     from matplotlib import pyplot as plt
     import numpy as np
-    maxRows=150
+    maxRows=100
     num_images = len(pred_lables)
-    num_cols = 3  # Number of columns in the matrix
+    num_cols = 4  # Number of columns in the matrix
     num_rows = (num_images // num_cols)  # Calculate number of rows needed
     if (num_rows>maxRows):
         num_rows=maxRows
     
-    pil_images=mrcFilesToPilImageStackParallel(titlspath,384)
-    fig, axs = plt.subplots(num_rows, num_cols, figsize=(15, 5*num_rows))
+    print("plotting " + str(num_rows) )
+    titlspathCut=titlspath[0:(maxRows*num_cols)]
+    pil_images=mrcFilesToPilImageStackParallel(titlspathCut,128,threads)
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(20, 5*num_rows))
     perm = np.random.permutation(num_images)
     for i, ax in enumerate(axs.flat):
         if i < num_images:
-            ind=i ##ind=perm[i]
-            img = pil_images[ind]
-            ax.imshow(img,cmap='gray')
-            if (predScoreLabelName is not None and  titlNameLabel is not None):
-                axTitleStr=f'{pred_Name[ind]}, Pred: {pred_lables[ind]}, Prob: {pred_probs[ind]:.2f}'
-            if (predScoreLabelName is not None and titlNameLabel is None):
-                axTitleStr=f'Pred: {pred_lables[ind]}, Prob: {pred_probs[ind]:.2f}'
-            if (predScoreLabelName is None and titlNameLabel is None):
-                axTitleStr=f'Pred: {pred_lables[ind]}'    
-            
-            ax.set_title(axTitleStr) 
-            
-            img_size = img.shape[-2:]  
-            rect_width = img_size[1] * 0.98  
-            rect_height = img_size[0] * 0.98
-            rect_x = (img_size[1] - rect_width) / 2  
-            rect_y = (img_size[0] - rect_height) / 2 
-            
-            if pred_lables[ind] == 'good':
-                color = 'g'  # Green for correct prediction
-            else:
-                color = 'r'  # Red for incorrect prediction """
-            rect = plt.Rectangle((rect_x, rect_y), rect_width, rect_height, linewidth=4, edgecolor=color, facecolor='none')
-            ax.add_patch(rect)
-            ax.axis('off')
+            try:
+                ind=i ##ind=perm[i]
+                img = pil_images[ind]
+                ax.imshow(img,cmap='gray')
+                if (predScoreLabelName is not None and  titlNameLabel is not None):
+                    axTitleStr=f'{pred_Name[ind]}\n Pred: {pred_lables[ind]}, Prob: {pred_probs[ind]:.2f}'
+                if (predScoreLabelName is not None and titlNameLabel is None):
+                    axTitleStr=f'Pred: {pred_lables[ind]}, Prob: {pred_probs[ind]:.2f}'
+                if (predScoreLabelName is None and titlNameLabel is None):
+                    axTitleStr=f'Pred: {pred_lables[ind]}'    
+                
+                ax.set_title(axTitleStr,fontsize=9) 
+                
+                img_size = img.shape[-2:]  
+                rect_width = img_size[1] * 0.98  
+                rect_height = img_size[0] * 0.98
+                rect_x = (img_size[1] - rect_width) / 2  
+                rect_y = (img_size[0] - rect_height) / 2 
+                
+                if pred_lables[ind] == 'good':
+                    color = 'g'  # Green for correct prediction
+                else:
+                    color = 'r'  # Red for incorrect prediction """
+                rect = plt.Rectangle((rect_x, rect_y), rect_width, rect_height, linewidth=5, edgecolor=color, facecolor='none')
+                ax.add_patch(rect)
+                ax.axis('off')
+            except Exception as exc:
+                print("error: skipping img:"+titlspath[ind])
+                print(exc)    
 
         else:
             ax.axis('off')  # Hide empty subplots

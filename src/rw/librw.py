@@ -347,6 +347,10 @@ class starFileMeta:
     
   def readStar(self):
     #Hack to avoid caching
+    
+    file_path = Path(self.starfilePath)
+    if not file_path.exists():
+        raise FileNotFoundError(f"The file {file_path} does not exist.")
     tmpTargetPath=tempfile.gettempdir() + os.path.sep + "tmpPointer.tmp" + str(time.time())
     os.symlink(os.path.abspath(self.starfilePath),tmpTargetPath)
     #self.dict = starread(self.starfilePath, always_dict = self.always_dict)
