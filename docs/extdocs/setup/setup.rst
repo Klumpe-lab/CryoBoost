@@ -23,8 +23,8 @@ Install dependencies
    pip3 install torch==2.2.1  torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu118
    conda install -c fastai fastai==2.7.14
    pip3 install --ignore-installed torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu118 --no-cache-dir
-   pip3 install pyqt6
-   conda install starfile
+   pip3 install pyqt6==6.7.0
+   pip install starfile
    conda install conda-forge::timm
    conda install seaborn mrcfile 
    conda install anaconda::scikit-learn
