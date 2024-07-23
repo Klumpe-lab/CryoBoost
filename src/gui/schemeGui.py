@@ -42,9 +42,11 @@ class MainUI(QMainWindow):
         self.groupBox_WorkFlow.setEnabled(False)
         self.groupBox_Setup.setEnabled(False)
         #self.groupBox_Project.setEnabled(False)
+        self.tabWidget.setCurrentIndex(0)
+        
         if (self.cbdat.args.autoGen or self.cbdat.args.skipSchemeEdit):
             self.makeJobTabsFromScheme()
-        
+         
        
     
     def initializeDataStrcuture(self,args):
