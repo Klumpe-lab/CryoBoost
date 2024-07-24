@@ -27,6 +27,7 @@ from skimage.transform import resize
 import numpy as np
 import pandas as pd
 from src.deepLearning.modelClasses import SmallSimpleCNN
+from scipy.fft import fft2, ifft2, fftshift, ifftshift
 import pickle
 
 def mrc_to_pil_image(mrc_path,sz):
@@ -77,6 +78,25 @@ def getTiltImagePathFromTiltStar(pathToStarFile: str, pathToRelionProj: str) -> 
     return tilts, len(st)
 
 
+def resize_by_fourier_cropping(image_array, new_shape):
+    
+    f_transform = fft2(image_array)
+    f_transform_shifted = fftshift(f_transform)
+    current_shape = f_transform_shifted.shape
+    resized_f_transform_shifted = np.zeros(new_shape, dtype=f_transform_shifted.dtype)
+    center_current = [dim // 2 for dim in current_shape]
+    center_new = [dim // 2 for dim in new_shape]
+    slices_current = [slice(center - min(center, new_center), center + min(center, new_center)) 
+                      for center, new_center in zip(center_current, center_new)]
+    slices_new = [slice(new_center - min(center, new_center), new_center + min(center, new_center)) 
+                  for center, new_center in zip(center_current, center_new)]
+    resized_f_transform_shifted[tuple(slices_new)] = f_transform_shifted[tuple(slices_current)]
+    resized_f_transform = ifftshift(resized_f_transform_shifted)
+    resized_image_array = ifft2(resized_f_transform).real
+    #resized_image_array = np.clip(resized_image_array, 0, 255)
+    #resized_image_array = resized_image_array.astype(np.uint8)
+
+    return resized_image_array
 
 
 def mrc_to_pil_image_parallel(mrc_path_sz):
@@ -92,7 +112,8 @@ def mrc_to_pil_image_parallel(mrc_path_sz):
     mrc_path, sz = mrc_path_sz
     with mrcfile.open(mrc_path, permissive=True) as mrc:
         image_array = mrc.data
-        image_array = resize(image_array, (sz, sz), anti_aliasing=True)
+        #image_array = resize(image_array, (sz, sz), anti_aliasing=True)
+        image_array=resize_by_fourier_cropping(image_array,[sz,sz])
         image_array = (image_array - image_array.mean())
         if image_array.std() != 0:
             image_array = image_array / image_array.std()
