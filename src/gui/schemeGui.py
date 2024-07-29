@@ -20,7 +20,7 @@ root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
 
 #from lib.functions import get_value_from_tab
-from src.gui.libGui import externalTextViewer,browse_dirs,browse_files,change_values,change_bckgrnd,get_inputNodesFromSchemeTable,messageBox 
+from src.gui.libGui import externalTextViewer,browse_dirs,browse_files,browse_filesOrFolders,change_values,change_bckgrnd,get_inputNodesFromSchemeTable,messageBox 
 from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
 
@@ -411,10 +411,21 @@ class MainUI(QMainWindow):
     
     
     def browsePathMovies(self):
-        browse_files(self.line_path_movies)
+        #browse_files(self.line_path_movies)
+        targetFold=os.getcwd()
+        dirName=browse_dirs(self.line_path_movies,targetFold)
+        if glob.glob(dirName+"*.tif"):
+            self.line_path_movies.setText(dirName + "/*.tif")
+        if glob.glob(dirName+"*.tiff"):
+            self.line_path_movies.setText(dirName + "/*.tiff")
+        if glob.glob(dirName+"*.eer"):
+            self.line_path_movies.setText(dirName + "/*.eer")    
         
     def browsePathMdocs(self):
-        browse_files(self.line_path_mdocs)
+        targetFold=os.getcwd()
+        dirName=browse_dirs(self.line_path_mdocs,targetFold)
+        if glob.glob(dirName+"*.mdoc"):
+            self.line_path_mdocs.setText(dirName + "/*.mdoc")
 
     def browsePathGain(self):
         browse_files(self.line_path_gain)

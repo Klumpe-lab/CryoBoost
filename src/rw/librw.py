@@ -384,22 +384,39 @@ class dataImport():
     self.mdocLocalFold="mdoc/"
     self.framesLocalFold="frames/"
     frameTargetPattern=self.targetPath + "/" + self.framesLocalFold + os.path.basename(self.wkFrames)
-    self.existingFrames=[os.path.realpath(file) for file in glob.glob(frameTargetPattern)]
-    self.existingMdoc=self.__getexistingMdoc()
+    self.existingFramesSource=[os.path.realpath(file) for file in glob.glob(frameTargetPattern)]
+    self.existingMdocSource=self.__getexistingMdoc()
     self.logDir=logDir
     self.logToConsole=False
     if (logDir is not None):  
       os.makedirs(logDir, exist_ok=True)
       self.logErrorFile=open(os.path.join(logDir,"run.err"),'a')
       self.logInfoFile=open(os.path.join(logDir,"run.out"),'a')
-      
-    self.runImport()
+   
+    
+    importOk=self.checkImport()  
+    if importOk:
+      self.runImport()
+    
+    
+    
+  
+  def checkImport(self):
+    importOk=True
+    #duplicates=self.__checkDuplicates(self.wkMdoc, self.existingMdocSource)
+    duplicateFiles=self.__checkDuplicates(self.wkMdoc, self.existingMdocSource)
+    if duplicateFiles:
+      importOk=False
+      for mdocName in duplicateFiles:
+        self.__writeLog("error",str(mdocName) + " name already exists")
+      self.__writeLog("error","importing files use prefix to import")
+    return importOk,duplicateFiles
   
   def __del__(self):
     if self.logDir is not None:
       self.logErrorFile.close()
       self.logInfoFile.close()
-  
+
   def __getexistingMdoc(self):
     
     existingMdoc=[]
@@ -419,12 +436,12 @@ class dataImport():
     framesFold=os.path.join(self.targetPath,self.framesLocalFold)
     os.makedirs(framesFold, exist_ok=True)
     
-    self.__genLinks(self.wkFrames,framesFold,self.existingFrames)
+    self.__genLinks(self.wkFrames,framesFold,self.existingFramesSource)
     
     if self.wkMdoc is not None:
       mdocFold=os.path.join(self.targetPath,self.mdocLocalFold)
       os.makedirs(mdocFold, exist_ok=True)  
-      self.__writeAdaptedMdoc(self.wkMdoc,mdocFold,self.existingMdoc)
+      self.__writeAdaptedMdoc(self.wkMdoc,mdocFold,self.existingMdocSource)
       #self.__genLinks(self.wkMdoc,mdocFold,self.existingMdoc)
   
   def __writeAdaptedMdoc(self,inputPattern,targetFold,existingFiles):
@@ -497,7 +514,27 @@ class dataImport():
         return True
     
     return False
-      
+  def __checkDuplicates(self, inputPattern, existingFiles):
+
+    name_duplicates=[]
+    filePathsSource = [file_path for file_path in glob.glob(inputPattern)]
+    filePathsSourceAbs = [os.path.abspath(file_path) for file_path in glob.glob(inputPattern)]
+    baseNamesSource = [self.prefix+os.path.basename(file).replace('\n', '') for file in filePathsSource]
+    baseNamesExisting = [os.path.basename(file).replace('\n', '') for file in existingFiles]
+    mdocExistingAbs=self.__getexistingMdoc()
+    mdocExistingAbs=[file.replace('\n', '') for file in mdocExistingAbs]
+    
+    name_sourceConflict = set(mdocExistingAbs).intersection(set(filePathsSourceAbs))
+    name_sourceConflict = set([os.path.basename(file).replace('\n', '') for file in name_sourceConflict])
+    name_targetConflict = set(baseNamesExisting).intersection(set(baseNamesSource))
+
+    if  name_sourceConflict>=name_targetConflict:
+        name_duplicates=[]
+    else:    
+        name_duplicates=name_targetConflict
+    
+    return name_duplicates
+        
        
 
 class schemeMeta:

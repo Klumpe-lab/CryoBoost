@@ -44,7 +44,7 @@ def messageBox(title, text):
         
 
 
-def browse_dirs(target_field):
+def browse_dirs(target_field,target_fold):
     """
     browse through the files to find the path and paste that path into the specified field.
 
@@ -57,17 +57,20 @@ def browse_dirs(target_field):
         A window will open, allowing you to browse through your files. Once a directory is selected, 
         the path to that directory will be copied into the field line_path_to_movies.
     """
-    current_dir = os.path.dirname(__file__)
+    current_dir = target_fold
     dir_name = QFileDialog.getExistingDirectory(None, "Navigate to Directory", current_dir)
     target_field.setText(dir_name + "/")
-
+    return dir_name+"/"
+    
 def browse_files(target_field):
     
     current_dir = os.path.dirname(os.getcwd())
     filepath,_=QFileDialog.getOpenFileName(None, "Select File", current_dir)
     target_field.setText(filepath)
 
-
+def browse_filesOrFolders(target_field,rootDir=None):
+    print("not workig ...")
+    
 
 def change_bckgrnd(table_widget, row_index, col_index, colour = (QColor(200, 200, 200))):
     """
