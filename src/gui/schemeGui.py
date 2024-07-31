@@ -415,17 +415,17 @@ class MainUI(QMainWindow):
         targetFold=os.getcwd()
         dirName=browse_dirs(self.line_path_movies,targetFold)
         if glob.glob(dirName+"*.tif"):
-            self.line_path_movies.setText(dirName + "/*.tif")
+            self.line_path_movies.setText(dirName + "*.tif")
         if glob.glob(dirName+"*.tiff"):
-            self.line_path_movies.setText(dirName + "/*.tiff")
+            self.line_path_movies.setText(dirName + "*.tiff")
         if glob.glob(dirName+"*.eer"):
-            self.line_path_movies.setText(dirName + "/*.eer")    
+            self.line_path_movies.setText(dirName + "*.eer")  
         
     def browsePathMdocs(self):
         targetFold=os.getcwd()
         dirName=browse_dirs(self.line_path_mdocs,targetFold)
         if glob.glob(dirName+"*.mdoc"):
-            self.line_path_mdocs.setText(dirName + "/*.mdoc")
+            self.line_path_mdocs.setText(dirName + "*.mdoc")
 
     def browsePathGain(self):
         browse_files(self.line_path_gain)

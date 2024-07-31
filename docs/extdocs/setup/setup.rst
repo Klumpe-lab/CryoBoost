@@ -29,12 +29,12 @@ Install dependencies
    conda install seaborn mrcfile 
    conda install anaconda::scikit-learn
    conda install anaconda::scikit-image
-   #for local documentation use
+   #for local documentation use (optional)
    conda install sphinx sphinx_rtd_theme
 
 
-Test torch,fastai installation
-===============================
+Test torch and fastai installation
+==================================
 .. code-block:: bash
    
    python -c 'import torch; print(torch.cuda.is_available())'
@@ -48,12 +48,13 @@ Install cryoboost
    cd /path/to/my/Folder/
    git clone https://github.com/FlorianBeckOle/CryoBoost.git
    
-To start cryoboost you need to set PATH,PYTHONPATH,CRYOBOOST_PYTHON_PATH(python intepreter) and CRYOBOOST_HOME
-the easiest is to adapt the /path/to/my/Folder/CryoBoost/.cbenv file and source it befor usage
-Also adapt the Environtmet in the /path/to/my/Folder/CryoBoost/conf/conf.yaml to enable remote execution
+To start CryoBoost, the PATH, PYTHONPATH, CRYOBOOST_PYTHON_PATH(python intepreter), and CRYOBOOST_HOME need to be set.
+Fot this, adapt the Environment in the /path/to/my/Folder/CryoBoost/conf/conf.yaml (required for remote execution), and
+the /path/to/my/Folder/CryoBoost/.cbenv file as shown below. 
+Then source .cbenv before starting CryoBoost.
 
 Configure /path/to/my/Folder/CryoBoost/config/conf.yaml
-================================================
+=======================================================
 .. code-block:: yaml
    
    Environment: "module load RELION/5.0-beta-3NC;source /path/to/my/Folder/CryoBoost/.cbenv"
@@ -68,8 +69,20 @@ Adapt /path/to/my/Folder/CryoBoost/.cbenv
    export PATH=$CRYOBOOST_HOME/bin:$PATH
   
 
-Generate documentation
-======================
+Further requiremets
+=================
+
+* check if you can login to the submission node without password (if not, see ssh-keygen in Wiki)
+
+.. code-block:: bash
+   
+   ssh hpcl8001
+
+* no Relion is loaded in your .bashrc
+
+
+Generate local documentation (optional)
+=======================================
 .. code-block:: bash
    
    cd /path/to/my/installationFolder/cryoboost

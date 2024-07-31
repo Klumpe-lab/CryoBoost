@@ -392,8 +392,6 @@ class dataImport():
       os.makedirs(logDir, exist_ok=True)
       self.logErrorFile=open(os.path.join(logDir,"run.err"),'a')
       self.logInfoFile=open(os.path.join(logDir,"run.out"),'a')
-   
-    
     importOk=self.checkImport()  
     if importOk:
       self.runImport()
@@ -404,13 +402,21 @@ class dataImport():
   def checkImport(self):
     importOk=True
     #duplicates=self.__checkDuplicates(self.wkMdoc, self.existingMdocSource)
+    if (not glob.glob(self.wkMdoc)):
+       self.__writeLog("error", "no mdocs found check wildcard")
+       self.__writeLog("error", self.wkMdoc)
+       importOk=False
+    if (not glob.glob(self.wkFrames)):
+       self.__writeLog("error", "no frames found check wildcard")
+       self.__writeLog("error", self.wkFrames)
+       importOk=False
     duplicateFiles=self.__checkDuplicates(self.wkMdoc, self.existingMdocSource)
     if duplicateFiles:
       importOk=False
       for mdocName in duplicateFiles:
         self.__writeLog("error",str(mdocName) + " name already exists")
       self.__writeLog("error","importing files use prefix to import")
-    return importOk,duplicateFiles
+    return importOk
   
   def __del__(self):
     if self.logDir is not None:
