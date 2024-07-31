@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'cryotheraPy'
+project = 'cryoBoost'
 copyright = '2023, Florian Beck'
 author = 'Florian Beck'
 release = '0.1'
