@@ -235,7 +235,7 @@ class pipe:
       else:
         lastJobFolder=lastJobFolderPipe
       
-      if (lastJobFolder is not  None):
+      if (lastJobFolder is not None):
         jobOut=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.out"
         jobErr=self.pathProject+os.path.sep+lastJobFolder+os.path.sep+"run.err"
       else:

@@ -175,7 +175,7 @@ class MainUI(QMainWindow):
         logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
         self.timer = QTimer(self)
         self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
-        self.timer.start(2000)  # Update the log fil    
+        self.timer.start(5000)  # Update the log fil    
 
     def schemeJobToTab(self,job,conf,insertPosition):
         # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
@@ -411,6 +411,7 @@ class MainUI(QMainWindow):
     
     
     def browsePathMovies(self):
+        
         #browse_files(self.line_path_movies)
         targetFold=os.getcwd()
         dirName=browse_dirs(self.line_path_movies,targetFold)
@@ -593,18 +594,24 @@ class MainUI(QMainWindow):
                    cleaned_line = self.process_backspaces(line).strip()
                    if (cleaned_line):
                         log_contentOut.append(cleaned_line)
-                   
-                #log_contentOut = log_file.read()
+                if len(log_contentOut) > 200:
+                    log_contentOut=log_contentOut[-200:]
+
                 log_contentOutStr= "\n".join(log_contentOut)
                 self.textBrowserJobsOut.setText(log_contentOutStr)
                            
             with open(logError, 'r') as log_fileError:
-                log_contentError = log_fileError.read()
+                log_contentError = log_fileError.readlines()
+                if len(log_contentError) > 200:
+                     log_contentError=log_contentError[-200:]
+                
                 if self.checkBox_jobErrroShowWarning.isChecked()==False:
-                    log_contentError = "\n".join(line for line in log_contentError.splitlines() if "warning" not in line.lower() and "warn" not in line.lower() )
-                self.textBrowserJobsError.setText(log_contentError)    
+                    log_contentError = [line for line in log_contentError if "warning" not in line.lower() and "warn" not in line.lower()]
+                    
+                log_contentErrorStr= "\n".join(log_contentError)
+                self.textBrowserJobsError.setText(log_contentErrorStr)    
         except Exception as e:
-            self.textBrowserJobsOut.setText(f"Failed to read log file: {e}")
+            self.textBrowserJobsOut.setText(f"Logfile not available your job is probably waiting\nCheck queue") #{e})
         self.textBrowserJobsOut.moveCursor(QTextCursor.MoveOperation.End) 
         self.textBrowserJobsError.moveCursor(QTextCursor.MoveOperation.End)
     
@@ -645,7 +652,8 @@ class MainUI(QMainWindow):
 
 
     def browsePathTarget(self):
-        browse_dirs(self.line_path_new_project)
+        defPath=os.getcwd()   
+        browse_dirs(self.line_path_new_project,defPath)
 
 
     def generateProject(self):
