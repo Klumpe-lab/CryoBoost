@@ -10,7 +10,7 @@ from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
 from src.rw.librw import starFileMeta
 from src.misc.system import run_command_async
-import subprocess
+import subprocess, shutil
 from PyQt6.QtCore import QTimer 
 import datetime
 
@@ -38,7 +38,8 @@ class MainUI(QMainWindow):
         self.cbdat=self.initializeDataStrcuture(args)
         self.setCallbacks()
         self.genSchemeTable()
-       
+        self.system=self.selSystemComponents()
+        
         self.groupBox_WorkFlow.setEnabled(False)
         self.groupBox_Setup.setEnabled(False)
         #self.groupBox_Project.setEnabled(False)
@@ -47,8 +48,14 @@ class MainUI(QMainWindow):
         if (self.cbdat.args.autoGen or self.cbdat.args.skipSchemeEdit):
             self.makeJobTabsFromScheme()
          
-       
-    
+    def selSystemComponents(self):
+        system = type('', (), {})() 
+        if shutil.which("zenity") is None:
+           system.filebrowser="qt"
+        else:   
+           system.filebrowser="zenity"
+        return system
+                
     def initializeDataStrcuture(self,args):
         #custom varibales
         cbdat = type('', (), {})() 
@@ -75,6 +82,8 @@ class MainUI(QMainWindow):
         self.line_path_mdocs.textChanged.connect(self.setPathMdocsToJobTap)
         self.line_path_mdocs.textChanged.connect(self.updateTomogramsForTraining)
         self.line_path_gain.textChanged.connect(self.setPathGainToJobTap)
+        self.line_path_new_project.textChanged.connect(self.updateLogViewer)
+        self.line_path_crImportPrefix.textChanged.connect(self.updateTomogramsForTraining)
         self.dropDown_gainRot.activated.connect(self.setGainRotToJobTap)
         self.dropDown_gainFlip.activated.connect(self.setGainFlipJobTap)
         self.textEdit_pixelSize.textChanged.connect(self.setPixelSizeToJobTap)
@@ -122,7 +131,6 @@ class MainUI(QMainWindow):
         self.dropDown_nrNodes.setCurrentIndex(2)
         self.dropDown_jobSize.setCurrentIndex(1)
         self.dropDown_jobSize.activated.connect(self.setNrNodesFromJobSize)
-        self.line_path_crImportPrefix.textChanged.connect(self.updateTomogramsForTraining)
         for i in self.cbdat.conf.microscope_presets:
             self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
     
@@ -172,11 +180,7 @@ class MainUI(QMainWindow):
             params_dict = {"generate_split_tomograms": "Yes" }
             self.setParamsDictToJobTap(params_dict)
               
-        logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
-        self.timer.start(5000)  # Update the log fil    
-
+        
     def schemeJobToTab(self,job,conf,insertPosition):
         # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
         self.tabWidget.insertTab(insertPosition, QWidget(), job)
@@ -414,7 +418,7 @@ class MainUI(QMainWindow):
         
         #browse_files(self.line_path_movies)
         targetFold=os.getcwd()
-        dirName=browse_dirs(self.line_path_movies,targetFold)
+        dirName=browse_dirs(self.line_path_movies,targetFold,self.system.filebrowser)
         if glob.glob(dirName+"*.tif"):
             self.line_path_movies.setText(dirName + "*.tif")
         if glob.glob(dirName+"*.tiff"):
@@ -424,17 +428,16 @@ class MainUI(QMainWindow):
         
     def browsePathMdocs(self):
         targetFold=os.getcwd()
-        dirName=browse_dirs(self.line_path_mdocs,targetFold)
+        dirName=browse_dirs(None,targetFold,self.system.filebrowser)
         if glob.glob(dirName+"*.mdoc"):
             self.line_path_mdocs.setText(dirName + "*.mdoc")
 
     def browsePathGain(self):
-        browse_files(self.line_path_gain)
+        browse_files(self.line_path_gain,self.system.filebrowser)
     
     def browseDenoisingModel(self):
-        browse_files(self.textEdit_pathDenoiseModel)
-    
-    
+        browse_files(self.textEdit_pathDenoiseModel,self.system.filebrowser)
+
     def generatePrefix(self):
        current_datetime = datetime.datetime.now()
        prefix=current_datetime.strftime("%Y-%m-%d-%H-%M-%S_")
@@ -653,9 +656,20 @@ class MainUI(QMainWindow):
 
     def browsePathTarget(self):
         defPath=os.getcwd()   
-        browse_dirs(self.line_path_new_project,defPath)
+        browse_dirs(self.line_path_new_project,defPath,self.system.filebrowser)
+       
 
-
+    def updateLogViewer(self):
+        print("logViewer updated")
+        logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
+        if hasattr(self, 'timer') and self.timer.isActive():
+            self.timer.stop()  
+        if not hasattr(self, 'timer'):
+            self.timer = QTimer(self)
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(lambda: self.view_log_file(logfile_path))
+        self.timer.start(4000)  # Updat
+    
     def generateProject(self):
         """
         first, create a symlink to the frames and mdoc files and change the absolute paths provided by the browse 

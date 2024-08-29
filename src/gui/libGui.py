@@ -1,5 +1,5 @@
 # library for the functions required for the basic functions of the application
-import sys
+import sys, subprocess
 import os
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QTableWidgetItem, QTabWidget, QFileDialog
@@ -44,7 +44,7 @@ def messageBox(title, text):
         
 
 
-def browse_dirs(target_field,target_fold):
+def browse_dirs(target_field,target_fold,dialog="qt"):
     """
     browse through the files to find the path and paste that path into the specified field.
 
@@ -58,15 +58,46 @@ def browse_dirs(target_field,target_fold):
         the path to that directory will be copied into the field line_path_to_movies.
     """
     current_dir = target_fold
-    dir_name = QFileDialog.getExistingDirectory(None, "Navigate to Directory", current_dir)
-    target_field.setText(dir_name + "/")
+    
+      
+    if dialog=="qt":
+        options = QFileDialog.Option.ShowDirsOnly | QFileDialog.Option.DontResolveSymlinks |  QFileDialog.Option.DontUseNativeDialog
+        dir_name = QFileDialog.getExistingDirectory(None, "Navigate to Directory", current_dir,options)
+    if dialog=="zenity":
+        try:
+            result = subprocess.run(
+                ['zenity', '--file-selection', '--directory','--filename='+current_dir],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            dir_name = result.stdout.strip()
+        except:
+            dir_name = ""   
+    if (target_field is not None):    
+        target_field.setText(dir_name + "/")
+    
     return dir_name+"/"
     
-def browse_files(target_field):
+def browse_files(target_field,dialog="qt"):
     
-    current_dir = os.path.dirname(os.getcwd())
-    filepath,_=QFileDialog.getOpenFileName(None, "Select File", current_dir)
-    target_field.setText(filepath)
+    current_dir = os.path.dirname(os.getcwd())+"/"
+    if dialog=="qt":
+        filepath,_=QFileDialog.getOpenFileName(None, "Select File", current_dir)
+    else:
+        try:
+            result = subprocess.run(
+                ['zenity', '--file-selection','--filename='+current_dir],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            filepath = result.stdout.strip()
+        except:
+            filepath="" 
+        
+    
+    target_field.setText(filepath)    
 
 def browse_filesOrFolders(target_field,rootDir=None):
     print("not workig ...")
