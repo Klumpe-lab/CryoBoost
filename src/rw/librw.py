@@ -395,9 +395,7 @@ class dataImport():
     importOk=self.checkImport()  
     if importOk:
       self.runImport()
-    
-    
-    
+      
   
   def checkImport(self):
     importOk=True
@@ -473,6 +471,7 @@ class dataImport():
       for i, line in enumerate(lines):
         if 'SubFramePath' in line:
             lineTmp=line.replace("SubFramePath = \\","")
+            lineTmp=line.replace("SubFramePath =","")
             lineTmp=os.path.basename(lineTmp.replace('\\',"/"))
             lines[i] = "SubFramePath = " + prefix + lineTmp
       
