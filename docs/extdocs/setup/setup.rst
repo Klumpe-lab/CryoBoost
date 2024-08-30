@@ -7,9 +7,9 @@ Install Miniconda
 .. code-block:: bash
 
    targetFold=/path/to/my/pythonInstall
-   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-   chmod 755 Miniconda3-latest-Linux-x86_64.sh
-   ./Miniconda3-latest-Linux-x86_64.sh -b -p $targetFold/conda3
+   wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+   chmod 755 Miniforge3-Linux-x86_64.sh
+   ./Miniforge3-Linux-x86_64.sh -b -p $targetFold/conda3
    export PATH=$targetFold/conda3/bin/:$PATH
    source $targetFold/conda3/etc/profile.d/conda.sh 
 
@@ -27,8 +27,7 @@ Install dependencies
    pip install starfile
    conda install conda-forge::timm
    conda install seaborn mrcfile 
-   conda install anaconda::scikit-learn
-   conda install anaconda::scikit-image
+   pip install scikit-learn scikit-image
    #for local documentation use (optional)
    conda install sphinx sphinx_rtd_theme
 
