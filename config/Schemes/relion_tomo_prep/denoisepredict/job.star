@@ -15,28 +15,28 @@ data_joboptions_values
 loop_ 
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
+in_tomoset  Schemes/relion_tomo_prep/reconstruction/tomograms.star 
 care_denoising_model  Schemes/relion_tomo_prep/denoisetrain/denoising_model.tar.gz 
 cryocare_path /fs/pool/pool-bmapps/hpcl8/app/soft/CRYO-CARE/0.2/conda3/envs/cryocare_11/bin/ 
-denoising_tomo_name         "" 
-do_cryocare_predict        Yes 
+gpu_ids          0 
 do_cryocare_train         No 
-  do_queue        Yes 
-   gpu_ids          0 
-in_tomoset  Schemes/relion_tomo_prep/reconstruction/tomograms.star 
-min_dedicated          1 
-  ntiles_x          4 
-  ntiles_y          4 
-  ntiles_z          4 
+tomograms_for_training Position_1 
 number_training_subvolumes        600 
+subvolume_dimensions         64 
+do_cryocare_predict        Yes 
+ntiles_x          4 
+ntiles_y          4 
+ntiles_z          4 
+denoising_tomo_name         "" 
+do_queue        Yes 
+queuename    openmpi 
+qsub     sbatch 
+qsubscript /fs/pool/pool-bmapps/hpcl8/app/soft/RELION/5.0-beta-3//scripts/qsubNC.sh 
+min_dedicated          1 
 other_args         "" 
-      qsub     sbatch 
 qsub_extra1          1 
 qsub_extra2          1 
 qsub_extra3   p.hpcl93 
 qsub_extra4          1 
 qsub_extra5       700G 
-qsubscript /fs/pool/pool-bmapps/hpcl8/app/soft/RELION/5.0-beta-3//scripts/qsubNC.sh 
- queuename    openmpi 
-subvolume_dimensions         64 
-tomograms_for_training Position_1 
  

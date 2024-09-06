@@ -15,7 +15,6 @@ data_joboptions_values
 loop_ 
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
-  do_queue         Yes 
     fn_exe         crboost_filterTitlts.py
   in_3dref         "" 
  in_coords         "" 
@@ -23,11 +22,7 @@ _rlnJobOptionValue #2
     in_mic         Schemes/relion_tomo_prep/ctffind/tilt_series_ctf.star
     in_mov         "" 
    in_part         "" 
-min_dedicated          1 
-nr_threads          24
 other_args         "" 
-param10_label         "" 
-param10_value         "" 
 param1_label      model 
 param1_value      default
 param2_label      defocusInAng
@@ -46,12 +41,17 @@ param8_label         ""
 param8_value         "" 
 param9_label         "" 
 param9_value         "" 
-      qsub     sbatch 
+param10_label         "" 
+param10_value         "" 
+nr_threads          24
+do_queue         Yes 
+queuename    openmpi 
+qsub     sbatch 
+qsubscript    qsub/qsub_hpcl89.sh 
+min_dedicated          1 
 qsub_extra1          1 
 qsub_extra2          1 
 qsub_extra3    p.hpcl8 
 qsub_extra4      2 
 qsub_extra5      370G
-qsubscript    qsub/qsub_hpcl89.sh 
- queuename    openmpi 
  

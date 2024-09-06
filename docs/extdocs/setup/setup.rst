@@ -78,6 +78,8 @@ Further requiremets
    ssh hpcl8001
 
 * no Relion is loaded in your .bashrc
+* no python is in your path
+
 
 
 Generate local documentation (optional)
