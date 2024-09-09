@@ -6,6 +6,7 @@ import sys
 from PyQt6.QtWidgets import QApplication
 from src.gui.schemeGui import MainUI 
 from src.pipe.libpipe import pipe
+from src.misc.system import test_crboostSetup
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="scheme gui")
@@ -34,6 +35,10 @@ def open_scheme_gui(args):
 def main():
     
     args,addArg = parse_arguments()
+    sytemOk=test_crboostSetup()
+    if (sytemOk==False):
+        return 0
+    
     #print(args)
     if args.noGui:
         pipeRunner=pipe(args)
@@ -46,7 +51,6 @@ def main():
             pipeRunner.runScheme()
         if args.autoLaunchSync:
             pipeRunner.runSchemeSync()
-            
     else:
         open_scheme_gui(args) 
         
