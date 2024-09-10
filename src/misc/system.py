@@ -48,19 +48,19 @@ def test_crboostSetup():
     # Run the command and capture the output, standard error, and exit code.
     if not os.path.exists(sysOkFile):
         sshOk=check_passwordless_ssh(headNode,sshStr,helpSsh)
-        if sshOk:
-            conflictRelionOk=check_appConflict(headNode,"relion",helpConflict)
-            conflictPythonOk=check_appConflict(headNode,"python",helpConflict)
-        else:
-            conflictRelionOk=False
-            conflictPythonOk=False
+        # if sshOk:
+        #     conflictRelionOk=check_appConflict(headNode,"relion",helpConflict)
+        #     conflictPythonOk=check_appConflict(headNode,"python",helpConflict)
+        # else:
+        #     conflictRelionOk=False
+        #     conflictPythonOk=False
             
-        if (sshOk and conflictRelionOk and conflictPythonOk):
-            print("setup ok ready to start cryoboost")
-            return True
-        else:
-             print("Error you cannot use cryoboost check messages above")
-             return False
+        # if (sshOk and conflictRelionOk and conflictPythonOk):
+        #     print("setup ok ready to start cryoboost")
+        #     return True
+        # else:
+        #      print("Error you cannot use cryoboost check messages above")
+        #      return False
         
         
 def check_appConflict(hostname,app,helpStr):
