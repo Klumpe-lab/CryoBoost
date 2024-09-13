@@ -744,7 +744,12 @@ class tiltSeriesMeta:
         all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
         all_tilts_df.dropna(inplace=True)  # check !!
         #generte key to merge later on
-        k=all_tilts_df['rlnMicrographName'].apply(os.path.basename)
+        #if ()
+        if 'rlnMicrographName' in all_tilts_df.columns:
+          k=all_tilts_df['rlnMicrographName'].apply(os.path.basename)
+        else:
+          k=all_tilts_df['rlnMicrographMovieName'].apply(os.path.basename)
+        
         if (k.is_unique):
           all_tilts_df['cryoBoostKey']=k
         else:
