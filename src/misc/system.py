@@ -83,7 +83,7 @@ def check_passwordless_ssh(hostname,sshStr,helpStr):
         command = f"{sshStr} -o BatchMode=yes {hostname} echo 'SSH test message'"
         #command = "sleep 20"
         print("testing: "+ command)
-        result = subprocess.run(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=10)
+        result = subprocess.run(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=20)
         if result.returncode == 0:
             print("Passwordless SSH ok")
             print(" ")

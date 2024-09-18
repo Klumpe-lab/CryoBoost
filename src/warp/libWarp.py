@@ -1,8 +1,23 @@
 from src.rw.librw import starFileMeta,tiltSeriesMeta
-import shutil,os,subprocess
+import shlex,os,subprocess,select,sys,threading
+
+def read_stream(stream, callback):
+    print("above loop")
+    while True:
+        #print("reading stream")
+        output = stream.read()
+        if output:
+            #callback(output.replace('\r', '\n'))
+            callback(output)
+        else:
+            print("breaking")
+            break
+
+
 def fsMotionAndCtf(inputList,outputFolder,gain=None,threads=4):
     """
     fsMotionAndCtf
+
     """
     #st=starFileMeta(inputList)
     relProj=os.path.dirname(os.path.dirname(os.path.dirname(inputList)))
@@ -25,10 +40,19 @@ def fsMotionAndCtf(inputList,outputFolder,gain=None,threads=4):
     if gain is not None:
         command.append("--gain_path " + gain.path)
     
-    print(command)    
+    
+    command_string = shlex.join(command)
+    print("************************************************")
+    print("********settings*********************************")
+    print(command_string)  
     result = subprocess.run(command, check=True, capture_output=True, text=True)          
     print("Command executed successfully:", result.stdout)
-    print(result.stderr)        
+    print("********  settings done*********************************")    
+    
+    
+    print("generating: ",outputFolder + "/warp_frameseries")
+    os.makedirs(outputFolder + "/warp_frameseries",exist_ok=True)
+    
     
     command=["WarpTools", "fs_motion_and_ctf",
              "--settings", outputFolder + "/warp_frameseries.settings",
@@ -39,11 +63,18 @@ def fsMotionAndCtf(inputList,outputFolder,gain=None,threads=4):
              "--c_use_sum", 
              "--out_averages",
              "--out_average_halves",
-             "--perdevice","6"
+             "--perdevice","4"
             ]
-    print(command)    
-    result = subprocess.run(command, check=True, capture_output=True, text=True)          
-    print("Command executed successfully:", result.stdout)    
+    command_string = shlex.join(command)
+        
+    #subprocess.run(command)
+    print("************************************************")
+    print("********fs-motion*********************************")
+    print(command_string)
+    #result = subprocess.run(command, check=True, capture_output=True, text=True)
+    os.system(command_string)
+    #print("Command executed successfully:", result.stdout)
+    print("********fs-motion done*********************************")
     
     #add info to star-+
     st.writeTiltSeries(outputFolder+"/fs_motion_and_ctf.star")

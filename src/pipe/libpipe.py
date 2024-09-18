@@ -38,7 +38,10 @@ class pipe:
     schemeName=self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName']
     schemeName=os.path.basename(schemeName.strip(os.path.sep)) #remove path from schemeName
     schemeLockFile=".relion_lock_scheme_" + schemeName + os.path.sep  + "lock_scheme"
-    relSchemeStart="(relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid)'
+    relSchemeStart="export TERM=xterm;(relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid)'
+    #waitFor=';sleep 2; while ps -p \`cat Schemes/' + schemeName + '/scheme.pid\` > /dev/null 2>&1;do sleep 4;done;sleep 2'
+    waitFor=";sleep 1"
+   
     self.schemeLockFile=schemeLockFile
     self.schemeName=schemeName
     
@@ -54,7 +57,7 @@ class pipe:
     envStr=envRel + ";"
     logStr=" > " + schemeName + ".log 2>&1 " 
     logStrAdd=" >> " + schemeName + ".log 2>&1 "
-    self.commandSchemeStart=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeStart + logStrAdd + '"'
+    self.commandSchemeStart=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeStart + logStrAdd + waitFor + '"'
     self.commandSchemeAbrot=sshStr + " " + headNode + ' "'  + envStr  + relSchemeAbrot + ";" + logStrAdd + '"'
     self.commandSchemeJobAbrot=sshStr + " " + headNode + ' "' + relStopLastJob + ";" + logStrAdd + '"'
     self.commandSchemeReset=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeReset + logStrAdd + '"'
@@ -93,13 +96,14 @@ class pipe:
      nodes = {i: job for i, job in enumerate(self.scheme.jobs_in_scheme)}
      self.scheme.filterSchemeByNodes(nodes) #to correct for input output mismatch within the scheme
      self.scheme.write_scheme(path_scheme)
+     self.scheme.schemeFilePath=path_scheme + "/scheme.star"
   
   def runScheme(self):
     
     self.generatCrJobLog("manageWorkflow","starting workflow:" + "\n")
     self.generatCrJobLog("manageWorkflow","  " + self.commandSchemeStart + "\n")
     p=run_command_async(self.commandSchemeStart)
-   
+    #p=run_command(self.commandSchemeStart)
  
   def runSchemeSync(self):
     p=run_command(self.commandSchemeStart)

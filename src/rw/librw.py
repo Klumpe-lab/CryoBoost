@@ -85,7 +85,7 @@ class cbconfig:
          compParams["nr_mpi"]=1  
          compParams[kNrGPU]=partionSetup["NrGPU"]
          compParams[kNrNodes]=1
-         compParams["nr_threads"]=1
+         compParams["nr_threads"]=partionSetup["NrGPU"]
          compParams["gpu_ids"]=gpuIDString
        
        if (jobType == "GPU-OneProcessOneGPU"):

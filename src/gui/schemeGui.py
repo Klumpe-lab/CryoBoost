@@ -60,13 +60,16 @@ class MainUI(QMainWindow):
         #custom varibales
         cbdat = type('', (), {})() 
         cbdat.CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
-        cbdat.defaultSchemePath=cbdat.CRYOBOOST_HOME + "/config/Schemes/relion_tomo_prep/"
+        if args.scheme=="relion_tomo_prep" or args.scheme=="default":      
+            cbdat.defaultSchemePath=cbdat.CRYOBOOST_HOME + "/config/Schemes/relion_tomo_prep/"
+        if args.scheme=="warp_tomo_prep":
+            cbdat.defaultSchemePath=cbdat.CRYOBOOST_HOME + "/config/Schemes/warp_tomo_prep/"
         cbdat.confPath=cbdat.CRYOBOOST_HOME + "/config/conf.yaml"
         cbdat.pipeRunner= None
         cbdat.conf=cbconfig(cbdat.confPath)     
         cbdat.args=args
-        if os.path.exists(str(args.proj) +  "/Schemes/relion_tomo_prep/scheme.star"):
-            cbdat.scheme=schemeMeta(args.proj +  "/Schemes/relion_tomo_prep/")
+        if os.path.exists(str(args.proj) +  "/Schemes/" + args.scheme + "/scheme.star"):
+            cbdat.scheme=schemeMeta(args.proj +  "/Schemes/" + args.scheme )
             args.scheme=cbdat.scheme
             cbdat.pipeRunner=pipe(args);
             cbdat.args.skipSchemeEdit=True
@@ -541,8 +544,8 @@ class MainUI(QMainWindow):
             return False 
     
     def openExtLogViewerWorkFlow(self):
-        
-        logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
+        logMid=self.cbdat.scheme.scheme_star.dict["scheme_general"]["rlnSchemeName"].replace("Schemes/","").replace("/","")
+        logfile_path=self.line_path_new_project.text()+os.path.sep + logMid +".log"
         self.viewer = externalTextViewer(logfile_path)
         self.viewer.show()
         
@@ -661,7 +664,8 @@ class MainUI(QMainWindow):
 
     def updateLogViewer(self):
         print("logViewer updated")
-        logfile_path=self.line_path_new_project.text()+os.path.sep +"relion_tomo_prep.log"
+        logMid=self.cbdat.scheme.scheme_star.dict["scheme_general"]["rlnSchemeName"].replace("Schemes/","").replace("/","")
+        logfile_path=self.line_path_new_project.text()+ os.path.sep + logMid +".log"
         if hasattr(self, 'timer') and self.timer.isActive():
             self.timer.stop()  
         if not hasattr(self, 'timer'):
@@ -696,7 +700,7 @@ class MainUI(QMainWindow):
         pipeRunner=pipe(args)
         pipeRunner.initProject()
         pipeRunner.writeScheme()
-        pipeRunner.scheme.schemeFilePath=args.proj +  "/Schemes/relion_tomo_prep/scheme.star"
+        #pipeRunner.scheme.schemeFilePath=args.proj +  "/Schemes/relion_tomo_prep/scheme.star"
         self.cbdat.pipeRunner=pipeRunner
         
     def updateWorkflow(self):

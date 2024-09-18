@@ -31,7 +31,7 @@ denoising_tomo_name         ""
 do_queue        Yes 
 queuename    openmpi 
 qsub     sbatch 
-qsubscript /fs/pool/pool-bmapps/hpcl8/app/soft/RELION/5.0-beta-3//scripts/qsubNC.sh 
+qsubscript qsub/qsub_relion_hpcl89.sh 
 min_dedicated          1 
 other_args         "" 
 qsub_extra1          1 
