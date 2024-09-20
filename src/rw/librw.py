@@ -101,6 +101,8 @@ class cbconfig:
          if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
             compParams["nr_threads"]=compParams["nr_threads"]-round(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"])
        
+       if comReq[0] in confComp['JOBsPerDevice'].keys():
+          compParams["param10_value"]=confComp['JOBsPerDevice'][comReq[0]][comReq[2]]
         
        return compParams 
         

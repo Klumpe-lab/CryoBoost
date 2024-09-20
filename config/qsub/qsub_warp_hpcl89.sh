@@ -5,7 +5,7 @@
 # Initial working directory:
 #SBATCH -D ./
 # Job Name:
-#SBATCH -J Relion
+#SBATCH -J WarpEm
 # Queue (Partition):
 #SBATCH --partition=XXXextra3XXX
 # Number of nodes and MPI tasks per node:
@@ -36,8 +36,8 @@ module load WARP/2.0.0dev26
 source /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/.cbenv
 
 module list
-echo "submitting "
-srun bash --norc -c "\
+echo "submitting Warp"
+bash --norc -c "\
 XXXcommandXXX
 "
 #Jobs need to have \ as final additional argument as relion removes the whole line when submittion an external job!

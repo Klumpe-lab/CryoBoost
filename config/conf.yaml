@@ -72,6 +72,7 @@ star_file:
   reconstruction: reconstruction/tomograms.star
   denoisetrain:   reconstruction/tomograms.star   #is not the result but the reconstruction is used as result   
   denoisepredict: denoise/denoised_tilt_series.star #maybe switch to reconstruction
+  fs_motion_and_ctf: fs_motion_and_ctf/fs_motion_and_ctf.star
 
 computing:
    
@@ -113,9 +114,13 @@ computing:
         - denoisepredict
       GPU-ThreadsOneNode:      
         - filtertilts
-           
       CPU-2MPIThreads:
         - reconstruction 
   JOBMaxNodes:
         motioncorr:
          - 4          
+  JOBsPerDevice: 
+        fs_motion_and_ctf:
+           p.hpcl9: 4
+           p.hpcl93: 4
+           p.hpcl8: 2
