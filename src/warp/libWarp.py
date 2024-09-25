@@ -1,4 +1,5 @@
 from src.rw.librw import starFileMeta,tiltSeriesMeta
+from src.rw.librw import warpMetaData
 import shlex,os,subprocess,select,sys,threading
 
 def read_stream(stream, callback):
@@ -97,11 +98,31 @@ def fsMotionAndCtf(args):
     command_string = shlex.join(command)
     print(command_string)
     
-    result = subprocess.run(command, check=True)#, capture_output=True, text=True)
+    try:
+        result = subprocess.run(command, check=True)#, capture_output=True, text=True)
+    except:
+        print("Error output:", e.stderr, file=sys.stderr)
     
-    
-    #add info to star-+
     if result.returncode == 0:
+        wm=warpMetaData(outputFolder+"/warp_frameseries/*.xml")
+        for index, row in st.all_tilts_df.iterrows():
+            key=st.all_tilts_df.at[index,'cryoBoostKey']
+            res = wm.data_df.query(f"cryoBoostKey == '{key}'")
+            st.all_tilts_df.at[index, 'rlnMicrographName'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc"
+            st.all_tilts_df.at[index, 'rlnMicrographNameEven'] = str(res.iloc[0]['folder']) + "/average/even/" + key + ".mrc"
+            st.all_tilts_df.at[index, 'rlnMicrographNameOdd'] = str(res.iloc[0]['folder']) + "/average/odd/" + key + ".mrc"
+            st.all_tilts_df.at[index, 'rlnMicrographMetadata']="None"
+            st.all_tilts_df.at[index, 'rlnAccumMotionTotal']=-1
+            st.all_tilts_df.at[index, 'rlnAccumMotionEarly']=-1
+            st.all_tilts_df.at[index, 'rlnAccumMotionLate']=-1
+            st.all_tilts_df.at[index, 'rlnCtfImage'] = str(res.iloc[0]['folder']) + "/powerspectrum/" + key + ".mrc"
+            st.all_tilts_df.at[index, 'rlnDefocusU'] = str(res.iloc[0]['defocus_value']) 
+            st.all_tilts_df.at[index, 'rlnDefocusV'] = str(res.iloc[0]['defocus_value'])
+            st.all_tilts_df.at[index, 'rlnCtfAstigmatism'] = str(res.iloc[0]['defocus_delta'])
+            st.all_tilts_df.at[index, 'rlnDefocusAngle'] = str(res.iloc[0]['defocus_angle'])
+            st.all_tilts_df.at[index, 'rlnCtfFigureOfMerit']="None"
+            st.all_tilts_df.at[index, 'rlnCtfMaxResolution']="None"
+            st.all_tilts_df.at[index, 'rlnMicrographMetadata']="None"
         st.writeTiltSeries(outputFolder+"/fs_motion_and_ctf.star")
         return 0
     else:

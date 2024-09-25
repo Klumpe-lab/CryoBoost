@@ -1,11 +1,47 @@
+
 # %%
 
 import yaml
-import os
+import os,pathlib
 import starfile
 import subprocess
 import glob
 import tempfile
+import pandas as pd
+import xml.etree.ElementTree as ET
+
+class warpMetaData:
+  
+  def __init__(self,dataPath):
+    
+    self.data_df=pd.DataFrame()
+    self.parseXMLdata(dataPath)
+  
+  def parseXMLdata(self,wk):
+    for name in glob.glob(wk):
+       df=self.__parseXMLFileFrameSeries(name) 
+       self.data_df =pd.concat([self.data_df, df], ignore_index=True) 
+
+  def __parseXMLFileFrameSeries(self,pathXML):
+    data_df=pd.DataFrame()
+    tree = ET.parse(pathXML)
+    root = tree.getroot()
+    ctf = root.find(".//CTF")
+    data={}
+    data = {
+       "cryoBoostKey":pathlib.Path(pathXML).name.replace(".xml",".eer"),
+       "name": pathXML,
+       "folder": str(pathlib.Path(pathXML).parent.as_posix()),
+       "defocus_value": ctf.find(".//Param[@Name='Defocus']").get('Value'),
+       "defocus_angle": ctf.find(".//Param[@Name='DefocusAngle']").get('Value'),
+       "defocus_delta": ctf.find(".//Param[@Name='DefocusDelta']").get('Value'),
+         
+        }
+
+   # Create a DataFrame from the dictionary
+    data_df = pd.DataFrame([data])
+    
+    return data_df
 
 #from lib.functions import calculate_dose_rate_per_pixel, extract_eer_from_header
 class cbconfig:
