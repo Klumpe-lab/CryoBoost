@@ -315,7 +315,7 @@ class MainUI(QMainWindow):
         mdocList=glob.glob(wk_mdocs)
         pref=self.line_path_crImportPrefix.text()
         mdocList=[mdoc for mdoc in mdocList]# if pref in mdoc]
-        tomoNames=[pref+os.path.splitext(os.path.basename(path))[0] for path in mdocList]
+        tomoNames=[pref+os.path.splitext(os.path.basename(path))[0].replace(".st","") for path in mdocList]
         if len(tomoNames)<3:
             nTomo=len(tomoNames)
         else:
