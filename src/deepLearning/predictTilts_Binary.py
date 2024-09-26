@@ -113,6 +113,15 @@ def mrc_to_pil_image_parallel(mrc_path_sz):
     with mrcfile.open(mrc_path, permissive=True) as mrc:
         image_array = mrc.data
         #image_array = resize(image_array, (sz, sz), anti_aliasing=True)
+        #image_array=resize_by_fourier_cropping(image_array,[sz,sz])
+        if min(image_array.shape)!=max(image_array.shape):
+            min_dimension = min(image_array.shape)
+            crop_size = min_dimension#
+            start_x = (image_array.shape[0] - crop_size) // 2
+            start_y = (image_array.shape[1] - crop_size) // 2
+            image_array = image_array[start_x:start_x + crop_size, start_y:start_y + crop_size]
+            
+        
         image_array=resize_by_fourier_cropping(image_array,[sz,sz])
         image_array = (image_array - image_array.mean())
         if image_array.std() != 0:
@@ -190,6 +199,7 @@ def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,probThr=0.1,probAction="ass
     batches = np.array_split(tiltspath,nrBatch )
     all_pLabels = []
     all_pProb = []
+    
     for i, batch in enumerate(tqdm(batches, desc="Predicting Tilts"), 1):
         pilImageBatch=mrcFilesToPilImageStackParallel(batch,sz,max_workers)
         pLables,pProb=predictPilImageStack(pilImageBatch,learn)
