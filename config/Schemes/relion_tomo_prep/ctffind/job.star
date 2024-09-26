@@ -32,7 +32,7 @@ resmin         30
 resmax          5 
 dfstep        500 
 localsearch_nominal_defocus      10000 
-exp_factor_dose        100 
+exp_factor_dose        185 
 nr_mpi         72 
 do_queue        Yes 
 queuename    openmpi 

@@ -12,6 +12,7 @@ from src.rw.librw import starFileMeta
 from src.misc.system import run_command_async
 import subprocess, shutil
 from PyQt6.QtCore import QTimer 
+import mrcfile
 import datetime
 
 current_dir = os.path.dirname(os.path.abspath(__name__))
@@ -20,7 +21,7 @@ root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
 
 #from lib.functions import get_value_from_tab
-from src.gui.libGui import externalTextViewer,browse_dirs,browse_files,browse_filesOrFolders,change_values,change_bckgrnd,get_inputNodesFromSchemeTable,messageBox 
+from src.gui.libGui import externalTextViewer,browse_dirs,browse_files,checkDosePerTilt,browse_filesOrFolders,change_values,change_bckgrnd,checkGainOptions,get_inputNodesFromSchemeTable,messageBox 
 from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
 
@@ -174,6 +175,13 @@ class MainUI(QMainWindow):
              self.line_path_new_project.setText(self.cbdat.args.proj)
         if (self.cbdat.args.pixS != None):
              self.textEdit_pixelSize.setText(self.cbdat.args.pixS)
+        if (self.cbdat.args.gain != None):
+            if not os.path.isfile(self.cbdat.args.gain):
+                raise Exception("file not found: "+self.cbdat.args.gain)
+            if not os.path.isabs(self.cbdat.args.gain):
+                self.line_path_gain.setText(os.path.abspath(self.cbdat.args.gain)) 
+            else:
+                self.line_path_gain.setText(self.cbdat.args.gain)
              
         self.groupBox_WorkFlow.setEnabled(True)
         self.groupBox_Setup.setEnabled(True)
@@ -246,6 +254,15 @@ class MainUI(QMainWindow):
         """
         
         params_dict = {"mdoc_files": "mdoc/*" + os.path.splitext(self.line_path_mdocs.text())[1] }
+        
+        if "ctffind" in self.cbdat.scheme.jobs_in_scheme.values:
+             thoneRingFade = self.cbdat.scheme.getJobOptions("ctffind").loc[
+                             self.cbdat.scheme.getJobOptions("ctffind")["rlnJobOptionVariable"] == "exp_factor_dose",
+                             "rlnJobOptionValue"
+                             ].values[0]  
+            
+        if self.textEdit_dosePerTilt.toPlainText().isnumeric():
+            checkDosePerTilt(self.line_path_mdocs.text(),float(self.textEdit_dosePerTilt.toPlainText()),float(thoneRingFade))
         self.setParamsDictToJobTap(params_dict)
     #self.textEdit_tomoForDenoiseTrain.textChanged.connect(self.setTomoForDenoiseTrainToJobTap)
     #self.textEdit_pathDenoiseModel.textChanged.connect(self.setPathDenoiseModelToJobTap)
@@ -308,14 +325,21 @@ class MainUI(QMainWindow):
         print("updating...")
         self.textEdit_tomoForDenoiseTrain.setText(tomoStr)
        
-
-    
     def setPixelSizeToJobTap(self):
         params_dict = {"angpix": self.textEdit_pixelSize.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"])      
      
     def setdosePerTiltToJobTap(self):
         params_dict = {"dose_rate": self.textEdit_dosePerTilt.toPlainText()} 
+        if "ctffind" in self.cbdat.scheme.jobs_in_scheme.values:
+             thoneRingFade = self.cbdat.scheme.getJobOptions("ctffind").loc[
+                             self.cbdat.scheme.getJobOptions("ctffind")["rlnJobOptionVariable"] == "exp_factor_dose",
+                             "rlnJobOptionValue"
+                             ].values[0]  
+            
+        if (self.textEdit_dosePerTilt.toPlainText().isnumeric()):
+            checkDosePerTilt(self.line_path_mdocs.text(),float(self.textEdit_dosePerTilt.toPlainText()),float(thoneRingFade))
+        
         self.setParamsDictToJobTap(params_dict,["importmovies"])       
     
     def setTiltAxisToJobTap(self):
@@ -328,11 +352,14 @@ class MainUI(QMainWindow):
     
     def setGainRotToJobTap(self):
         params_dict = {"gain_rot": self.dropDown_gainRot.currentText()} 
+        checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
         self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
     
     def setGainFlipJobTap(self):
         params_dict = {"gain_flip": self.dropDown_gainFlip.currentText()} 
+        checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
         self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+        
     def setInvertHandToJobTap(self):
         params_dict = {"flip_tiltseries_hand": self.textEdit_invertHand.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 

@@ -13,6 +13,7 @@ def parse_arguments():
     parser.add_argument("--scheme", "-s", required=False,default="relion_tomo_prep" ,help="path to scheme folder")
     parser.add_argument("--movies", "-mov", required=False,default="None",help="Input movie dir")
     parser.add_argument("--mdocs", "-m", required=False,default="None",help="Input mdocs dir")
+    parser.add_argument("--gain", "-g", required=False,help="Path to gain ref")
     parser.add_argument("--pixS", "-pS", required=False,default="1.8",help="Input pixelsize")
     parser.add_argument("--impPrefix", "-iP", required=False,default="auto",help="Input prefix")
     parser.add_argument("--proj", "-p", required=False,default="None",help="Output output project dir")
@@ -37,7 +38,8 @@ def main():
     args,addArg = parse_arguments()
     sytemOk=test_crboostSetup()
     if (sytemOk==False):
-        return 0
+        raise Exception("Connection to HeadNode not possilbe")
+        #return 0
     
     #print(args)
     if args.noGui:

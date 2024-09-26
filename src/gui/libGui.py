@@ -6,6 +6,8 @@ from PyQt6.QtWidgets import QTableWidgetItem, QTabWidget, QFileDialog
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtWidgets import QMainWindow,QApplication, QWidget, QVBoxLayout, QTextEdit, QScrollBar
 from PyQt6.QtCore import Qt
+import glob
+import mrcfile
 
 
 
@@ -21,6 +23,42 @@ def get_inputNodesFromSchemeTable(table_widget,jobsOnly=True):
         inputNodes[row]=table_widget.item(row,0).text()        
     return inputNodes
 
+def checkDosePerTilt(mdocWk,dosePerTilt,thoneRingFade):
+    
+    mdoc=glob.glob(mdocWk)
+    with open(mdoc[0], 'r') as file:
+       text = file.read()
+    
+    nrTilts = text.count("[ZValue")
+    print("tilts: " + str(nrTilts) + " dosePerTilt: " + str(dosePerTilt) + " thoneRingFade: "  + str(thoneRingFade))
+    if (float(dosePerTilt)*nrTilts)>float(thoneRingFade):
+        print("total dose is bigger than thoneRingFade of ctffind check: dose per tilt and ctffind exp_factor_dose parameter")
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setWindowTitle('Information')
+        msg_box.setText("Check Dose Per Tilt and ctffind expFactor Dose")
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg_box.resize(2000, 400) 
+        msg_box.exec()
+
+def checkGainOptions(gainPath,rot,flip):
+    
+    if os.path.exists(gainPath):
+        try:
+            mrcfile.open(gainPath)
+            isMRC=True
+        except:
+            isMRC=False
+        
+        if (rot!="No rotation (0)" or flip!="No flipping (0)") and isMRC==False:
+            print("you cannot use transform on non .mrc gain")
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setWindowTitle('Information')
+            msg_box.setText("You cannot use transfroms with gain in the current format only .mrc supported by relion you can transform the gain with:\nclip resize -ox 4096 gain.gain gain.mrc")
+            msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msg_box.resize(2000, 400) 
+            msg_box.exec()
 
 def messageBox(title, text):
     """

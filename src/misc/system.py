@@ -48,6 +48,10 @@ def test_crboostSetup():
     # Run the command and capture the output, standard error, and exit code.
     if not os.path.exists(sysOkFile):
         sshOk=check_passwordless_ssh(headNode,sshStr,helpSsh)
+        if (sshOk):
+            return True
+        else:
+            return False
         # if sshOk:
         #     conflictRelionOk=check_appConflict(headNode,"relion",helpConflict)
         #     conflictPythonOk=check_appConflict(headNode,"python",helpConflict)
