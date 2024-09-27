@@ -68,7 +68,8 @@ def plotFilterTiltsResults(ts,outputFolder,classLabelName=None,predScoreLabelNam
     
     print("plotting " + str(num_rows) )
     titlspathCut=titlspath[0:(maxRows*num_cols)]
-    pil_images=mrcFilesToPilImageStackParallel(titlspathCut,128,threads)
+    pil_images=mrcFilesToPilImageStackParallel(titlspathCut,128,threads,ignoreNonSquare=1)
+   
     fig, axs = plt.subplots(num_rows, num_cols, figsize=(20, 5*num_rows))
     perm = np.random.permutation(num_images)
     for i, ax in enumerate(axs.flat):

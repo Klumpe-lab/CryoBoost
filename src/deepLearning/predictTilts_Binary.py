@@ -109,29 +109,60 @@ def mrc_to_pil_image_parallel(mrc_path_sz):
     Returns:
     - A PIL Image object.
     """
-    mrc_path, sz = mrc_path_sz
+    mrc_path, sz,ignoreNonSquare = mrc_path_sz
     with mrcfile.open(mrc_path, permissive=True) as mrc:
         image_array = mrc.data
-        #image_array = resize(image_array, (sz, sz), anti_aliasing=True)
-        #image_array=resize_by_fourier_cropping(image_array,[sz,sz])
-        if min(image_array.shape)!=max(image_array.shape):
+        
+        ratio=max(image_array.shape)/min(image_array.shape)
+        imgIsNonSquare=min(image_array.shape)!=max(image_array.shape)
+        
+        if imgIsNonSquare and ignoreNonSquare==0:
+            #print("in ns0")
+            image_arrayOrg=image_array
             min_dimension = min(image_array.shape)
             crop_size = min_dimension#
-            start_x = (image_array.shape[0] - crop_size) // 2
-            start_y = (image_array.shape[1] - crop_size) // 2
-            image_array = image_array[start_x:start_x + crop_size, start_y:start_y + crop_size]
+            start_x = 0+30 # (image_array.shape[0] - crop_size) // 2
+            start_y = 0+30 #(image_array.shape[1] - crop_size) // 2
+            image_array = image_array[start_x:start_x + crop_size-30, start_y:start_y + crop_size]
+            #print("shape0",image_array.shape)
+         
+        if imgIsNonSquare and ignoreNonSquare==1:
+            image_array=resize_by_fourier_cropping(image_array,[sz,round(sz*ratio)])
+            #image_array = resize(image_array, (sz, round(sz*ratio)), anti_aliasing=True)
+        else:
+            image_array=resize_by_fourier_cropping(image_array,[sz,sz])
             
-        
-        image_array=resize_by_fourier_cropping(image_array,[sz,sz])
         image_array = (image_array - image_array.mean())
         if image_array.std() != 0:
             image_array = image_array / image_array.std()
         image_array = (image_array - image_array.min()) / (image_array.max() - image_array.min()) * 255.0
         image_array = image_array.astype('uint8')
-        pil_image = Image.fromarray(image_array)
-        return pil_image
+        
+        if imgIsNonSquare and ignoreNonSquare==0:
+            pil1 = Image.fromarray(image_array)
+        else:
+            pil_image=Image.fromarray(image_array)
+            return pil_image
+          
+        if imgIsNonSquare:
+            image_array=image_arrayOrg
+            min_dimension = min(image_array.shape)
+            crop_size = min_dimension#
+            start_x =0+30
+            start_y = (image_array.shape[1] - crop_size) #-20#// 2
+            image_array = image_array[start_x:start_x + crop_size-30, start_y:start_y + crop_size-30]
+            #print("shape1",image_array.shape)
+            image_array=resize_by_fourier_cropping(image_array,[sz,sz])
+            image_array = (image_array - image_array.mean())
+            if image_array.std() != 0:
+                image_array = image_array / image_array.std()
+            image_array = (image_array - image_array.min()) / (image_array.max() - image_array.min()) * 255.0
+            image_array = image_array.astype('uint8')
+            pil2 = Image.fromarray(image_array)
+           
+            return pil1,pil2
 
-def mrcFilesToPilImageStackParallel(mrcFiles, sz, max_workers=20):
+def mrcFilesToPilImageStackParallel(mrcFiles, sz, max_workers=20,ignoreNonSquare=0):
     """
     Convert MRC files to PIL Image objects in parallel.
     
@@ -144,7 +175,7 @@ def mrcFilesToPilImageStackParallel(mrcFiles, sz, max_workers=20):
     """
     
     with ProcessPoolExecutor(max_workers) as executor:
-        pil_images = list(executor.map(mrc_to_pil_image_parallel, [(mrc_path, sz) for mrc_path in mrcFiles]))
+        pil_images = list(executor.map(mrc_to_pil_image_parallel, [(mrc_path, sz,ignoreNonSquare) for mrc_path in mrcFiles]))
     return pil_images
 
 
@@ -202,7 +233,31 @@ def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,probThr=0.1,probAction="ass
     
     for i, batch in enumerate(tqdm(batches, desc="Predicting Tilts"), 1):
         pilImageBatch=mrcFilesToPilImageStackParallel(batch,sz,max_workers)
-        pLables,pProb=predictPilImageStack(pilImageBatch,learn)
+        
+        if isinstance(pilImageBatch[0], tuple):
+            ib0=[]
+            ib1=[]
+            for item in pilImageBatch:
+                ib0.append(item[0])
+                ib1.append(item[1])
+            
+            pLables0,pProb0=predictPilImageStack(ib0,learn)
+            pLables1,pProb1=predictPilImageStack(ib1,learn)
+            pLables=[]
+            pProb=[]
+            for i in range(len(pLables0)):
+                if pLables0[i] == 'good' and pLables1[i] == 'good':
+                    pLables.append('good')
+                    pProb.append((pProb0[i]+pProb1[i])/2)
+                else:
+                    pLables.append('bad')
+                    if pLables0[i] == 'bad':
+                        pProb.append(pProb0[i])
+                    else:
+                        pProb.append(pProb1[i])    
+        else:
+            pLables,pProb=predictPilImageStack(pilImageBatch,learn)
+        
         all_pLabels.extend(pLables)
         all_pProb.extend(pProb)
     
@@ -221,5 +276,5 @@ def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,probThr=0.1,probAction="ass
     
     ts.addColumns(df)
         
-    return ts    
+    return ts 
         
