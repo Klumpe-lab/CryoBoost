@@ -25,7 +25,11 @@ def get_inputNodesFromSchemeTable(table_widget,jobsOnly=True):
 
 def checkDosePerTilt(mdocWk,dosePerTilt,thoneRingFade):
     
+    if mdocWk=="":
+        return
     mdoc=glob.glob(mdocWk)
+    if not mdoc:
+        return
     with open(mdoc[0], 'r') as file:
        text = file.read()
     
