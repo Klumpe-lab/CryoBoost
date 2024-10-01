@@ -46,6 +46,7 @@ _rlnSchemeJobMode #3
 _rlnSchemeJobHasStarted #4 
 importmovies importmovies   continue            0 
 fs_motion_and_ctf fs_motion_and_ctf continue 0 
+aligntilts aligntilts continue 0 
 
 # version 50001
 
@@ -60,4 +61,5 @@ _rlnSchemeEdgeBooleanVariable #5
       WAIT EXIT_maxtime            0  undefined  undefined 
 EXIT_maxtime importmovies            0  undefined  undefined 
 importmovies fs_motion_and_ctf       0 undefined  undefined 
-fs_motion_and_ctf    EXIT                    0 undefined
+fs_motion_and_ctf aligntilts       0 undefined  undefine
+aligntilts    EXIT                    0 undefined

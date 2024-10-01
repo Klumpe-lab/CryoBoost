@@ -256,13 +256,13 @@ class MainUI(QMainWindow):
         params_dict = {"mdoc_files": "mdoc/*" + os.path.splitext(self.line_path_mdocs.text())[1] }
         
         if "ctffind" in self.cbdat.scheme.jobs_in_scheme.values:
-             thoneRingFade = self.cbdat.scheme.getJobOptions("ctffind").loc[
+            thoneRingFade = self.cbdat.scheme.getJobOptions("ctffind").loc[
                              self.cbdat.scheme.getJobOptions("ctffind")["rlnJobOptionVariable"] == "exp_factor_dose",
                              "rlnJobOptionValue"
                              ].values[0]  
-            
-        if self.textEdit_dosePerTilt.toPlainText().isnumeric():
-            checkDosePerTilt(self.line_path_mdocs.text(),float(self.textEdit_dosePerTilt.toPlainText()),float(thoneRingFade))
+            if self.textEdit_dosePerTilt.toPlainText().isnumeric():
+                checkDosePerTilt(self.line_path_mdocs.text(),float(self.textEdit_dosePerTilt.toPlainText()),float(thoneRingFade))
+        
         self.setParamsDictToJobTap(params_dict)
     #self.textEdit_tomoForDenoiseTrain.textChanged.connect(self.setTomoForDenoiseTrainToJobTap)
     #self.textEdit_pathDenoiseModel.textChanged.connect(self.setPathDenoiseModelToJobTap)

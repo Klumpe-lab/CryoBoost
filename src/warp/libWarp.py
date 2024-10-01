@@ -14,12 +14,96 @@ def read_stream(stream, callback):
             print("breaking")
             break
 
+def tsAlignment(args):
+    relProj=os.path.dirname(os.path.dirname(os.path.dirname(args.in_mics)))
+    if relProj != "" and relProj is not None:
+        relProj=relProj+"/"
+    st=tiltSeriesMeta(args.in_mics,relProj)
+    framePixS=st.all_tilts_df["rlnMicrographOriginalPixelSize"][0]
+    outputFolder=args.out_dir    
+    dataFold=outputFolder+"/tomostar"
+    expPerTilt=st.all_tilts_df["rlnMicrographPreExposure"].sort_values().iloc[1]
+    warpFrameSeriesFold=st.all_tilts_df["rlnMicrographName"].sort_values().iloc[0]
+    warpFrameSeriesFold=os.path.split(warpFrameSeriesFold)[0].replace("average","")
+    
+    print("generating: ",dataFold)
+    os.makedirs(dataFold,exist_ok=True) 
+    
+    command=["WarpTools", "create_settings",
+             "--folder_data", "tomostar",
+             "--extension" ,"*.tomostar",
+             "--folder_processing", "warp_tiltseries",
+             "--output" , outputFolder + "/warp_tiltseries.settings",
+             "--angpix" , str(framePixS),
+             "--exposure",str(expPerTilt),
+             "--tomo_dimensions",args.tomo_dimensions,
+             ]
+    if args.gain_path!="None":
+        command.extend(["--gain_path",args.gain_path])
+    
+    if args.gain_operations is not None:
+        if args.gain_operations.find("flip_x") != -1:
+            command.append("--gain_flip_x")
+        if args.gain_operations.find("flip_y") != -1:
+            command.append("--gain_flip_y")
+        if args.gain_operations.find("gain_transpose") != -1:
+            command.append("--gain_gain_transpose")
+    command_string = shlex.join(command)
+    print(command_string)  
+    try:
+        result = subprocess.run(command, check=True) #, capture_output=True, text=True)          
+    except subprocess.CalledProcessError as e:
+        print("Error output:", e.stderr, file=sys.stderr)
+    
+    print("++++++++++settings done++++++++++++++++")
+   
+    mdocFolder,mdocPattern = os.path.split(args.mdocWk)
+    
+    command=["WarpTools", "ts_import",
+             "--mdocs",mdocFolder,
+             "--pattern",mdocPattern,
+             "--frameseries",warpFrameSeriesFold,
+             "--output" ,dataFold,
+             "--tilt_exposure",str(expPerTilt), 
+            ]
+    
+    command_string = shlex.join(command)
+    print(command_string)  
+    try:
+        result = subprocess.run(command, check=True) #, capture_output=True, text=True)          
+    except subprocess.CalledProcessError as e:
+        print("Error output:", e.stderr, file=sys.stderr) 
+    
+    print("generating: ",outputFolder + "/warp_tiltseries")
+    os.makedirs(outputFolder + "/warp_tiltseries",exist_ok=True) 
+    print("++++++++++Tiltseries import done++++++++++++++++")
+    
+    if (args.alignment_program=="Aretomo"):
+    
+        command=["WarpTools", "ts_aretomo",
+                "--settings", outputFolder + "/warp_tiltseries.settings",
+                "--angpix",str(args.rescale_angpixs),
+                "--alignz",str(args.aretomo_sample_thickness),
+                "--perdevice",str(args.perdevice),
+                "--patches",str(args.aretomo_patches),
+                ]
+    else:
+        command=["WarpTools", "ts_etomo_patches",
+                "--settings", outputFolder + "/warp_tiltseries.settings",
+                "--angpix",str(args.rescale_angpixs),
+                
+                ]
+    command_string = shlex.join(command)
+    print(command_string)  
+    try:
+        result = subprocess.run(command, check=True) #, capture_output=True, text=True)          
+    except subprocess.CalledProcessError as e:
+        print("Error output:", e.stderr, file=sys.stderr)     
+    
+            
 
 def fsMotionAndCtf(args):
-    """
-    fsMotionAndCtf
-
-    """
+    
     
     relProj=os.path.dirname(os.path.dirname(os.path.dirname(args.in_mics)))
     if relProj != "" and relProj is not None:

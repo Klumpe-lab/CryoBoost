@@ -30,7 +30,8 @@ unset LD_LIBRARY_PATH
 #build up environment variables
 module load intel/18.0.5
 module load impi/2018.4
-module load IMOD/4.11.1
+module load IMOD/4.12.17
+module load jdk
 module load ARETOMO/1.3.4
 module load RELION/5.0-beta-3NC
 source /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/.cbenv

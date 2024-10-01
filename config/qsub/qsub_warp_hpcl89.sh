@@ -30,6 +30,7 @@ unset LD_LIBRARY_PATH
 #build up environment variables
 module load intel/18.0.5
 module load impi/2018.4
+module load jdk
 module load IMOD/4.12.17
 module load ARETOMO2/1.0.0
 module load WARP/2.0.0dev26
