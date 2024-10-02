@@ -20,6 +20,7 @@ def tsAlignment(args):
         relProj=relProj+"/"
     st=tiltSeriesMeta(args.in_mics,relProj)
     framePixS=st.all_tilts_df["rlnMicrographOriginalPixelSize"][0]
+    tiltAxis=st.all_tilts_df["rlnTomoNominalTiltAxisAngle"][0]
     outputFolder=args.out_dir    
     dataFold=outputFolder+"/tomostar"
     expPerTilt=st.all_tilts_df["rlnMicrographPreExposure"].sort_values().iloc[1]
@@ -65,6 +66,7 @@ def tsAlignment(args):
              "--frameseries",warpFrameSeriesFold,
              "--output" ,dataFold,
              "--tilt_exposure",str(expPerTilt), 
+             "--override_axis",str(tiltAxis),
             ]
     
     command_string = shlex.join(command)
@@ -85,13 +87,16 @@ def tsAlignment(args):
                 "--angpix",str(args.rescale_angpixs),
                 "--alignz",str(args.aretomo_sample_thickness),
                 "--perdevice",str(args.perdevice),
-                "--patches",str(args.aretomo_patches),
                 ]
+        #if args.refine_tilt_axis:
+            #-"--patches",str(args.aretomo_patches),
+        #    command.append('--axis_iter 3')
+        #    command.append('--axis_batch 5')
+        
     else:
         command=["WarpTools", "ts_etomo_patches",
                 "--settings", outputFolder + "/warp_tiltseries.settings",
                 "--angpix",str(args.rescale_angpixs),
-                
                 ]
     command_string = shlex.join(command)
     print(command_string)  

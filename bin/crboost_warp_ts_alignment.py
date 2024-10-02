@@ -23,9 +23,7 @@ def parse_arguments():
     parser.add_argument("--aretomo_sample_thickness", required=False,default="200", help=" Default: 200. Thichness of sample used for Alignment")
     parser.add_argument("--aretomo_patches", required=False,default="1x1", help=" Default: 1x1. Num of Aretomo patches")
     parser.add_argument("--imod_patch_size_and_overlap", required=False,default="200", help=" Default: 200:50 Patch size in A patch overlap in %")
-   
-    
-   
+    parser.add_argument("--refine_tilt_axis", required=False,default=False, help=" Default: False Refine given Tiltaxis")
     
     parser.add_argument("--perdevice", required=False,default="1" ,help="Default: 1. Number of processes per GPU")
     
