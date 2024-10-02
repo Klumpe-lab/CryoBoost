@@ -85,7 +85,7 @@ def tsAlignment(args):
         command=["WarpTools", "ts_aretomo",
                 "--settings", outputFolder + "/warp_tiltseries.settings",
                 "--angpix",str(args.rescale_angpixs),
-                "--alignz",str(args.aretomo_sample_thickness),
+                "--alignz",str(float(args.aretomo_sample_thickness)*10),
                 "--perdevice",str(args.perdevice),
                 ]
         #if args.refine_tilt_axis:
@@ -105,7 +105,23 @@ def tsAlignment(args):
     except subprocess.CalledProcessError as e:
         print("Error output:", e.stderr, file=sys.stderr)     
     
-            
+    if result.returncode == 0:
+        #adapt values here
+        print("transfer from xf still missing ...not needed to proceed in warp")
+        for index, row in st.all_tilts_df.iterrows():
+            key=st.all_tilts_df.at[index,'cryoBoostKey']
+            #st.all_tilts_df.at[index, 'cryoBoostXfPath'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc" 
+            # st.all_tilts_df.at[index, '_rlnTomoXTilt']= 
+            # _rlnTomoYTilt #26
+            # _rlnTomoZRot #27
+            # _rlnTomoXShiftAngst #28
+            # _rlnTomoYShiftAngst #29
+        st.writeTiltSeries(outputFolder+"/aligned_tilt_series.star")
+        
+        return 0
+    else:
+        return 1        
+               
 
 def fsMotionAndCtf(args):
     
