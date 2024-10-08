@@ -73,6 +73,9 @@ star_file:
   denoisetrain:   reconstruction/tomograms.star   #is not the result but the reconstruction is used as result   
   denoisepredict: denoise/denoised_tilt_series.star #maybe switch to reconstruction
   fs_motion_and_ctf: fs_motion_and_ctf/fs_motion_and_ctf.star
+  aligntiltsWarp: aligntiltsWarp/aligned_tilt_series.star
+  ts_ctf: ts_ctf/ts_ctf_tilt_series.star
+  ts_reconstruct: ts_reconstruct/tomograms.star
 
 computing:
    
@@ -107,8 +110,11 @@ computing:
        - motioncorr
        - ctffind
       GPU-OneProcess: 
+        - aligntiltsWarp
         - aligntilts
         - fs_motion_and_ctf
+        - ts_ctf
+        - ts_reconstruct
       GPU-OneProcessOneGPU:
         - denoisetrain
         - denoisepredict
@@ -124,3 +130,15 @@ computing:
            p.hpcl9: 4
            p.hpcl93: 4
            p.hpcl8: 2
+        aligntiltsWarp:
+           p.hpcl9: 4
+           p.hpcl93: 4
+           p.hpcl8: 2
+        ts_ctf:
+           p.hpcl9: 4
+           p.hpcl93: 4
+           p.hpcl8: 2 
+        ts_reconstruct:
+           p.hpcl9: 4
+           p.hpcl93: 4
+           p.hpcl8: 2             

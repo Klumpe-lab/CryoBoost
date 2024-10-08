@@ -39,7 +39,7 @@ param7_value      "30:6.0"
 param8_label      "c_defocus_min_max" 
 param8_value      "1.1:8" 
 param9_label      "c_grid" 
-param9_value      "1x1x1" 
+param9_value      "2x2x1" 
 param10_label     "perdevice" 
 param10_value     "1" 
 nr_threads        1
