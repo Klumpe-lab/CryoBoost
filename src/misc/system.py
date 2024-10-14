@@ -1,8 +1,60 @@
 # %%
 
-import subprocess,os,getpass
-from src.rw.librw import cbconfig
+import subprocess,os,getpass,sys,shlex,time
+from src.rw.librw import cbconfig,starFileMeta
 
+
+def run_wrapperCommand(command,tag=None,relionProj=None):
+    """
+    Run a command and return 0/1 for working non working
+
+    Parameters:
+    command (str): The command to run.
+
+    Returns:
+    tuple: A tuple containing the output, standard error, and exit code.
+    """
+    command_string = shlex.join(command)
+    print(command_string)
+    sys.stdout.flush()
+        
+    try:
+        result = subprocess.run(command, check=True) #, capture_output=True, text=True)          
+    except subprocess.CalledProcessError as e:
+        print(tag," error",file=sys.stderr)
+        error_output = e.stderr if e.stderr else str(e)
+        sys.stderr.flush()
+        print("Error syscall:", error_output, file=sys.stderr)
+        print("***************************************************", file=sys.stderr)
+        print("Error: " +tag+ " stopping" , file=sys.stderr)
+        sys.stderr.flush()
+        if relionProj is not None:
+            try:
+                defPipePath=relionProj+os.path.sep+"default_pipeline.star"
+                st=starFileMeta(defPipePath)
+                df=st.dict["pipeline_processes"]
+                hit=df.rlnPipeLineProcessName[df.index[df['rlnPipeLineProcessStatusLabel'] == 'Running']]
+                fold=str(hit.values[0])
+                if os.path.isfile(fold + os.path.sep + "RELION_JOB_EXIT_SUCCESS")==False:
+                    df.loc[df['rlnPipeLineProcessStatusLabel'] == 'Running', 'rlnPipeLineProcessStatusLabel'] = 'Failed'
+                    print("setting to job to failed")
+                    st.writeStar(defPipePath)
+                    CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
+                    conf=cbconfig(CRYOBOOST_HOME + "/config/conf.yaml")
+                    envRel=conf.confdata['submission'][0]['Environment']+"; "
+                    resultUpdate = subprocess.run(envRel+";relion_pipeliner --RunJobs ", shell=True, capture_output=True, text=True, check=True)
+                     
+            except subprocess.CalledProcessError as e:
+                print("error resetting pipe!"+str(e))
+                
+        sys.exit(1)
+    if result is not None:
+        return result
+    else:
+        raise Exception("Command execution failed without raising an exception")
+    
+    
+    
 def run_command(command):
     """
     Run a command and capture its output, standard error, and exit code.

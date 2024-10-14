@@ -145,7 +145,7 @@ class pipe:
           fold=str(hit.values[0])
           if os.path.isfile(fold + os.path.sep + "RELION_JOB_EXIT_SUCCESS")==False:
             df.loc[df['rlnPipeLineProcessStatusLabel'] == 'Running', 'rlnPipeLineProcessStatusLabel'] = 'Failed'
-            print("resetting pipe!")
+            print("setting to job to failed")
             st.writeStar(defPipePath)
         except:
           print("error resetting pipe!")
@@ -254,12 +254,16 @@ class pipe:
       
       if os.path.isfile(defPipePath):
         try:
-          st=starFileMeta(defPipePath)
-          df=st.dict["pipeline_processes"]
-          hit=df.rlnPipeLineProcessName[df.index[df['rlnPipeLineProcessStatusLabel'] == 'Running']]
-          fold=str(hit.values[0])
+            st=starFileMeta(defPipePath)
+            df=st.dict["pipeline_processes"]
+            hit=df.rlnPipeLineProcessName[df.index[df['rlnPipeLineProcessStatusLabel'] == 'Running']]
+            if hit.size > 0:
+              fold=str(hit.values[0])
+            else:
+              hit=df.loc[df['rlnPipeLineProcessStatusLabel'] == 'Failed', 'rlnPipeLineProcessName'].iloc[-1]
+              fold=hit
         except:
-          fold=None
+              fold=None
         return fold
       else:
         return None

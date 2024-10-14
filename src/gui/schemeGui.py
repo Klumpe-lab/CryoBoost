@@ -400,11 +400,11 @@ class MainUI(QMainWindow):
         programSelected=self.dropDown_tomoAlignProgram.currentText()
         if (programSelected=="Imod"):
             params_dictAre = {"do_aretomo": "No"}
-            params_dictImod = {"do_aretomo": "Yes"}
+            params_dictImod = {"do_imod_patchtrack": "Yes"}
         
         if (programSelected=="Aretomo"):
             params_dictAre = {"do_aretomo": "Yes"}
-            params_dictImod = {"do_aretomo": "No"}
+            params_dictImod = {"do_imod_patchtrack": "No"}
         
         self.setParamsDictToJobTap(params_dictAre,["aligntilts"])
         self.setParamsDictToJobTap(params_dictImod,["aligntilts"])

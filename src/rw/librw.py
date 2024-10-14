@@ -795,6 +795,7 @@ class tiltSeriesMeta:
 
         self.all_tilts_df = all_tilts_df
         self.tilt_series_df = tilt_series.df
+        self.__extractInformation()
 
     def writeTiltSeries(self, tiltseriesStarFile, tiltSeriesStarFolder='tilt_series'):
         """
@@ -921,5 +922,37 @@ class tiltSeriesMeta:
         columns_df['cryoBoostKey']=k
       
       self.all_tilts_df=self.all_tilts_df.merge(columns_df,on='cryoBoostKey',how='left') 
-        
+    
+    def __extractInformation(self):        
+      self.tsInfo=type('', (), {})()
+      self.tsInfo.allUnique=1
+      
+      directories = self.all_tilts_df["rlnMicrographMovieName"].apply(lambda x: os.path.dirname(x))
+      extensions = self.all_tilts_df["rlnMicrographMovieName"].apply(lambda x: os.path.splitext(x)[1])
 
+      unique_directories = directories.unique()
+      unique_extensions = extensions.unique()
+      self.tsInfo.allUnique=self.tsInfo.allUnique and len(unique_directories)==1 and len(unique_extensions)==1
+      self.tsInfo.frameFold=unique_directories[0]
+      self.tsInfo.frameExt=unique_extensions[0]
+      
+      attributes = {
+                  'volt': 'rlnVoltage',
+                  'cs': 'rlnSphericalAberration',
+                  'cAmp': 'rlnAmplitudeContrast',
+                  'framePixS': 'rlnMicrographOriginalPixelSize'
+                  }
+
+      for attr, df_attr in attributes.items():
+          if df_attr in self.tilt_series_df.columns:
+              unique_values = self.tilt_series_df[df_attr].unique()
+              setattr(self.tsInfo, attr, unique_values)
+              self.tsInfo.allUnique = self.tsInfo.allUnique and len(unique_values) == 1
+              if len(unique_values) > 0:
+                  setattr(self.tsInfo, attr, unique_values[0])
+          else:
+              print(f"Warning: {df_attr} not found in tilt_series_df")
+            
+      
+      
+      
