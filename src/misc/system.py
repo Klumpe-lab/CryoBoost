@@ -92,6 +92,11 @@ def test_crboostSetup():
     if os.path.exists(sysOkFile):
         return True
     CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
+    if CRYOBOOST_HOME is None or CRYOBOOST_HOME.strip() == "":
+        print("error CRYOBOOST_HOME is empty")
+        print("set CRYOBOOST_HOME !")
+        return False
+      
     conf=cbconfig(CRYOBOOST_HOME + "/config/conf.yaml")   
     headNode=conf.confdata['submission'][0]['HeadNode']
     sshStr=conf.confdata['submission'][0]['SshCommand']

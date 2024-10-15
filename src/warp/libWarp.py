@@ -2,6 +2,7 @@ from src.rw.librw import starFileMeta,tiltSeriesMeta
 from src.rw.librw import warpMetaData
 import shlex,os,subprocess,select,sys,threading
 import shutil,glob
+from abc import ABC, abstractmethod
 
 def read_stream(stream, callback):
     print("above loop")
@@ -14,6 +15,20 @@ def read_stream(stream, callback):
         else:
             print("breaking")
             break
+
+class warpWrapperBase(ABC):
+    @abstractmethod
+    def run(self):
+        pass
+    @abstractmethod
+    def createSettings(self):
+        pass
+    @abstractmethod
+    def checkResults(self):
+        pass
+    @abstractmethod
+    def updateMetaData(self):
+        pass     
 
 def tsReconstruct(args):
     relProj=os.path.dirname(os.path.dirname(os.path.dirname(args.in_mics)))

@@ -38,7 +38,7 @@ def main():
     args,addArg = parse_arguments()
     sytemOk=test_crboostSetup()
     if (sytemOk==False):
-        raise Exception("Connection to HeadNode not possilbe")
+        raise Exception("CryBoost cannot be used")
         #return 0
     
     #print(args)
