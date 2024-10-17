@@ -13,7 +13,7 @@ def parse_arguments():
     parser.add_argument("--o", dest="out_dir", required=True, help="Output directory name")
     parser.add_argument("--j", "-nr_threads",dest="threads" ,required=False, default=None, help="Nr of threads used. Ignore!")
     
-    parser.add_argument("--eer_ngroups", required=False,default="32", help=" Default: 32. Number of groups to combine raw EER frames into, i.e. number of 'virtual' frames in resulting stack; use negative value to specify the number of frames per virtual frame instead")
+    parser.add_argument("--eer_fractions", required=False,default="32", help=" Default: 32. The number of hardware frames to group into one fraction")
     parser.add_argument("--gain_path", required=False,default="None", help="Path to gain file")
     parser.add_argument("--gain_operations", required=False,default="None", help="Operations applied to gain e.g flip_x:transpose or flip_y") 
     

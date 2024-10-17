@@ -4,8 +4,7 @@ import argparse
 import os
 import sys
 
-
-from src.warp.libWarp import tsCtf
+from src.warp.tsCtf import tsCtf
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="filter tilts")
@@ -28,10 +27,10 @@ def main():
     args,addArg = parse_arguments()
     
     print("launching")
-    retVal=tsCtf(args)
-    if retVal==1:
+    tsC=tsCtf(args,runFlag="Full")
+    if tsC.result.returncode==1:
         raise Exception("Error: ts_ctf failed")
-    if retVal==0:
+    if tsC.result.returncode==0:
         successName=args.out_dir + "/RELION_JOB_EXIT_SUCCESS"
         with open(successName, 'a'):
              os.utime(successName, None)

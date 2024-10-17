@@ -356,18 +356,27 @@ class MainUI(QMainWindow):
         self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
     
     def setGainFlipJobTap(self):
-        params_dict = {"gain_flip": self.dropDown_gainFlip.currentText()} 
-        checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
-        self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
-        
+        if "motioncorr" in self.cbdat.scheme.jobs_in_scheme.values:
+            params_dict = {"gain_flip": self.dropDown_gainFlip.currentText()} 
+            checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
+            self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+        if  "fs_motion_and_ctf" in self.cbdat.scheme.jobs_in_scheme.values:   
+            params_dict = {"gain_flip": self.dropDown_gainFlip.currentText()} 
+            checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
+            self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+            
     def setInvertHandToJobTap(self):
         params_dict = {"flip_tiltseries_hand": self.textEdit_invertHand.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 
     
     def setEerFractionsToJobTap(self):
-        params_dict = {"eer_grouping": self.textEdit_eerFractions.toPlainText()}
-        self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
-    
+        if "motioncorr" in self.cbdat.scheme.jobs_in_scheme.values: 
+            params_dict = {"eer_grouping": self.textEdit_eerFractions.toPlainText()}
+            self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+        if "fs_motion_and_ctf" in self.cbdat.scheme.jobs_in_scheme.values:
+            params_dict = {"param1_value": self.textEdit_eerFractions.toPlainText()}
+            self.setParamsDictToJobTap(params_dict,["fs_motion_and_ctf"]) 
+            
     def setAreTomoSampleThickToJobTap(self):
         params_dict = {"aretomo_thickness": self.textEdit_areTomoSampleThick.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["aligntilts"]) 

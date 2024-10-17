@@ -2,31 +2,17 @@
 import os,subprocess,shlex,sys
 from src.rw.librw import tiltSeriesMeta,warpMetaData
 from src.misc.system import run_wrapperCommand
+from src.warp.libWarp import warpWrapperBase
 
-class fsMotionAndCtf():
+class fsMotionAndCtf(warpWrapperBase):
     def __init__(self,args,runFlag=None):
        
-        self.args=args
-        relProj=os.path.dirname(os.path.dirname(os.path.dirname(args.in_mics)))
-        if relProj != "" and relProj is not None:
-            relProj=relProj+"/"
-        self.st=tiltSeriesMeta(args.in_mics,relProj)
-        self.args=args
-        if (relProj==""):
-            relProj="./"
-        self.relProj=relProj
-        if runFlag=="Full":
-            self.run()
-                
+        super().__init__(args,runFlag=runFlag)
         
-    def run(self):
-        self.createSettings()
-        self.runMotionAndCtf()
-        self.update_tiltseries_data()
-        self.check_resutls()
-        
-        
+             
     def createSettings(self):
+        print("--------------create settings---------------------------")
+        sys.stdout.flush()  
         
         command=["WarpTools", "create_settings",
                 "--folder_data", "../../"+self.st.tsInfo.frameFold,
@@ -35,29 +21,22 @@ class fsMotionAndCtf():
                 "--output" , self.args.out_dir + "/warp_frameseries.settings",
                 "--angpix" , str(self.st.tsInfo.framePixS)
                 ]
-        if self.st.tsInfo.frameExt=="*.eer":
-            command.extend(["--eer_ngroups", str(self.args.eer_ngroups)])
+       
+        if self.st.tsInfo.frameExt==".eer":
+            #minus overlaods ngroups to fractions
+            command.extend(["--eer_ngroups", "-"+str(self.args.eer_fractions)])
         
-        if self.args.gain_path!="None":
-            command.extend(["--gain_path",self.args.gain_path])
-        
-        if self.args.gain_operations is not None:
-            if self.args.gain_operations.find("flip_x") != -1:
-                command.append("--gain_flip_x")
-            if self.args.gain_operations.find("flip_y") != -1:
-                command.append("--gain_flip_y")
-            if self.args.gain_operations.find("gain_transpose") != -1:
-                command.append("--gain_gain_transpose")
-        print("relPB4",self.relProj)
         self.result=run_wrapperCommand(command,tag="fsMotionAndCtf-Settings",relionProj=self.relProj)
             
-    def runMotionAndCtf(self):    
+    def runMainApp(self):    
+        print("--------------run frame alignment---------------------------")
+        sys.stdout.flush()  
         
-        print("generating: ",self.args.out_dir + "/warp_frameseries")
+        print("generating: ",self.args.out_dir + "/" + self.fsFolderName)
         sys.stdout.flush()
         os.makedirs(self.args.out_dir + "/warp_frameseries",exist_ok=True)
         command=["WarpTools", "fs_motion_and_ctf",
-                "--settings", self.args.out_dir + "/warp_frameseries.settings",
+                "--settings", self.args.out_dir + "/" + self.fsSettingsName,
                 "--m_grid" ,self.args.m_grid,
                 "--m_range_min" ,self.args.m_range_min_max.split(":")[0],
                 "--m_range_max" ,self.args.m_range_min_max.split(":")[1],
@@ -86,8 +65,8 @@ class fsMotionAndCtf():
         self.result=run_wrapperCommand(command,tag="run_fsMotionAndCtf",relionProj=self.relProj)
         
         
-    def update_tiltseries_data(self):
-        wm=warpMetaData(self.args.out_dir+"/warp_frameseries/*.xml")
+    def updateMetaData(self):
+        wm=warpMetaData(self.args.out_dir+ os.path.sep + self.fsFolderName +"/*.xml")
         for index, row in self.st.all_tilts_df.iterrows():
             key=self.st.all_tilts_df.at[index,'cryoBoostKey']
             res = wm.data_df.query(f"cryoBoostKey == '{key}'")
@@ -108,7 +87,7 @@ class fsMotionAndCtf():
             self.st.all_tilts_df.at[index, 'rlnMicrographMetadata']="None"
         self.st.writeTiltSeries(self.args.out_dir+"/fs_motion_and_ctf.star")
          
-    def check_resutls(self):
+    def checkResults(self):
         #check if important results exists and values are in range
         #set to 1 of something is missing self.result.returncode
         pass

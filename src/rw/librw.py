@@ -935,17 +935,28 @@ class tiltSeriesMeta:
       self.tsInfo.allUnique=self.tsInfo.allUnique and len(unique_directories)==1 and len(unique_extensions)==1
       self.tsInfo.frameFold=unique_directories[0]
       self.tsInfo.frameExt=unique_extensions[0]
+      self.tsInfo.expPerTilt=self.all_tilts_df["rlnMicrographPreExposure"].drop_duplicates().sort_values().iloc[1]
+      self.tsInfo.numTiltSeries=self.tilt_series_df.shape[0]
       
-      attributes = {
+      df_attr="rlnMicrographName"
+      #print(self.all_tilts_df.columns)
+      if df_attr in self.all_tilts_df.columns:
+          warpFrameSeriesFold=self.all_tilts_df[df_attr].sort_values().iloc[0]
+          self.tsInfo.warpFrameSeriesFold=os.path.split(warpFrameSeriesFold)[0].replace("average","")
+      else:
+          print(f"Warning: {df_attr} not found in tilt_series_df")
+      
+      attributes = {  
                   'volt': 'rlnVoltage',
                   'cs': 'rlnSphericalAberration',
                   'cAmp': 'rlnAmplitudeContrast',
-                  'framePixS': 'rlnMicrographOriginalPixelSize'
+                  'framePixS': 'rlnMicrographOriginalPixelSize',
+                  'tiltAxis': 'rlnTomoNominalTiltAxisAngle'
                   }
 
       for attr, df_attr in attributes.items():
-          if df_attr in self.tilt_series_df.columns:
-              unique_values = self.tilt_series_df[df_attr].unique()
+          if df_attr in self.all_tilts_df.columns:
+              unique_values = self.all_tilts_df[df_attr].unique()
               setattr(self.tsInfo, attr, unique_values)
               self.tsInfo.allUnique = self.tsInfo.allUnique and len(unique_values) == 1
               if len(unique_values) > 0:

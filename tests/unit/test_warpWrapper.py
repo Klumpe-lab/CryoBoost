@@ -6,16 +6,19 @@ def test_fsMotionAndCtfSettings():
     inputTsPath='data/tilts/tilt_series_ctf.star'
     output = 'tmpOut/test_fsMotionAndCtfSettings/'
     
-    # if ((output[0]!='/') and ('tmpOut' in output) and os.path.exists(output)): 
-    #     shutil.rmtree(output)
-    
+    if os.path.isfile(output + "warp_frameseries.settings"):
+        os.remove(output + "warp_frameseries.settings")
+
     os.makedirs("tmpOut", exist_ok=True)
     os.makedirs(output, exist_ok=True)
-        
+    
+    args=type('', (), {})()   
     args.in_mics =inputTsPath
-    args.cs=1
-    fsM=fsMotionAndCtf(args.in_mics)
+    args.out_dir=output
+    args.gain_path="None"
+    args.gain_operations=None
+    fsM=fsMotionAndCtf(args)
+    fsM.createSettings()
     
-    
-    assert 1 == 1   
+    assert os.path.isfile(output + "warp_frameseries.settings")   
     

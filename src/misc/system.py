@@ -31,6 +31,8 @@ def run_wrapperCommand(command,tag=None,relionProj=None):
         if relionProj is not None:
             try:
                 defPipePath=relionProj+os.path.sep+"default_pipeline.star"
+                if not os.path.exists(defPipePath):
+                    return
                 st=starFileMeta(defPipePath)
                 df=st.dict["pipeline_processes"]
                 hit=df.rlnPipeLineProcessName[df.index[df['rlnPipeLineProcessStatusLabel'] == 'Running']]

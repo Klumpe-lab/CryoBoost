@@ -1,4 +1,4 @@
 #!/bin/bash
 
-echo $CRYOBOOST_PYTHON_PATH
+echo "python interpreter: $CRYOBOOST_PYTHON_PATH"
 $CRYOBOOST_PYTHON_PATH "$@"

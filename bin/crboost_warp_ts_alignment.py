@@ -5,7 +5,7 @@ import os
 import sys
 
 
-from src.warp.libWarp import tsAlignment
+from src.warp.tsAlignment import tsAlignment
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="filter tilts")
@@ -17,7 +17,7 @@ def parse_arguments():
     parser.add_argument("--gain_operations", required=False,default="None", help="Operations applied to gain e.g flip_x:transpose or flip_y") 
     parser.add_argument("--tomo_dimensions", required=False,default="4096x4049x2048", help=" Default: 4096x4049x2048. Unbinned Tomo Dimension")
     parser.add_argument("--mdocWk", required=True,default="mdoc/*.mdoc", help="Default: mdoc/*.mdoc wildcard to mdoc files")
-    parser.add_argument("--rescale_angpixs", required=False,default="15", help="Rescale tilt images to this pixel size")
+    parser.add_argument("--rescale_angpixs", required=False,default="12", help="Rescale tilt images to this pixel size")
     
     parser.add_argument("--alignment_program", required=False,default="Aretomo", help=" Default: Aretomo opt. Imod")
     parser.add_argument("--aretomo_sample_thickness", required=False,default="200", help=" Default: 200. Thickness of sample in nm used for Alignment")
@@ -33,12 +33,11 @@ def parse_arguments():
 def main():
     
     args,addArg = parse_arguments()
+    tsA=tsAlignment(args,runFlag="Full")
     
-    print("launching")
-    retVal=tsAlignment(args)
-    if retVal==1:
+    if tsA.result.returncode==1:
         raise Exception("Error: tsAlignment failed")
-    if (retVal==0):
+    if tsA.result.returncode==0:
         successName=args.out_dir + "/RELION_JOB_EXIT_SUCCESS"
         with open(successName, 'a'):
              os.utime(successName, None)

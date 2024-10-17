@@ -23,7 +23,7 @@ _rlnJobOptionValue #2
    in_part         "" 
 other_args         "\" 
 param1_label      "rescale_angpixs" 
-param1_value      "10" 
+param1_value      "12" 
 param2_label      "halfmap_frames"
 param2_value      "1"
 param3_label      "deconv" 

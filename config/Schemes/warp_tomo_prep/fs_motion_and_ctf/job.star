@@ -22,7 +22,7 @@ _rlnJobOptionValue #2
     in_mov         "" 
    in_part         "" 
 other_args         "--c_window 512 --out_average_halves \" 
-param1_label      "eer_groups" 
+param1_label      "eer_fractions" 
 param1_value      "32" 
 param2_label      "gain_path" 
 param2_value      "None" 
