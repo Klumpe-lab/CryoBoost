@@ -23,6 +23,8 @@ class tsAlignment(warpWrapperBase):
                 "--exposure",str(self.st.tsInfo.expPerTilt),
                 "--tomo_dimensions",self.args.tomo_dimensions,
                 ]
+        
+            
         command=self.addGainStringToCommand(self.args,command)
         self.result=run_wrapperCommand(command,tag="tsAlignment-Settings",relionProj=self.relProj)
         
@@ -48,6 +50,8 @@ class tsAlignment(warpWrapperBase):
                     "--tilt_exposure",str(self.st.tsInfo.expPerTilt), 
                     "--override_axis",str(self.st.tsInfo.tiltAxis),
                 ]
+        if self.st.tsInfo.keepHand==1:
+            command.append("--dont_invert")
         self.result=run_wrapperCommand(command,tag="tsAlignment-ImportTs",relionProj=self.relProj)
             
     def runMainApp(self):    
@@ -60,21 +64,31 @@ class tsAlignment(warpWrapperBase):
         sys.stdout.flush()
         os.makedirs(tsFold,exist_ok=True) 
         if (self.args.alignment_program=="Aretomo"):
-    
+
             command=["WarpTools", "ts_aretomo",
                     "--settings",self.args.out_dir+"/"+ self.tsSettingsName,
                     "--angpix",str(self.args.rescale_angpixs),
                     "--alignz",str(int(float(self.args.aretomo_sample_thickness)*10)),
                     "--perdevice",str(self.args.perdevice),
                     ]
-            #if args.refine_tilt_axis:
+            if self.args.aretomo_patches!="0x0":
+                command.extend(["--patches",str(self.args.aretomo_patches)])
+             
+            if self.args.refineTiltAxis_iter_and_batch!="0:0":
+                batchSz=self.args.refineTiltAxis_iter_and_batch.split(":")[0]
+                if int(batchSz)>int(self.st.nrTomo):
+                    batchSz=self.st.nrTomo
+                command.extend(["--axis_iter",str(batchSz)])
+                command.extend(["--axis_batch",str(self.args.refineTiltAxis_iter_and_batch.split(":")[1])])
                 #-"--patches",str(args.aretomo_patches),
             #    command.append('--axis_iter 3')
             #    command.append('--axis_batch 5')
+           
         else:
             command=["WarpTools", "ts_etomo_patches",
                     "--settings", tsFold + "/" + self.tsSettingsName,
                     "--angpix",str(self.args.rescale_angpixs),
+                    "--patch_size",str(self.args.imod_patch_size_and_overlap.split(":")[0]),
                     ]
         
         self.result=run_wrapperCommand(command,tag="run_tsAlignment",relionProj=self.relProj)

@@ -21,9 +21,9 @@ def parse_arguments():
     
     parser.add_argument("--alignment_program", required=False,default="Aretomo", help=" Default: Aretomo opt. Imod")
     parser.add_argument("--aretomo_sample_thickness", required=False,default="200", help=" Default: 200. Thickness of sample in nm used for Alignment")
-    parser.add_argument("--aretomo_patches", required=False,default="0 0", help=" Default: 0 0. Num of Aretomo patches")
+    parser.add_argument("--aretomo_patches", required=False,default="2x2", help=" Default: 2x2. Num of Aretomo patches use 0x0 to switch off")
     parser.add_argument("--imod_patch_size_and_overlap", required=False,default="200", help=" Default: 200:50 Patch size in A patch overlap in %")
-    parser.add_argument("--refine_tilt_axis", required=False,default=False, help=" Default: False Refine given Tiltaxis")
+    parser.add_argument("--refineTiltAxis_iter_and_batch", required=False,default="3:5", help=" Default: 3:5 (3 iterations with 5 Tomograms) Refine given Tiltaxis use 0:0 to switch off")
     
     parser.add_argument("--perdevice", required=False,default="1" ,help="Default: 1. Number of processes per GPU")
     

@@ -92,148 +92,148 @@ class warpWrapperBase(ABC):
                 command.append("--gain_flip_x")
             if args.gain_operations.find("flip_y") != -1:
                 command.append("--gain_flip_y")
-            if args.gain_operations.find("gain_transpose") != -1:
-                command.append("--gain_gain_transpose")
+            if args.gain_operations.find("transpose") != -1:
+                command.append("--gain_transpose")
         return command
         
-def tsReconstruct(args):
-    relProj=os.path.dirname(os.path.dirname(os.path.dirname(args.in_mics)))
-    if relProj != "" and relProj is not None:
-        relProj=relProj+"/"
-    st=tiltSeriesMeta(args.in_mics,relProj)
-    outputFolder=args.out_dir    
-    warpTiltSeriesFoldSource=os.path.split(args.in_mics)[0]+"/warp_tiltseries"
-    warpTiltSeriesFoldTarget=outputFolder+"/warp_tiltseries"
+# def tsReconstruct(args):
+#     relProj=os.path.dirname(os.path.dirname(os.path.dirname(args.in_mics)))
+#     if relProj != "" and relProj is not None:
+#         relProj=relProj+"/"
+#     st=tiltSeriesMeta(args.in_mics,relProj)
+#     outputFolder=args.out_dir    
+#     warpTiltSeriesFoldSource=os.path.split(args.in_mics)[0]+"/warp_tiltseries"
+#     warpTiltSeriesFoldTarget=outputFolder+"/warp_tiltseries"
     
-    print("generating: ",warpTiltSeriesFoldTarget)
-    os.makedirs(warpTiltSeriesFoldTarget,exist_ok=True) 
-    print("copying data: ",warpTiltSeriesFoldSource + "/*.xml to" + warpTiltSeriesFoldTarget)
-    for f in glob.glob(warpTiltSeriesFoldSource + "/*.xml"):
-        shutil.copy(f,warpTiltSeriesFoldTarget)
-    print("copying data: ", os.path.split(args.in_mics)[0] + "/warp_tiltseries.settings to " + warpTiltSeriesFoldTarget)
-    shutil.copy(os.path.split(args.in_mics)[0] + "/warp_tiltseries.settings",outputFolder)
-    print("copying data: ", os.path.split(args.in_mics)[0] + "/tomostar to " + outputFolder)
-    shutil.copytree(os.path.split(args.in_mics)[0] + "/tomostar",outputFolder+"/tomostar",dirs_exist_ok=True)
+#     print("generating: ",warpTiltSeriesFoldTarget)
+#     os.makedirs(warpTiltSeriesFoldTarget,exist_ok=True) 
+#     print("copying data: ",warpTiltSeriesFoldSource + "/*.xml to" + warpTiltSeriesFoldTarget)
+#     for f in glob.glob(warpTiltSeriesFoldSource + "/*.xml"):
+#         shutil.copy(f,warpTiltSeriesFoldTarget)
+#     print("copying data: ", os.path.split(args.in_mics)[0] + "/warp_tiltseries.settings to " + warpTiltSeriesFoldTarget)
+#     shutil.copy(os.path.split(args.in_mics)[0] + "/warp_tiltseries.settings",outputFolder)
+#     print("copying data: ", os.path.split(args.in_mics)[0] + "/tomostar to " + outputFolder)
+#     shutil.copytree(os.path.split(args.in_mics)[0] + "/tomostar",outputFolder+"/tomostar",dirs_exist_ok=True)
 
-    # command=["WarpTools", "ts_reconstruct",
-    #         "--settings", outputFolder + "/warp_tiltseries.settings",
-    #         "--angpix" ,str(args.rescale_angpixs),
-    #         "--halfmap_frames" ,str(args.halfmap_frames),
-    #         "--deconv" ,str(args.deconv),
-    #         "--perdevice",str(args.perdevice),
-    #         ]
+#     # command=["WarpTools", "ts_reconstruct",
+#     #         "--settings", outputFolder + "/warp_tiltseries.settings",
+#     #         "--angpix" ,str(args.rescale_angpixs),
+#     #         "--halfmap_frames" ,str(args.halfmap_frames),
+#     #         "--deconv" ,str(args.deconv),
+#     #         "--perdevice",str(args.perdevice),
+#     #         ]
     
-    command=["WarpTools", "ts_reconstruct",
-            "--settings", outputFolder + "/warp_tiltseries.settings",
-            "--angpix" ,str(args.rescale_angpixs),
-            "--halfmap_frames" ,str(args.halfmap_frames),
-            "--deconv" ,str(args.deconv),
-            "--perdevice" ,str(args.perdevice),
-            ]
+#     command=["WarpTools", "ts_reconstruct",
+#             "--settings", outputFolder + "/warp_tiltseries.settings",
+#             "--angpix" ,str(args.rescale_angpixs),
+#             "--halfmap_frames" ,str(args.halfmap_frames),
+#             "--deconv" ,str(args.deconv),
+#             "--perdevice" ,str(args.perdevice),
+#             ]
     
     
-    command_string = shlex.join(command)
-    print(command_string)  
+#     command_string = shlex.join(command)
+#     print(command_string)  
 
-    try:
-        #print("launching via subprocess")
-        result = subprocess.run(command, check=True) #,capture_output=True, text=True) #, capture_output=True, text=True)          
-    except subprocess.CalledProcessError as e:
-        print("Error output:", e.stderr, file=sys.stderr)
+#     try:
+#         #print("launching via subprocess")
+#         result = subprocess.run(command, check=True) #,capture_output=True, text=True) #, capture_output=True, text=True)          
+#     except subprocess.CalledProcessError as e:
+#         print("Error output:", e.stderr, file=sys.stderr)
         
     
-    if result.returncode == 0:
-        #adapt values here
-        print("transfer from tsReconstruct still missing...not needed to proceed in warp")
-        for index, row in st.all_tilts_df.iterrows():
-            key=st.all_tilts_df.at[index,'cryoBoostKey']
-            #st.all_tilts_df.at[index, 'cryoBoostXfPath'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc" 
-            # st.all_tilts_df.at[index, '_rlnTomoXTilt']= 
-            # _rlnTomoYTilt #26
-            # _rlnTomoZRot #27
-            # _rlnTomoXShiftAngst #28
-            # _rlnTomoYShiftAngst #29
-        st.writeTiltSeries(outputFolder+"/tomograms.star")
-        return 0
-    else:
-        return 1        
+#     if result.returncode == 0:
+#         #adapt values here
+#         print("transfer from tsReconstruct still missing...not needed to proceed in warp")
+#         for index, row in st.all_tilts_df.iterrows():
+#             key=st.all_tilts_df.at[index,'cryoBoostKey']
+#             #st.all_tilts_df.at[index, 'cryoBoostXfPath'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc" 
+#             # st.all_tilts_df.at[index, '_rlnTomoXTilt']= 
+#             # _rlnTomoYTilt #26
+#             # _rlnTomoZRot #27
+#             # _rlnTomoXShiftAngst #28
+#             # _rlnTomoYShiftAngst #29
+#         st.writeTiltSeries(outputFolder+"/tomograms.star")
+#         return 0
+#     else:
+#         return 1        
 
 
 
 
 
-def tsCtf(args):
-    relProj=os.path.dirname(os.path.dirname(os.path.dirname(args.in_mics)))
-    if relProj != "" and relProj is not None:
-        relProj=relProj+"/"
-    st=tiltSeriesMeta(args.in_mics,relProj)
-    framePixS=st.all_tilts_df["rlnMicrographOriginalPixelSize"][0]
-    tiltAxis=st.all_tilts_df["rlnTomoNominalTiltAxisAngle"][0]
-    volt=st.tilt_series_df.rlnVoltage[0]
-    cs=st.tilt_series_df.rlnSphericalAberration[0]
-    cAmp=st.tilt_series_df.rlnAmplitudeContrast[0]  
-    outputFolder=args.out_dir    
-    dataFold=outputFolder+"/tomostar"
-    expPerTilt=st.all_tilts_df["rlnMicrographPreExposure"].sort_values().iloc[1]
-    warpTiltSeriesFoldSource=os.path.split(args.in_mics)[0]+"/warp_tiltseries"
-    warpTiltSeriesFoldTarget=outputFolder+"/warp_tiltseries"
-    nrTilt=st.tilt_series_df.shape[0]
+# def tsCtf(args):
+#     relProj=os.path.dirname(os.path.dirname(os.path.dirname(args.in_mics)))
+#     if relProj != "" and relProj is not None:
+#         relProj=relProj+"/"
+#     st=tiltSeriesMeta(args.in_mics,relProj)
+#     framePixS=st.all_tilts_df["rlnMicrographOriginalPixelSize"][0]
+#     tiltAxis=st.all_tilts_df["rlnTomoNominalTiltAxisAngle"][0]
+#     volt=st.tilt_series_df.rlnVoltage[0]
+#     cs=st.tilt_series_df.rlnSphericalAberration[0]
+#     cAmp=st.tilt_series_df.rlnAmplitudeContrast[0]  
+#     outputFolder=args.out_dir    
+#     dataFold=outputFolder+"/tomostar"
+#     expPerTilt=st.all_tilts_df["rlnMicrographPreExposure"].sort_values().iloc[1]
+#     warpTiltSeriesFoldSource=os.path.split(args.in_mics)[0]+"/warp_tiltseries"
+#     warpTiltSeriesFoldTarget=outputFolder+"/warp_tiltseries"
+#     nrTilt=st.tilt_series_df.shape[0]
     
         
-    print("generating: ",warpTiltSeriesFoldTarget)
-    os.makedirs(warpTiltSeriesFoldTarget,exist_ok=True) 
-    print("copying data: ",warpTiltSeriesFoldSource + "/*.xml to" + warpTiltSeriesFoldTarget)
-    for f in glob.glob(warpTiltSeriesFoldSource + "/*.xml"):
-        shutil.copy(f,warpTiltSeriesFoldTarget)
-    print("copying data: ", os.path.split(args.in_mics)[0] + "/warp_tiltseries.settings to " + warpTiltSeriesFoldTarget)
-    shutil.copy(os.path.split(args.in_mics)[0] + "/warp_tiltseries.settings",outputFolder)
-    print("copying data: ", os.path.split(args.in_mics)[0] + "/tomostar to " + outputFolder)
-    shutil.copytree(os.path.split(args.in_mics)[0] + "/tomostar",outputFolder+"/tomostar",dirs_exist_ok=True)
-    # command=["WarpTools", "ts_ctf",
-    #          "--settings", outputFolder + "/warp_tiltseries.settings",
-    #          "--range_high","6",
-    #          "--defocus_max", "8"]
+#     print("generating: ",warpTiltSeriesFoldTarget)
+#     os.makedirs(warpTiltSeriesFoldTarget,exist_ok=True) 
+#     print("copying data: ",warpTiltSeriesFoldSource + "/*.xml to" + warpTiltSeriesFoldTarget)
+#     for f in glob.glob(warpTiltSeriesFoldSource + "/*.xml"):
+#         shutil.copy(f,warpTiltSeriesFoldTarget)
+#     print("copying data: ", os.path.split(args.in_mics)[0] + "/warp_tiltseries.settings to " + warpTiltSeriesFoldTarget)
+#     shutil.copy(os.path.split(args.in_mics)[0] + "/warp_tiltseries.settings",outputFolder)
+#     print("copying data: ", os.path.split(args.in_mics)[0] + "/tomostar to " + outputFolder)
+#     shutil.copytree(os.path.split(args.in_mics)[0] + "/tomostar",outputFolder+"/tomostar",dirs_exist_ok=True)
+#     # command=["WarpTools", "ts_ctf",
+#     #          "--settings", outputFolder + "/warp_tiltseries.settings",
+#     #          "--range_high","6",
+#     #          "--defocus_max", "8"]
     
-    command=["WarpTools", "ts_ctf",
-            "--settings", outputFolder + "/warp_tiltseries.settings",
-            "--window" ,str(args.window),
-            "--range_low" ,args.range_min_max.split(":")[0],
-            "--range_high" ,args.range_min_max.split(":")[1],
-            "--defocus_min" ,args.defocus_min_max.split(":")[0],
-            "--defocus_max" ,args.defocus_min_max.split(":")[1],
-            "--voltage" ,str(round(volt)),
-            "--cs" ,str(cs),
-            "--amplitude" ,str(cAmp),
-            "--perdevice",str(args.perdevice),
-            #"--auto_hand" ,str(nrAutoHand),
-            ]
+#     command=["WarpTools", "ts_ctf",
+#             "--settings", outputFolder + "/warp_tiltseries.settings",
+#             "--window" ,str(args.window),
+#             "--range_low" ,args.range_min_max.split(":")[0],
+#             "--range_high" ,args.range_min_max.split(":")[1],
+#             "--defocus_min" ,args.defocus_min_max.split(":")[0],
+#             "--defocus_max" ,args.defocus_min_max.split(":")[1],
+#             "--voltage" ,str(round(volt)),
+#             "--cs" ,str(cs),
+#             "--amplitude" ,str(cAmp),
+#             "--perdevice",str(args.perdevice),
+#             #"--auto_hand" ,str(nrAutoHand),
+#             ]
     
-    command_string = shlex.join(command)
-    print(command_string)  
-    #os.system(command_string)
+#     command_string = shlex.join(command)
+#     print(command_string)  
+#     #os.system(command_string)
     
-    try:
-        #print("launching via subprocess")
-        result = subprocess.run(command, check=True) #,capture_output=True, text=True) #, capture_output=True, text=True)          
-    except subprocess.CalledProcessError as e:
-        print("Error output:", e.stderr, file=sys.stderr)
+#     try:
+#         #print("launching via subprocess")
+#         result = subprocess.run(command, check=True) #,capture_output=True, text=True) #, capture_output=True, text=True)          
+#     except subprocess.CalledProcessError as e:
+#         print("Error output:", e.stderr, file=sys.stderr)
         
     
-    if result.returncode == 0:
-        #adapt values here
-        print("transfer from tsCTF still missing...not needed to proceed in warp")
-        for index, row in st.all_tilts_df.iterrows():
-            key=st.all_tilts_df.at[index,'cryoBoostKey']
-            #st.all_tilts_df.at[index, 'cryoBoostXfPath'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc" 
-            # st.all_tilts_df.at[index, '_rlnTomoXTilt']= 
-            # _rlnTomoYTilt #26
-            # _rlnTomoZRot #27
-            # _rlnTomoXShiftAngst #28
-            # _rlnTomoYShiftAngst #29
-        st.writeTiltSeries(outputFolder+"/ts_ctf_tilt_series.star")
-        return 0
-    else:
-        return 1        
+#     if result.returncode == 0:
+#         #adapt values here
+#         print("transfer from tsCTF still missing...not needed to proceed in warp")
+#         for index, row in st.all_tilts_df.iterrows():
+#             key=st.all_tilts_df.at[index,'cryoBoostKey']
+#             #st.all_tilts_df.at[index, 'cryoBoostXfPath'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc" 
+#             # st.all_tilts_df.at[index, '_rlnTomoXTilt']= 
+#             # _rlnTomoYTilt #26
+#             # _rlnTomoZRot #27
+#             # _rlnTomoXShiftAngst #28
+#             # _rlnTomoYShiftAngst #29
+#         st.writeTiltSeries(outputFolder+"/ts_ctf_tilt_series.star")
+#         return 0
+#     else:
+#         return 1        
     
 
 # def tsAlignment(args):

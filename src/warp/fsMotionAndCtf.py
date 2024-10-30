@@ -21,9 +21,11 @@ class fsMotionAndCtf(warpWrapperBase):
                 "--output" , self.args.out_dir + "/warp_frameseries.settings",
                 "--angpix" , str(self.st.tsInfo.framePixS)
                 ]
-       
+        self.addGainStringToCommand(self.args,command) 
         if self.st.tsInfo.frameExt==".eer":
             #minus overlaods ngroups to fractions
+            print("info: --eer_ngroups with negative sign == eer_fractions in relion")
+            sys.stdout.flush()  
             command.extend(["--eer_ngroups", "-"+str(self.args.eer_fractions)])
         
         self.result=run_wrapperCommand(command,tag="fsMotionAndCtf-Settings",relionProj=self.relProj)
@@ -55,6 +57,7 @@ class fsMotionAndCtf(warpWrapperBase):
                 "--out_skip_last", str(self.args.out_skip_last),
                 "--perdevice", str(self.args.perdevice),
                 ]
+       
         
         if self.args.out_average_halves!=False:
             command.append("--out_average_halves")

@@ -951,7 +951,8 @@ class tiltSeriesMeta:
                   'cs': 'rlnSphericalAberration',
                   'cAmp': 'rlnAmplitudeContrast',
                   'framePixS': 'rlnMicrographOriginalPixelSize',
-                  'tiltAxis': 'rlnTomoNominalTiltAxisAngle'
+                  'tiltAxis': 'rlnTomoNominalTiltAxisAngle',
+                  'keepHand': 'rlnTomoHand'
                   }
 
       for attr, df_attr in attributes.items():

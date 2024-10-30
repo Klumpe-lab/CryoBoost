@@ -38,6 +38,7 @@ class MainUI(QMainWindow):
        
         self.cbdat=self.initializeDataStrcuture(args)
         self.setCallbacks()
+        self.adaptWidgetsToJobsInScheme()
         self.genSchemeTable()
         self.system=self.selSystemComponents()
         
@@ -48,6 +49,14 @@ class MainUI(QMainWindow):
         
         if (self.cbdat.args.autoGen or self.cbdat.args.skipSchemeEdit):
             self.makeJobTabsFromScheme()
+    
+    def adaptWidgetsToJobsInScheme(self):
+        
+        if "fs_motion_and_ctf" in self.cbdat.scheme.jobs_in_scheme.values:
+            self.dropDown_gainRot.clear()  # This will remove all items from the dropdown
+            self.dropDown_gainRot.addItem("No transpose")
+            self.dropDown_gainRot.addItem("Transpose")
+        
          
     def selSystemComponents(self):
         system = type('', (), {})() 
@@ -98,6 +107,10 @@ class MainUI(QMainWindow):
         self.textEdit_areTomoSampleThick.textChanged.connect(self.setAreTomoSampleThickToJobTap)
         self.textEdit_ImodPatchSize.textChanged.connect(self.setImodPatchSizeToJobTap)
         self.textEdit_imodPatchOverlap.textChanged.connect(self.setImodPatchOverlapToJobTap)
+        
+        self.textEdit_refineTiltAxisNrTomo.textChanged.connect(self.setTiltAxisRefineParamToJobTap)
+        self.textEdit_refineTiltAxisIter.textChanged.connect(self.setTiltAxisRefineParamToJobTap)
+        self.dropDown_doRefineTiltAxis.activated.connect(self.setTiltAxisRefineParamToJobTap)
         
         self.dropDown_tomoAlignProgram.activated.connect(self.setTomoAlignProgramToJobTap)
         self.btn_openWorkFlowLog.clicked.connect(self.openExtLogViewerWorkFlow)
@@ -349,21 +362,60 @@ class MainUI(QMainWindow):
     def setPathGainToJobTap(self):
         params_dict = {"fn_gain_ref": self.line_path_gain.text()} 
         self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+        params_dict = {"param2_value": self.line_path_gain.text()} 
+        self.setParamsDictToJobTap(params_dict,["fs_motion_and_ctf"]) 
+        
     
     def setGainRotToJobTap(self):
-        params_dict = {"gain_rot": self.dropDown_gainRot.currentText()} 
-        checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
-        self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
-    
+        if "motioncorr" in self.cbdat.scheme.jobs_in_scheme.values:
+            params_dict = {"gain_rot": self.dropDown_gainRot.currentText()} 
+            checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
+            self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+        if "fs_motion_and_ctf" in self.cbdat.scheme.jobs_in_scheme.values:   
+            selFlip=self.dropDown_gainFlip.currentText()
+            selRot=self.dropDown_gainRot.currentText()
+            gainOpString=""
+            if selFlip=="Flip upside down (1)":
+                gainOpString=gainOpString+"flip_y"
+            if selFlip=="Flip left to right (2)":
+                if gainOpString!="":
+                    gainOpString=gainOpString+":"
+                gainOpString=gainOpString+"flip_x"
+            if selRot=="Transpose":
+                if gainOpString!="":
+                    gainOpString=gainOpString+":"
+                gainOpString=gainOpString+"transpose"
+            
+            #checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
+            params_dict = {"param3_value": gainOpString}
+            self.setParamsDictToJobTap(params_dict,["fs_motion_and_ctf"]) 
+        
+        
     def setGainFlipJobTap(self):
         if "motioncorr" in self.cbdat.scheme.jobs_in_scheme.values:
             params_dict = {"gain_flip": self.dropDown_gainFlip.currentText()} 
             checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
             self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
-        if  "fs_motion_and_ctf" in self.cbdat.scheme.jobs_in_scheme.values:   
-            params_dict = {"gain_flip": self.dropDown_gainFlip.currentText()} 
-            checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
-            self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+        if "fs_motion_and_ctf" in self.cbdat.scheme.jobs_in_scheme.values:   
+            
+            selFlip=self.dropDown_gainFlip.currentText()
+            selRot=self.dropDown_gainRot.currentText()
+            gainOpString=""
+            if selFlip=="Flip upside down (1)":
+                gainOpString=gainOpString+"flip_y"
+            if selFlip=="Flip left to right (2)":
+                if gainOpString!="":
+                    gainOpString=gainOpString+":"
+                gainOpString=gainOpString+"flip_x"
+            if selRot=="Transpose":
+                if gainOpString!="":
+                    gainOpString=gainOpString+":"
+                gainOpString=gainOpString+"transpose"
+            
+            #checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
+            params_dict = {"param3_value": gainOpString}
+            print(params_dict)
+            self.setParamsDictToJobTap(params_dict,["fs_motion_and_ctf"]) 
             
     def setInvertHandToJobTap(self):
         params_dict = {"flip_tiltseries_hand": self.textEdit_invertHand.toPlainText()} 
@@ -378,21 +430,46 @@ class MainUI(QMainWindow):
             self.setParamsDictToJobTap(params_dict,["fs_motion_and_ctf"]) 
             
     def setAreTomoSampleThickToJobTap(self):
+        
         params_dict = {"aretomo_thickness": self.textEdit_areTomoSampleThick.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
+        
+        if "aligntiltsWarp" in self.cbdat.scheme.jobs_in_scheme.values:
+            params_dict = {"param6_value": self.textEdit_areTomoSampleThick.toPlainText()}
+            self.setParamsDictToJobTap(params_dict,["aligntiltsWarp"]) 
+        
+    # def setAreTomoSampleThickToJobTap(self):
+    #     params_dict = {"aretomo_thickness": self.textEdit_areTomoSampleThick.toPlainText()} 
+    #     self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
     
-    def setAreTomoSampleThickToJobTap(self):
-        params_dict = {"aretomo_thickness": self.textEdit_areTomoSampleThick.toPlainText()} 
-        self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
+    def setTiltAxisRefineParamToJobTap(self):
+        if "aligntiltsWarp" in self.cbdat.scheme.jobs_in_scheme.values:
+            if self.dropDown_doRefineTiltAxis.currentText() == "False":
+                refineStr = "0:0"
+            else:
+                refineStr = self.textEdit_refineTiltAxisIter.toPlainText()+":"+self.textEdit_refineTiltAxisNrTomo.toPlainText()
+            params_dict = {"param9_value": refineStr}
+            self.setParamsDictToJobTap(params_dict,["aligntiltsWarp"]) 
     
     def setImodPatchSizeToJobTap(self):
         params_dict = {"patch_size": self.textEdit_ImodPatchSize.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
+        if "aligntiltsWarp" in self.cbdat.scheme.jobs_in_scheme.values:
+            params_dict = {"param7_value": self.textEdit_ImodPatchSize.toPlainText()+
+                           ":"+self.textEdit_imodPatchOverlap.toPlainText()
+                           }
+            self.setParamsDictToJobTap(params_dict,["aligntiltsWarp"]) 
     
     def setImodPatchOverlapToJobTap(self):
         params_dict = {"patch_overlap": self.textEdit_imodPatchOverlap.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
-    
+        if "aligntiltsWarp" in self.cbdat.scheme.jobs_in_scheme.values:
+            params_dict = {"param7_value": self.textEdit_ImodPatchSize.toPlainText()+
+                           ":"+self.textEdit_imodPatchOverlap.toPlainText()
+                           }
+            self.setParamsDictToJobTap(params_dict,["aligntiltsWarp"]) 
+        
+        
     def setNrNodesFromJobSize(self):
        
        if self.dropDown_jobSize.currentText().strip()=="small":
@@ -417,6 +494,10 @@ class MainUI(QMainWindow):
         
         self.setParamsDictToJobTap(params_dictAre,["aligntilts"])
         self.setParamsDictToJobTap(params_dictImod,["aligntilts"])
+        if "aligntiltsWarp" in self.cbdat.scheme.jobs_in_scheme.values:
+            params_dict = {"param5_value": programSelected}
+            self.setParamsDictToJobTap(params_dict,["aligntiltsWarp"]) 
+        
         
     def setNrNodesToJobTap(self):
        
