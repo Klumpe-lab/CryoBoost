@@ -131,9 +131,9 @@ computing:
            p.hpcl93: 4
            p.hpcl8: 2
         aligntiltsWarp:
-           p.hpcl9: 4
-           p.hpcl93: 4
-           p.hpcl8: 2
+           p.hpcl9: 1
+           p.hpcl93: 1
+           p.hpcl8: 1
         ts_ctf:
            p.hpcl9: 4
            p.hpcl93: 4

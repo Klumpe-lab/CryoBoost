@@ -1,3 +1,4 @@
+
 import sys
 import os
 import pandas as pd
@@ -105,6 +106,11 @@ class MainUI(QMainWindow):
         self.textEdit_invertHand.textChanged.connect(self.setInvertHandToJobTap)
         self.textEdit_eerFractions.textChanged.connect(self.setEerFractionsToJobTap)
         self.textEdit_areTomoSampleThick.textChanged.connect(self.setAreTomoSampleThickToJobTap)
+        
+        self.textEdit_areTomoPatch.textChanged.connect(self.setAreTomoPatchToJobTap)
+        self.textEdit_algRescaleTilts.textChanged.connect(self.setAlgRescaleTiltsJobTap)
+        
+        
         self.textEdit_ImodPatchSize.textChanged.connect(self.setImodPatchSizeToJobTap)
         self.textEdit_imodPatchOverlap.textChanged.connect(self.setImodPatchOverlapToJobTap)
         
@@ -437,7 +443,21 @@ class MainUI(QMainWindow):
         if "aligntiltsWarp" in self.cbdat.scheme.jobs_in_scheme.values:
             params_dict = {"param6_value": self.textEdit_areTomoSampleThick.toPlainText()}
             self.setParamsDictToJobTap(params_dict,["aligntiltsWarp"]) 
+    #self.textEdit_areTomoPatch.textChanged.connect(self.setAreTomoPatchToJobTap)
+    #self.textEdit_algRescaleTilts.textChanged.connect(self.setAlgRescaleTiltsJobTap)
+    def setAreTomoPatchToJobTap(self):
         
+        if "aligntiltsWarp" in self.cbdat.scheme.jobs_in_scheme.values:
+            params_dict = {"other_args": self.textEdit_areTomoPatch.toPlainText()}
+            self.setParamsDictToJobTap(params_dict,["aligntiltsWarp"]) 
+        
+    def setAlgRescaleTiltsJobTap(self):
+        
+        if "aligntiltsWarp" in self.cbdat.scheme.jobs_in_scheme.values:
+            params_dict = {"param8_value": self.textEdit_algRescaleTilts.toPlainText()}
+            self.setParamsDictToJobTap(params_dict,["aligntiltsWarp"]) 
+        
+            
     # def setAreTomoSampleThickToJobTap(self):
     #     params_dict = {"aretomo_thickness": self.textEdit_areTomoSampleThick.toPlainText()} 
     #     self.setParamsDictToJobTap(params_dict,["aligntilts"]) 

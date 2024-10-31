@@ -21,7 +21,7 @@ _rlnJobOptionValue #2
     in_mic         Schemes/warp_tomo_prep/aligntilts/tilt_series.star
     in_mov         "" 
    in_part         "" 
-other_args         "--aretomo_patches 2x2 \" 
+other_args         "--aretomo_patches 0x0 \" 
 param1_label      "tomo_dimensions" 
 param1_value      "4096x4096x2048" 
 param2_label      "gain_path" 

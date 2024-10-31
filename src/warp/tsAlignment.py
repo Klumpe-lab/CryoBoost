@@ -75,11 +75,12 @@ class tsAlignment(warpWrapperBase):
                 command.extend(["--patches",str(self.args.aretomo_patches)])
              
             if self.args.refineTiltAxis_iter_and_batch!="0:0":
-                batchSz=self.args.refineTiltAxis_iter_and_batch.split(":")[0]
+                tsIter=self.args.refineTiltAxis_iter_and_batch.split(":")[0]
+                batchSz=self.args.refineTiltAxis_iter_and_batch.split(":")[1]
                 if int(batchSz)>int(self.st.nrTomo):
                     batchSz=self.st.nrTomo
-                command.extend(["--axis_iter",str(batchSz)])
-                command.extend(["--axis_batch",str(self.args.refineTiltAxis_iter_and_batch.split(":")[1])])
+                command.extend(["--axis_iter",str(tsIter)])
+                command.extend(["--axis_batch",str(batchSz)])
                 #-"--patches",str(args.aretomo_patches),
             #    command.append('--axis_iter 3')
             #    command.append('--axis_batch 5')
