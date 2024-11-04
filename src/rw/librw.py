@@ -282,7 +282,241 @@ def read_header(path_to_frames):
   #header = frame.read()
   #print(result.stdout)
   
+class mdocMeta:
+  def __init__(self,mdocWk=None):
+      
+    if (mdocWk is not None):
+      self.mdocWk = mdocWk
+      self.readAllMdoc(mdocWk)
+  
+  def filterByTiltSeriesStarFile(self,tiltSeriesFileName):
+    
+    ts=tiltSeriesMeta(tiltSeriesFileName)
+    dfMdoc=self.all_df['cryoBoostKey']
+    dfTs=ts.all_tilts_df['rlnMicrographMovieName'].apply(os.path.basename)
+    
+    mask=dfMdoc.isin(dfTs)
+    self.all_df=self.all_df[mask]
 
+  def readAllMdoc(self,wkMdoc):
+    mdoc_files = glob.glob(wkMdoc)
+    self.all_df=pd.DataFrame()
+    for mdoc in mdoc_files:
+      header, data = self.readMdoc(mdoc)
+      df = pd.DataFrame(data)
+      df['mdocHeader']=header
+      df['mdocFileName']=os.path.basename(mdoc)
+      df['mdocOrgPath']=mdoc
+      self.all_df = pd.concat([self.all_df, df], ignore_index=True) 
+      if 'SubFramePath' in self.all_df:
+        k = self.all_df['SubFramePath'].apply(lambda x: os.path.basename(x.replace("\\","/").replace("\\","")))
+      else:
+        raise Exception("SubFramePath entry missing check your mdoc's: "+ mdoc)
+      if (k.is_unique):
+        self.all_df['cryoBoostKey']=k
+      else:
+        raise Exception("SubFramePath is not unique !!") 
+    
+  
+  def addPrefixToFileName(self,prefix):
+
+    self.all_df['SubFramePath']=self.all_df['SubFramePath'].apply(lambda x: prefix+os.path.basename(x))
+    self.all_df['mdocFileName']=self.all_df['mdocFileName'].apply(lambda x: prefix+os.path.basename(x))
+         
+          
+  def writeAllMdoc(self,folder,appendMdocRootPath=False):   
+    
+    for mdoc in self.all_df['mdocFileName'].unique():
+      df = self.all_df[self.all_df['mdocFileName']==mdoc]
+      header=df['mdocHeader'].unique()[0]
+      mdocPath=os.path.join(folder,mdoc)       
+      self.writeMdoc(mdocPath,header,df,appendMdocRootPath)
+      del df,header
+    
+    
+  def readMdoc(self,file_path):
+      """
+      Parses an .mdoc file into a header and a pandas DataFrame containing ZValue sections.
+
+      Args:
+          file_path (str): Path to the .mdoc file.
+
+      Returns:
+          tuple: A tuple containing the header string and a DataFrame with ZValue section data.
+      """
+      header = []
+      data = []
+      current_row = {}
+      in_zvalue_section = False
+      
+      with open(file_path, 'r') as file:
+          lines = file.readlines()
+
+      for line in lines:
+          line = line.strip()
+          
+          # Check if we're entering ZValue section
+          if line.startswith('[ZValue'):
+              in_zvalue_section = True
+              if current_row:
+                  data.append(current_row)
+                  current_row = {}
+              current_row['ZValue'] = line.split('=')[1].strip().strip(']')
+              continue
+          
+          # Check if we're leaving ZValue section
+          if in_zvalue_section and line.startswith('[') and not line.startswith('[ZValue'):
+              in_zvalue_section = False
+              data.append(current_row)
+              current_row = {}
+          
+          if in_zvalue_section:
+              # Process each line within ZValue section
+              if line.startswith('TiltAngle'):
+                  current_row['TiltAngle'] = line.split('=')[1].strip()
+              elif line.startswith('StagePosition'):
+                  current_row['StagePosition'] = line.split('=')[1].strip()
+              elif line.startswith('StageZ'):
+                  current_row['StageZ'] = line.split('=')[1].strip()
+              elif line.startswith('Magnification'):
+                  current_row['Magnification'] = line.split('=')[1].strip()
+              elif line.startswith('Intensity'):
+                  current_row['Intensity'] = line.split('=')[1].strip()
+              elif line.startswith('ExposureDose'):
+                  current_row['ExposureDose'] = line.split('=')[1].strip()
+              elif line.startswith('PixelSpacing'):
+                  current_row['PixelSpacing'] = line.split('=')[1].strip()
+              elif line.startswith('SpotSize'):
+                  current_row['SpotSize'] = line.split('=')[1].strip()
+              elif line.startswith('Defocus'):
+                  current_row['Defocus'] = line.split('=')[1].strip()
+              elif line.startswith('ImageShift'):
+                  current_row['ImageShift'] = line.split('=')[1].strip()
+              elif line.startswith('RotationAngle'):
+                  current_row['RotationAngle'] = line.split('=')[1].strip()
+              elif line.startswith('ExposureTime'):
+                  current_row['ExposureTime'] = line.split('=')[1].strip()
+              elif line.startswith('Binning'):
+                  current_row['Binning'] = line.split('=')[1].strip()
+              elif line.startswith('MagIndex'):
+                  current_row['MagIndex'] = line.split('=')[1].strip()
+              elif line.startswith('CountsPerElectron'):
+                  current_row['CountsPerElectron'] = line.split('=')[1].strip()
+              elif line.startswith('MinMaxMean'):
+                  current_row['MinMaxMean'] = line.split('=')[1].strip()
+              elif line.startswith('TargetDefocus'):
+                  current_row['TargetDefocus'] = line.split('=')[1].strip()
+              elif line.startswith('PriorRecordDose'):
+                  current_row['PriorRecordDose'] = line.split('=')[1].strip()
+              elif line.startswith('SubFramePath'):
+                  current_row['SubFramePath'] = line.split('=')[1].strip()
+              elif line.startswith('NumSubFrames'):
+                  current_row['NumSubFrames'] = line.split('=')[1].strip()
+              elif line.startswith('FrameDosesAndNumber'):
+                  current_row['FrameDosesAndNumber'] = line.split('=')[1].strip()
+              elif line.startswith('DateTime'):
+                  current_row['DateTime'] = line.split('=')[1].strip()
+              elif line.startswith('FilterSlitAndLoss'):
+                  current_row['FilterSlitAndLoss'] = line.split('=')[1].strip()
+              elif line.startswith('ChannelName'):
+                  current_row['ChannelName'] = line.split('=')[1].strip()
+              elif line.startswith('CameraLength'):
+                  current_row['CameraLength'] = line.split('=')[1].strip()
+          else:
+              # Collect header information
+              header.append(line)
+
+      # Append the last row if it exists
+      if current_row:
+          data.append(current_row)
+      
+      # Convert header list to a single string
+      header_str = "\n".join(header)
+
+      # Create DataFrame for ZValue sections
+      df = pd.DataFrame(data)
+      
+      return header_str, df
+
+  def writeMdoc(self,output_path, header_str, df,appendMdocRootPath=False):
+      """
+      Writes the modified .mdoc data to a file.
+
+      Args:
+          file_path (str): Path to the output .mdoc file.
+          header_str (str): Header string of the .mdoc file.
+          df (DataFrame): DataFrame containing the ZValue sections.
+      """
+     
+      #df=df.drop(columns=["mdocHeader","mdocFilePath","cryoBoostKey"])   
+      # Define the format for each line in the ZValue sections
+      def format_row(row):
+          return (
+              f'[ZValue = {row.get("ZValue", "")}]\n'
+              f'TiltAngle = {row.get("TiltAngle", "")}\n'
+              f'StagePosition = {row.get("StagePosition", "")}\n'
+              f'StageZ = {row.get("StageZ", "")}\n'
+              f'Magnification = {row.get("Magnification", "")}\n'
+              f'Intensity = {row.get("Intensity", "")}\n'
+              f'ExposureDose = {row.get("ExposureDose", "")}\n'
+              f'PixelSpacing = {row.get("PixelSpacing", "")}\n'
+              f'SpotSize = {row.get("SpotSize", "")}\n'
+              f'Defocus = {row.get("Defocus", "")}\n'
+              f'ImageShift = {row.get("ImageShift", "")}\n'
+              f'RotationAngle = {row.get("RotationAngle", "")}\n'
+              f'ExposureTime = {row.get("ExposureTime", "")}\n'
+              f'Binning = {row.get("Binning", "")}\n'
+              f'MagIndex = {row.get("MagIndex", "")}\n'
+              f'CountsPerElectron = {row.get("CountsPerElectron", "")}\n'
+              f'MinMaxMean = {row.get("MinMaxMean", "")}\n'
+              f'TargetDefocus = {row.get("TargetDefocus", "")}\n'
+              f'PriorRecordDose = {row.get("PriorRecordDose", "")}\n'
+              f'SubFramePath = {row.get("SubFramePath", "")}\n'
+              f'NumSubFrames = {row.get("NumSubFrames", "")}\n'
+              f'FrameDosesAndNumber = {row.get("FrameDosesAndNumber", "")}\n'
+              f'DateTime = {row.get("DateTime", "")}\n'
+              f'FilterSlitAndLoss = {row.get("FilterSlitAndLoss", "")}\n'
+              f'ChannelName = {row.get("ChannelName", "")}\n'
+              f'CameraLength = {row.get("CameraLength", "")}\n'
+          )
+      
+
+      # Open the file for writing
+      with open(output_path, 'w') as file:
+          # Write the header
+          file.write(header_str + '\n')
+          
+          # Write each ZValue section using DataFrame
+          df.apply(lambda row: file.write(format_row(row) + '\n'), axis=1)
+          
+          if (appendMdocRootPath):
+            file.write("CryoBoost_RootMdocPath = " + os.path.abspath(df["mdocOrgPath"].unique()[0]) + "\n")
+          
+
+  # def move_files_to_trash(missing_files, tilts_folder, ext):
+  #     """
+  #     Move the excluded .mrc and .eer files to a 'Trash' folder.
+
+  #     Args:
+  #         missing_files (set): Set of filenames of missing files.
+  #         tilts_folder (str): Directory containing the files.
+  #         extension (str): extension of the file, either mrc or eer
+  #     """
+  #     trash_folder = os.path.join(tilts_folder, 'Trash')
+  #     os.makedirs(trash_folder, exist_ok=True)
+
+  #     for file in missing_files:
+  #         src = os.path.join(tilts_folder, f'{file}.{ext}')
+  #         dst = os.path.join(trash_folder, f'{file}.{ext}')
+  #         if os.path.exists(src):
+  #             shutil.move(src, dst)
+  #             print(f'Moved {file} to Trash')
+  #         else:
+  #             print(f'{file} not found in {tilts_folder}')
+
+    
+  
+#TODO lagacy will be removed by mdoc object
 def read_mdoc(path_to_mdoc_dir, path_to_yaml = "../src/read_write/config_reading_meta.yaml"):
   """
   reads mdoc file and fetches the relevant parameters to automatically set the respective values.

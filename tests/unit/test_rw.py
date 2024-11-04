@@ -1,5 +1,52 @@
 from src.rw.librw import dataImport
+from src.rw.librw import mdocMeta,tiltSeriesMeta
+
 import os,glob,shutil 
+
+
+def test_mdocReadWrite():
+   
+   sourceWk="data/raw/copia/mdoc/*.mdoc"
+   targetPath="tmpOut/test_mdocReadWrite/"
+   
+   if os.path.exists(targetPath):
+       shutil.rmtree(targetPath)
+   os.makedirs(targetPath, exist_ok=True)
+    
+   mdoc=mdocMeta(sourceWk)   
+   mdoc.writeAllMdoc(targetPath)
+   mdocNew=mdocMeta(targetPath+"*.mdoc")
+   
+   assert mdocNew.all_df.equals(mdoc.all_df)
+
+def test_mdocFilterByTiltSeriesStar():
+
+   sourceWk="data/tilts/mdoc/*.mdoc"
+   sourceTsStar="data/tilts/tilt_series_ctf.star"
+   targetPath="tmpOut/test_mdocFilterByTiltSeriesStar/"
+   
+   if os.path.exists(targetPath):
+       shutil.rmtree(targetPath)
+   os.makedirs(targetPath, exist_ok=True)
+   mdoc=mdocMeta(sourceWk)   
+   ts=tiltSeriesMeta(sourceTsStar)
+   filterParams = {"cryoBoostTestLabel": ("good")}
+   ts.filterTilts(filterParams)
+   ts.writeTiltSeries(targetPath+"/ts_test.star")
+   
+   mdoc.filterByTiltSeriesStarFile(targetPath+"/ts_test.star")
+   mdoc.writeAllMdoc(targetPath)
+   mdocNew=mdocMeta(targetPath+"*.mdoc")
+   mdocNew=mdocNew.all_df['cryoBoostKey']
+   dfTs=ts.all_tilts_df['rlnMicrographMovieName'].apply(os.path.basename)
+   
+   assert dfTs.equals(mdocNew)
+
+   mdocNew=mdocMeta(targetPath+"*.mdoc")
+   mdocNew.addPrefixToFileName("umba-prefix_") 
+
+   pass
+
 
 
 def test_importData():
