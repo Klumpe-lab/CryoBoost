@@ -42,10 +42,44 @@ def test_mdocFilterByTiltSeriesStar():
    
    assert dfTs.equals(mdocNew)
 
-   mdocNew=mdocMeta(targetPath+"*.mdoc")
-   mdocNew.addPrefixToFileName("umba-prefix_") 
+   
+def test_mdocAddPrefix():
 
-   pass
+   sourceWk="data/tilts/mdoc/*.mdoc"
+   targetPath="tmpOut/test_mdocAddPrefix/"
+   testPref="umba-prefix_"
+   
+   if os.path.exists(targetPath):
+      shutil.rmtree(targetPath)
+   os.makedirs(targetPath, exist_ok=True)
+   mdoc=mdocMeta(sourceWk)   
+   mdoc.addPrefixToFileName(testPref) 
+   mdoc.writeAllMdoc(targetPath)
+   mdoc=mdocMeta(targetPath+"*.mdoc")
+
+   mdocOrg=mdocMeta(sourceWk)
+   dfPref=mdoc.all_df['SubFramePath']   
+   dfTest=mdocOrg.all_df['SubFramePath'].apply(lambda x:testPref+os.path.basename(x))
+   
+   assert dfTest.equals(dfPref)
+
+
+def test_mdocAddOrgPath():
+
+   sourceWk="data/tilts/mdoc/*.mdoc"
+   targetPath="tmpOut/test_mdocAddOrgPath/"
+   
+   resultPath=glob.glob(os.path.abspath(sourceWk))[0]
+   if os.path.exists(targetPath):
+      shutil.rmtree(targetPath)
+   os.makedirs(targetPath, exist_ok=True)
+   mdoc=mdocMeta(sourceWk)   
+  
+   mdoc.writeAllMdoc(targetPath,appendMdocRootPath=True)
+   mdoc=mdocMeta(targetPath+"*.mdoc")
+   orgPathMdoc=mdoc.all_df["mdocOrgPath"].unique()[0]
+   
+   assert orgPathMdoc==resultPath
 
 
 

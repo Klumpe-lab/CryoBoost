@@ -302,11 +302,15 @@ class mdocMeta:
     mdoc_files = glob.glob(wkMdoc)
     self.all_df=pd.DataFrame()
     for mdoc in mdoc_files:
-      header, data = self.readMdoc(mdoc)
+      header,data,orgPath = self.readMdoc(mdoc)
       df = pd.DataFrame(data)
       df['mdocHeader']=header
       df['mdocFileName']=os.path.basename(mdoc)
-      df['mdocOrgPath']=mdoc
+      if orgPath is not None:
+        df['mdocOrgPath']=orgPath
+      else:
+        df['mdocOrgPath']=mdoc
+      
       self.all_df = pd.concat([self.all_df, df], ignore_index=True) 
       if 'SubFramePath' in self.all_df:
         k = self.all_df['SubFramePath'].apply(lambda x: os.path.basename(x.replace("\\","/").replace("\\","")))
@@ -348,6 +352,7 @@ class mdocMeta:
       data = []
       current_row = {}
       in_zvalue_section = False
+      orgPath=None
       
       with open(file_path, 'r') as file:
           lines = file.readlines()
@@ -425,18 +430,22 @@ class mdocMeta:
           else:
               # Collect header information
               header.append(line)
-
+          if line.startswith('CryoBoost_RootMdocPath'):
+              orgPath=line.split('=')[1].strip()
+              
+              
       # Append the last row if it exists
       if current_row:
           data.append(current_row)
-      
+
       # Convert header list to a single string
       header_str = "\n".join(header)
 
       # Create DataFrame for ZValue sections
       df = pd.DataFrame(data)
       
-      return header_str, df
+      
+      return header_str,df,orgPath
 
   def writeMdoc(self,output_path, header_str, df,appendMdocRootPath=False):
       """
@@ -489,7 +498,7 @@ class mdocMeta:
           # Write each ZValue section using DataFrame
           df.apply(lambda row: file.write(format_row(row) + '\n'), axis=1)
           
-          if (appendMdocRootPath):
+          if appendMdocRootPath:
             file.write("CryoBoost_RootMdocPath = " + os.path.abspath(df["mdocOrgPath"].unique()[0]) + "\n")
           
 
