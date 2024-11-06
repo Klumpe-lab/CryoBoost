@@ -1,17 +1,20 @@
 from src.rw.librw import tiltSeriesMeta
 from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageStackParallel
-import os
+from src.rw.librw import mdocMeta
+import os,shutil
 
-def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None,probThr=0.1,probAction="assingToGood",threads=24):
+#TODO This has to an object !
+
+
+def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None,probThr=0.1,probAction="assingToGood",threads=24,mdocWk=None):
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
     if os.path.exists(outputFolder+"tiltseries_filtered.star"):
          tsExist=tiltSeriesMeta(outputFolder+"tiltseries_filtered.star")
          ts.reduceToNonOverlab(tsExist)
          if len(ts.tilt_series_df)==0:
-             print("nothing to do")
              return
          print(ts.tilt_series_df.rlnTomoName)
-        
+    
     #plotTiltStat(ts,outputFolder)
     threads=int(threads)
     if (pramRuleFilter!=None):
@@ -27,6 +30,34 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
         ts=tsExist
     
     ts.writeTiltSeries(outputFolder+"tiltseries_filtered.star")
+
+    preExpFolder=os.path.dirname(tilseriesStar)
+    if os.path.exists(preExpFolder+"/warp_frameseries.settings"):
+        print("Warp frame alignment detected ...getting data from: " + preExpFolder)
+        getDataFromPreExperiment(preExpFolder,outputFolder)
+        os.makedirs(outputFolder+"/mdoc", exist_ok=True)    
+        print("  filtering mdocs: " + mdocWk)
+        mdocWk=os.path.dirname(mdocWk) + os.path.sep + "*.mdoc"
+        mdoc=mdocMeta(mdocWk)
+        mdoc.filterByTiltSeriesStarFile(outputFolder+"tiltseries_filtered.star")
+        print("  filtered mdoc has " + str(len(mdoc.all_df)) + " tilts")
+        mdoc.writeAllMdoc(outputFolder+"/mdoc")    
+
+def getDataFromPreExperiment(sourceFolder,targetFolder):
+    fsFolderSource=os.path.abspath(sourceFolder+os.path.sep+"warp_frameseries")
+    fsFolderTarget=os.path.abspath(targetFolder+os.path.sep+"warp_frameseries")
+    if os.path.exists(fsFolderTarget):
+        print(fsFolderTarget+" already exists")
+    else:
+        print(" generating symlink:")
+        print("   ln -s "+ fsFolderSource+ " " +  fsFolderTarget)
+        os.symlink(fsFolderSource,fsFolderTarget)
+    fsSettingsSource=sourceFolder+os.path.sep+"warp_frameseries.settings"
+    fsSettingsTarget=targetFolder+os.path.sep+"warp_frameseries.settings"
+    print(" copy settings file")
+    print("   cp "+ fsSettingsSource + " " + fsSettingsTarget)
+    shutil.copyfile(fsSettingsSource,fsSettingsTarget)
+    
     
 def plotTiltStat(ts,outputFolder,plot=None):
     import matplotlib.pyplot as plt

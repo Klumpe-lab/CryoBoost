@@ -73,20 +73,21 @@ class fsMotionAndCtf(warpWrapperBase):
         for index, row in self.st.all_tilts_df.iterrows():
             key=self.st.all_tilts_df.at[index,'cryoBoostKey']
             res = wm.data_df.query(f"cryoBoostKey == '{key}'")
-            self.st.all_tilts_df.at[index, 'rlnMicrographName'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc"
-            self.st.all_tilts_df.at[index, 'rlnMicrographNameEven'] = str(res.iloc[0]['folder']) + "/average/even/" + key + ".mrc"
-            self.st.all_tilts_df.at[index, 'rlnMicrographNameOdd'] = str(res.iloc[0]['folder']) + "/average/odd/" + key + ".mrc"
+            baseN=key.replace(".eer","")
+            self.st.all_tilts_df.at[index, 'rlnMicrographName'] = str(res.iloc[0]['folder']) + "/average/" + baseN + ".mrc"
+            self.st.all_tilts_df.at[index, 'rlnMicrographNameEven'] = str(res.iloc[0]['folder']) + "/average/even/" + baseN + ".mrc"
+            self.st.all_tilts_df.at[index, 'rlnMicrographNameOdd'] = str(res.iloc[0]['folder']) + "/average/odd/" + baseN + ".mrc"
             self.st.all_tilts_df.at[index, 'rlnMicrographMetadata']="None"
-            self.st.all_tilts_df.at[index, 'rlnAccumMotionTotal']=-1
-            self.st.all_tilts_df.at[index, 'rlnAccumMotionEarly']=-1
-            self.st.all_tilts_df.at[index, 'rlnAccumMotionLate']=-1
-            self.st.all_tilts_df.at[index, 'rlnCtfImage'] = str(res.iloc[0]['folder']) + "/powerspectrum/" + key + ".mrc"
+            self.st.all_tilts_df.at[index, 'rlnAccumMotionTotal']=0.000001 #TODO change real values from .xml
+            self.st.all_tilts_df.at[index, 'rlnAccumMotionEarly']=0.000001 #TODO change real values from .xml
+            self.st.all_tilts_df.at[index, 'rlnAccumMotionLate']=0.000001  #TODO change real values from .xml
+            self.st.all_tilts_df.at[index, 'rlnCtfImage'] = str(res.iloc[0]['folder']) + "/powerspectrum/" + baseN + ".mrc"
             self.st.all_tilts_df.at[index, 'rlnDefocusU'] = str(res.iloc[0]['defocus_value']) 
             self.st.all_tilts_df.at[index, 'rlnDefocusV'] = str(res.iloc[0]['defocus_value'])
             self.st.all_tilts_df.at[index, 'rlnCtfAstigmatism'] = str(res.iloc[0]['defocus_delta'])
             self.st.all_tilts_df.at[index, 'rlnDefocusAngle'] = str(res.iloc[0]['defocus_angle'])
             self.st.all_tilts_df.at[index, 'rlnCtfFigureOfMerit']="None"
-            self.st.all_tilts_df.at[index, 'rlnCtfMaxResolution']="None"
+            self.st.all_tilts_df.at[index, 'rlnCtfMaxResolution']=0.000001  #TODO change real values from .xml
             self.st.all_tilts_df.at[index, 'rlnMicrographMetadata']="None"
         self.st.writeTiltSeries(self.args.out_dir+"/fs_motion_and_ctf.star")
          

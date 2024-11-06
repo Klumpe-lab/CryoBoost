@@ -39,9 +39,15 @@ class tsAlignment(warpWrapperBase):
         sys.stdout.flush()
         os.makedirs(dataFold,exist_ok=True) 
         
-        mdocFolder,mdocPattern = os.path.split(self.args.mdocWk)
-        mdocPattern="*.mdoc"
-
+        if os.path.exists(self.preJobFolder + "/mdoc"):
+            print("local mdoc folder detected=>proj. filtering")
+            mdocFolder=self.preJobFolder + "/mdoc"
+            print("new mdoc folder: " + mdocFolder)
+            sys.stdout.flush()
+        else:
+            mdocFolder,mdocPattern = os.path.split(self.args.mdocWk)
+        mdocPattern="*.mdoc" 
+            
         command=["WarpTools", "ts_import",
                     "--mdocs",mdocFolder,
                     "--pattern",mdocPattern,

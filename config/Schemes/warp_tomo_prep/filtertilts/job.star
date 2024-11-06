@@ -19,23 +19,23 @@ _rlnJobOptionValue #2
   in_3dref         "" 
  in_coords         "" 
    in_mask         "" 
-    in_mic         Schemes/relion_tomo_prep/ctffind/tilt_series_ctf.star
+    in_mic         Schemes/warp_tomo_prep/fs_motion_and_ctf/fs_motion_and_ctf.star
     in_mov         "" 
    in_part         "" 
 other_args         "" 
 param1_label      model 
 param1_value      default
 param2_label      defocusInAng
-param2_value      2000,140000,-70,70 
+param2_value      0,600000,-70,70 
 param3_label      ctfMaxResolution
 param3_value      0,50,-70,70 
 param4_label      driftInAng
-param4_value      1,90000,-70,70    
+param4_value      0,90000,-70,70    
 param5_label      probThreshold
 param5_value         0.70 
 param6_label      probThrAction 
 param6_value         assignToGood 
-param7_label      "mdocWk" 
+param7_label      mdocWk 
 param7_value      "mdoc/*.mdoc" 
 param8_label         "" 
 param8_value         "" 

@@ -32,7 +32,7 @@ _rlnSchemeOperatorInput1 #4
 _rlnSchemeOperatorInput2 #5 
 EXIT       exit  undefined  undefined  undefined
 EXIT_maxtime exit_maxtime  undefined maxtime_hr  undefined 
-      WAIT       wait  undefined   wait_sec  undefined 
+WAIT       wait  undefined   wait_sec  undefined 
  
 
 # version 50001
@@ -46,6 +46,7 @@ _rlnSchemeJobMode #3
 _rlnSchemeJobHasStarted #4 
 importmovies importmovies   continue            0 
 fs_motion_and_ctf fs_motion_and_ctf continue 0 
+filtertilts  filtertilts continue 0
 aligntiltsWarp aligntiltsWarp continue 0 
 ts_ctf ts_ctf continue 0 
 ts_reconstruct ts_reconstruct continue 0
@@ -62,7 +63,8 @@ _rlnSchemeEdgeBooleanVariable #5
 WAIT EXIT_maxtime            0  undefined  undefined 
 EXIT_maxtime importmovies            0  undefined  undefined 
 importmovies fs_motion_and_ctf       0 undefined  undefined 
-fs_motion_and_ctf aligntiltsWarp       0 undefined  undefine
+fs_motion_and_ctf filtertilts        0 undefined  undefine
+filtertilts aligntiltsWarp           0 undefined  undefine   
 aligntiltsWarp    ts_ctf               0 undefined  undefine
 ts_ctf ts_reconstruct                  0 undefined  undefine
 ts_reconstruct     EXIT                0 undefined
