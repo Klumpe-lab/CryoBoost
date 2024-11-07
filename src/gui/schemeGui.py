@@ -9,8 +9,11 @@ from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QDialog, QComboBox, QTabWidget, QWidget,QScrollArea ,QCheckBox, QAbstractItemView
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
-from src.rw.librw import starFileMeta
+from src.rw.librw import starFileMeta,mdocMeta
 from src.misc.system import run_command_async
+from src.gui.libGui import externalTextViewer,browse_dirs,browse_files,checkDosePerTilt,browse_filesOrFolders,change_values,change_bckgrnd,checkGainOptions,get_inputNodesFromSchemeTable,messageBox 
+from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
+from src.gui.edit_scheme import EditScheme
 import subprocess, shutil
 from PyQt6.QtCore import QTimer 
 import mrcfile
@@ -22,9 +25,6 @@ root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
 
 #from lib.functions import get_value_from_tab
-from src.gui.libGui import externalTextViewer,browse_dirs,browse_files,checkDosePerTilt,browse_filesOrFolders,change_values,change_bckgrnd,checkGainOptions,get_inputNodesFromSchemeTable,messageBox 
-from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
-from src.gui.edit_scheme import EditScheme
 
 class MainUI(QMainWindow):
     """
@@ -283,6 +283,15 @@ class MainUI(QMainWindow):
                 checkDosePerTilt(self.line_path_mdocs.text(),float(self.textEdit_dosePerTilt.toPlainText()),float(thoneRingFade))
         
         self.setParamsDictToJobTap(params_dict)
+        try:
+            mdoc=mdocMeta(self.line_path_mdocs.text())
+            self.textEdit_pixelSize.setText(str(mdoc.param4Processing["PixelSize"]))
+            self.textEdit_dosePerTilt.setText(str(mdoc.param4Processing["DosePerTilt"]))
+            self.textEdit_nomTiltAxis.setText(str(mdoc.param4Processing["TiltAxisAngle"]))
+        except:
+            pass
+        
+        
     #self.textEdit_tomoForDenoiseTrain.textChanged.connect(self.setTomoForDenoiseTrainToJobTap)
     #self.textEdit_pathDenoiseModel.textChanged.connect(self.setPathDenoiseModelToJobTap)
     
