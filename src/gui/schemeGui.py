@@ -283,12 +283,16 @@ class MainUI(QMainWindow):
                 checkDosePerTilt(self.line_path_mdocs.text(),float(self.textEdit_dosePerTilt.toPlainText()),float(thoneRingFade))
         
         self.setParamsDictToJobTap(params_dict)
+        
+
         try:
             mdoc=mdocMeta(self.line_path_mdocs.text())
+            print(str(mdoc.param4Processing["PixelSize"]))
             self.textEdit_pixelSize.setText(str(mdoc.param4Processing["PixelSize"]))
             self.textEdit_dosePerTilt.setText(str(mdoc.param4Processing["DosePerTilt"]))
             self.textEdit_nomTiltAxis.setText(str(mdoc.param4Processing["TiltAxisAngle"]))
-        except:
+            print("success!!")
+        except: 
             pass
         
         

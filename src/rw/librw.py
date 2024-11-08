@@ -29,7 +29,7 @@ class warpMetaData:
     ctf = root.find(".//CTF")
     data={}
     data = {
-       "cryoBoostKey":pathlib.Path(pathXML).name.replace(".xml",".eer"),
+       "cryoBoostKey":pathlib.Path(pathXML).name.replace(".xml",""),
        "name": pathXML,
        "folder": str(pathlib.Path(pathXML).parent.as_posix()),
        "defocus_value": ctf.find(".//Param[@Name='Defocus']").get('Value'),
@@ -328,7 +328,7 @@ class mdocMeta:
       self.param4Processing["TiltAxisAngle"]=-round(-(-1*float(self.all_df.RotationAngle.unique()[0]))+180,1)
     else: #+180
       self.acqApp="SerialEM"
-      self.param4Processing["TiltAxisAngle"]=round(float(mdoc.all_df.mdocHeader[0].split("Tilt axis angle =")[1].split(",")[0]),2) #+180
+      self.param4Processing["TiltAxisAngle"]=round(float(self.all_df.mdocHeader[0].split("Tilt axis angle =")[1].split(",")[0]),2) #+180
     self.param4Processing["DosePerTilt"]=round(float(self.all_df.ExposureDose[0])*1.5,2)
     self.param4Processing["PixelSize"]= round(float(self.all_df.mdocHeader[0].split("PixelSpacing = ")[1].split('\n')[0]),2)
     

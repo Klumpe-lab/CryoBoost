@@ -72,6 +72,7 @@ class fsMotionAndCtf(warpWrapperBase):
         wm=warpMetaData(self.args.out_dir+ os.path.sep + self.fsFolderName +"/*.xml")
         for index, row in self.st.all_tilts_df.iterrows():
             key=self.st.all_tilts_df.at[index,'cryoBoostKey']
+            key=os.path.splitext(key)[0]
             res = wm.data_df.query(f"cryoBoostKey == '{key}'")
             baseN=key.replace(".eer","")
             self.st.all_tilts_df.at[index, 'rlnMicrographName'] = str(res.iloc[0]['folder']) + "/average/" + baseN + ".mrc"
