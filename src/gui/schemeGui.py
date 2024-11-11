@@ -297,7 +297,7 @@ class MainUI(QMainWindow):
             self.textEdit_pixelSize.setText(str(mdoc.param4Processing["PixelSize"]))
             self.textEdit_dosePerTilt.setText(str(mdoc.param4Processing["DosePerTilt"]))
             self.textEdit_nomTiltAxis.setText(str(mdoc.param4Processing["TiltAxisAngle"]))
-            print("success!!")
+            
         except: 
             pass
         
@@ -370,13 +370,12 @@ class MainUI(QMainWindow):
     def setdosePerTiltToJobTap(self):
         params_dict = {"dose_rate": self.textEdit_dosePerTilt.toPlainText()} 
         if "ctffind" in self.cbdat.scheme.jobs_in_scheme.values:
-             thoneRingFade = self.cbdat.scheme.getJobOptions("ctffind").loc[
+            thoneRingFade = self.cbdat.scheme.getJobOptions("ctffind").loc[
                              self.cbdat.scheme.getJobOptions("ctffind")["rlnJobOptionVariable"] == "exp_factor_dose",
                              "rlnJobOptionValue"
                              ].values[0]  
-            
-        if (self.textEdit_dosePerTilt.toPlainText().isnumeric()):
-            checkDosePerTilt(self.line_path_mdocs.text(),float(self.textEdit_dosePerTilt.toPlainText()),float(thoneRingFade))
+            if self.textEdit_dosePerTilt.toPlainText().isnumeric():
+                checkDosePerTilt(self.line_path_mdocs.text(),float(self.textEdit_dosePerTilt.toPlainText()),float(thoneRingFade))
         
         self.setParamsDictToJobTap(params_dict,["importmovies"])       
     

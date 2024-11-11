@@ -14,7 +14,7 @@ def parse_arguments():
     parser.add_argument("--movies", "-mov", required=False,default="None",help="Input movie dir")
     parser.add_argument("--mdocs", "-m", required=False,default="None",help="Input mdocs dir")
     parser.add_argument("--gain", "-g", required=False,help="Path to gain ref")
-    parser.add_argument("--pixS", "-pS", required=False,default="1.8",help="Input pixelsize")
+    parser.add_argument("--pixS", "-pS", required=False,default=None,help="Input pixelsize")
     parser.add_argument("--impPrefix", "-iP", required=False,default="auto",help="Input prefix")
     parser.add_argument("--proj", "-p", required=False,default="None",help="Output output project dir")
     parser.add_argument("--noGui", "-nG", required=False,action='store_true',help="do not open cryoboost gui")
