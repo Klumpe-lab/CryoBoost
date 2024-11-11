@@ -10,7 +10,7 @@ from src.misc.system import test_crboostSetup
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="scheme gui")
-    parser.add_argument("--scheme", "-s", required=False,default="relion_tomo_prep" ,help="path to scheme folder")
+    parser.add_argument("--scheme", "-s", required=False,default="gui" ,help="path to scheme folder or predefined schemes warp_tomo_prep/relion_tomo_prep")
     parser.add_argument("--movies", "-mov", required=False,default="None",help="Input movie dir")
     parser.add_argument("--mdocs", "-m", required=False,default="None",help="Input mdocs dir")
     parser.add_argument("--gain", "-g", required=False,help="Path to gain ref")

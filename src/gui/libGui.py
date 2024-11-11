@@ -2,8 +2,8 @@
 import sys, subprocess
 import os
 from PyQt6.QtGui import QColor
-from PyQt6.QtWidgets import QTableWidgetItem, QTabWidget, QFileDialog
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QTableWidgetItem, QTabWidget, QFileDialog,QPushButton
+from PyQt6.QtWidgets import QMessageBox,QDialog,QListWidget
 from PyQt6.QtWidgets import QMainWindow,QApplication, QWidget, QVBoxLayout, QTextEdit, QScrollBar
 from PyQt6.QtCore import Qt
 import glob
@@ -44,6 +44,35 @@ def checkDosePerTilt(mdocWk,dosePerTilt,thoneRingFade):
         msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
         msg_box.resize(2000, 400) 
         msg_box.exec()
+
+def get_user_selection():
+    class ListDialog(QDialog):
+        def __init__(self):
+            super().__init__()
+            self.selected_item = None
+            self.init_ui()
+
+        def init_ui(self):
+            layout = QVBoxLayout()
+            self.list_widget = QListWidget()
+            self.list_widget.addItems(['relion_tomo_prep', 'warp_tomo_prep', 'browse'])
+            ok_button = QPushButton("OK")
+            ok_button.clicked.connect(self.on_ok)
+            layout.addWidget(self.list_widget)
+            layout.addWidget(ok_button)
+            self.setLayout(layout)
+
+        def on_ok(self):
+            if self.list_widget.currentItem():
+                self.selected_item = self.list_widget.currentItem().text()
+            self.accept()
+
+    
+    dialog = ListDialog()
+    dialog.exec()
+    
+    return str(dialog.selected_item)
+
 
 def checkGainOptions(gainPath,rot,flip):
     
@@ -99,7 +128,11 @@ def browse_dirs(target_field,target_fold,dialog="qt"):
         A window will open, allowing you to browse through your files. Once a directory is selected, 
         the path to that directory will be copied into the field line_path_to_movies.
     """
-    current_dir = target_fold
+    
+    if target_field is None:
+        current_dir=os.getcwd()
+    else:
+        current_dir = target_fold
     
       
     if dialog=="qt":

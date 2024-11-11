@@ -6,12 +6,12 @@ import glob,random
 from PyQt6 import QtWidgets
 from PyQt6.QtGui import QTextCursor
 from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QDialog, QComboBox, QTabWidget, QWidget,QScrollArea ,QCheckBox, QAbstractItemView
+from PyQt6.QtWidgets import QListWidget,QPushButton,QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QDialog, QComboBox, QTabWidget, QWidget,QScrollArea ,QCheckBox, QAbstractItemView
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
 from src.rw.librw import starFileMeta,mdocMeta
 from src.misc.system import run_command_async
-from src.gui.libGui import externalTextViewer,browse_dirs,browse_files,checkDosePerTilt,browse_filesOrFolders,change_values,change_bckgrnd,checkGainOptions,get_inputNodesFromSchemeTable,messageBox 
+from src.gui.libGui import get_user_selection,externalTextViewer,browse_dirs,browse_files,checkDosePerTilt,browse_filesOrFolders,change_values,change_bckgrnd,checkGainOptions,get_inputNodesFromSchemeTable,messageBox 
 from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
 import subprocess, shutil
@@ -37,11 +37,12 @@ class MainUI(QMainWindow):
         super(MainUI, self).__init__()
         loadUi(os.path.abspath(__file__).replace('.py','.ui'), self)
        
+        self.system=self.selSystemComponents()
         self.cbdat=self.initializeDataStrcuture(args)
         self.setCallbacks()
         self.adaptWidgetsToJobsInScheme()
         self.genSchemeTable()
-        self.system=self.selSystemComponents()
+        
         
         self.groupBox_WorkFlow.setEnabled(False)
         self.groupBox_Setup.setEnabled(False)
@@ -71,10 +72,15 @@ class MainUI(QMainWindow):
         #custom varibales
         cbdat = type('', (), {})() 
         cbdat.CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
+        if args.scheme=="gui":
+            args.scheme=get_user_selection()
         if args.scheme=="relion_tomo_prep" or args.scheme=="default":      
             cbdat.defaultSchemePath=cbdat.CRYOBOOST_HOME + "/config/Schemes/relion_tomo_prep/"
         if args.scheme=="warp_tomo_prep":
             cbdat.defaultSchemePath=cbdat.CRYOBOOST_HOME + "/config/Schemes/warp_tomo_prep/"
+        if args.scheme=="browse":
+            cbdat.defaultSchemePath=browse_dirs(target_field=None,target_fold=None,dialog=self.system.filebrowser)
+           
         cbdat.confPath=cbdat.CRYOBOOST_HOME + "/config/conf.yaml"
         cbdat.pipeRunner= None
         cbdat.conf=cbconfig(cbdat.confPath)     
