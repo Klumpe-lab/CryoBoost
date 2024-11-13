@@ -1,5 +1,5 @@
-import sys
-from src.rw.librw import warpMetaData
+import sys,os
+from src.rw.librw import warpMetaData,starFileMeta
 from src.misc.system import run_wrapperCommand
 from src.warp.libWarp import warpWrapperBase
 
@@ -29,12 +29,28 @@ class tsReconstruct(warpWrapperBase):
         self.result=run_wrapperCommand(command,tag="run_tsReconstruct",relionProj=self.relProj)
     
     def updateMetaData(self):
+        recRes=format(float(self.args.rescale_angpixs),'.2f')
+        #update information for tomograms
         wm=warpMetaData(self.args.out_dir+"/warp_tiltseries/*.xml")
         for index, row in self.st.all_tilts_df.iterrows():
             key=self.st.all_tilts_df.at[index,'cryoBoostKey']
-            #res = wm.data_df.query(f"cryoBoostKey == '{key}'")
-            #self.st.all_tilts_df.at[index, 'xxxxxx'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc"
-        self.st.writeTiltSeries(self.args.out_dir+"/tomograms.star")    
+            key=os.path.splitext(key)[0]
+            res = wm.data_df.query(f"cryoBoostKey == '{key}'") 
+            #TODO Add information for each tilt here
+            
+        self.st.writeTiltSeries(self.args.out_dir+"/tomograms.star")
+        #update information for template matching
+        st=starFileMeta(self.args.out_dir+"/tomograms.star")
+        for index, row in st.df.iterrows():
+            tN=st.df.at(index,['rlnTomoName'])
+            print("tN"+tN)
+            recName=self.args.out_dir + os.path.sep + self.tsFolderName + "/reconstruction/" + tN + recRes +"Apx.mrc"
+            print("rN"+recName)
+            st.df.at(index,['rlnTomoReconstructedTomogram'])=recName
+        
+                                    
+        
+            
     def checkResults(self):
         #check if important results exists and values are in range
         #set to 1 of something is missing self.result.returncode

@@ -17,7 +17,8 @@ def test_mdocReadWrite():
    mdoc.writeAllMdoc(targetPath)
    mdocNew=mdocMeta(targetPath+"*.mdoc")
    
-   assert mdocNew.all_df.equals(mdoc.all_df)
+   assert mdocNew.all_df.drop("mdocOrgPath",axis=1).equals(mdoc.all_df.drop("mdocOrgPath",axis=1))
+   
 
 def test_mdocFilterByTiltSeriesStar():
 

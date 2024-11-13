@@ -17,6 +17,8 @@ def test_fsMotionAndCtfSettings():
     args.out_dir=output
     args.gain_path="None"
     args.gain_operations=None
+    args.eer_fractions=32
+    
     fsM=fsMotionAndCtf(args)
     fsM.createSettings()
     

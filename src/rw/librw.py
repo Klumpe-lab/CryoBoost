@@ -326,7 +326,7 @@ class mdocMeta:
     if self.all_df.mdocHeader[0].find("SerialEM:")==-1:
       self.acqApp="Tomo5"
       #self.param4Processing["TiltAxisAngle"]=-round(-(-1*float(self.all_df.RotationAngle.unique()[0]))+180,1)
-      self.param4Processing["TiltAxisAngle"]=round(float(self.all_df.RotationAngle.unique()[0]),1)
+      self.param4Processing["TiltAxisAngle"]=abs(round(float(self.all_df.RotationAngle.unique()[0]),1))
     else: #+180
       self.acqApp="SerialEM"
       self.param4Processing["TiltAxisAngle"]=round(float(self.all_df.mdocHeader[0].split("Tilt axis angle =")[1].split(",")[0]),2) #+180
