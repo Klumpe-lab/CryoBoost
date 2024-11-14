@@ -35,6 +35,22 @@ class pytomTm(templateMatchingWrapperBase):
                      "--per-tilt-weighting",
                      "-g", "0",
                      "--log","debug"]
+        if bool(strtobool(self.args.spectralWhitening)):            
+            constParams.extend(["--spectral-whitening"])
+        if bool(strtobool(self.args.randomPhaseCorrection)):            
+            constParams.extend(["--random-phase-correction"])
+        if bool(strtobool(self.args.nonSphericalMask)):            
+            constParams.extend(["--non-spherical-mask"])
+        if self.args.bandPassFilter is not None:
+            constParams.extend(["--low-pass",str(self.args.bandPassFiler).split(":")[0]])
+            constParams.extend(["--high-pass",str(self.args.bandPassFiler).spli(":")[1]])
+            
+            
+        if self.args.templateSym!="C1":
+            if self.args.templateSym[0]!="C":
+                raise("Only C symmetrz allowed")
+            else:
+                constParams.extend("--z-axis-rotational-symmetry",self.args.templateSym)
         
         volumes=self.st.tilt_series_df[[self.args.volume_column,"rlnTomoName"]]
         z=0
@@ -51,6 +67,8 @@ class pytomTm(templateMatchingWrapperBase):
                     command.extend(["--defocus",self.args.out_dir+"/defocusFiles/"+tomoName+".txt"])
             if bool(strtobool(self.args.doseWeight)):            
                     command.extend(["--dose-accumulation",self.args.out_dir+"/doseFiles/"+tomoName+".txt",])
+           
+            
             command.extend(constParams)
             self.result=run_wrapperCommand(command,tag="run_template_matching",relionProj=self.relProj)
     
@@ -75,7 +93,5 @@ class pytomTm(templateMatchingWrapperBase):
         #check if important results exists and values are in range
         #set to 1 of something is missing self.result.returncode
         pass        
-    def genTiltFileFromTiltSeries(self):
-        
-        pass
+    
     

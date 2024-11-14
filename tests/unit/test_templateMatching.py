@@ -14,12 +14,20 @@ def test_pytomTM_Full():
     args= type('', (), {})() 
     args.in_mics=inputTsPath
     args.out_dir=output
-    args.template="data/vols/Position_1.mrc"
-    args.templateMask="data/vols/mask.mrc"
     args.volume_column="rlnTomoReconstructedTomogram"
+    args.volumeMaskFold=None
+    args.template="data/vols/Position_1.mrc"
+    args.templateSym="C1"
+    args.templateMask="data/vols/mask.mrc"
+    args.nonSphericalMask="True"
     args.angularSearch=str(30)    
-    args.ctfWeight="False"
     args.doseWeight="False"
+    args.nonSphericalMask="False"
+    args.bandPassFilter=None
+    args.ctfWeight="True"
+    args.doseWeight="True"
+    args.spectralWhitening="True"
+    args.randomPhaseCorrection="True"
     
     tm=pytomTm(args,runFlag="Full")
     

@@ -22,8 +22,8 @@ def parse_arguments():
     parser.add_argument("--bandPassFilter", required=False,default=None, help="two comma separated values low,high")
     parser.add_argument("--ctfWeight", required=False,default=True, help="Default True Apply ctf correction ")
     parser.add_argument("--doseWeight", required=False,default=True, help="Default True Apply dose weighting")
-    parser.add_argument("--spectral-whitening", required=False,default=True, help="Default True Apply spectral whitening")
-    parser.add_argument("--random-phase-correction", required=False,default=False, help="Default: False")
+    parser.add_argument("--spectralWhitening", required=False,default=True, help="Default True Apply spectral whitening")
+    parser.add_argument("--randomPhaseCorrection", required=False,default=False, help="Default: False")
         
     args,unkArgs=parser.parse_known_args()
     return args,unkArgs
