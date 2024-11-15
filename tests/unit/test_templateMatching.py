@@ -14,7 +14,7 @@ def test_pytomTM_Full():
     args= type('', (), {})() 
     args.in_mics=inputTsPath
     args.out_dir=output
-    args.volume_column="rlnTomoReconstructedTomogram"
+    args.volumeColumn="rlnTomoReconstructedTomogram"
     args.volumeMaskFold=None
     args.template="data/vols/Position_1.mrc"
     args.templateSym="C1"
@@ -24,11 +24,14 @@ def test_pytomTM_Full():
     args.doseWeight="False"
     args.nonSphericalMask="False"
     args.bandPassFilter=None
-    args.ctfWeight="True"
+    args.ctfWeight="False"
+    args.bandPassFilter="None"
     args.doseWeight="True"
-    args.spectralWhitening="True"
+    args.spectralWhitening="False"
     args.randomPhaseCorrection="True"
-    
+    args.gpu_ids="0"
+    args.split="None"
+        
     tm=pytomTm(args,runFlag="Full")
     
     assert os.path.isfile(output+'tmResults/Position_1_scores.mrc')

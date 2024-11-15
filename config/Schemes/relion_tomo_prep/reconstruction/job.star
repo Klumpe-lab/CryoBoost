@@ -19,7 +19,7 @@ in_tiltseries Schemes/relion_tomo_prep/aligntilts/aligned_tilt_series.star
 xdim       4096 
 ydim       4096 
 zdim       2048 
-binned_angpix      11.72 
+binned_angpix      11.8 
 generate_split_tomograms         No 
 tiltangle_offset          0 
 tomo_name         "" 

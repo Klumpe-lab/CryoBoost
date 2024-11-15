@@ -1,4 +1,4 @@
-import sys,os
+import sys,os,subprocess
 from distutils.util import strtobool
 from src.misc.system import run_wrapperCommand
 from src.templateMatching.libTemplateMatching import templateMatchingWrapperBase
@@ -15,7 +15,7 @@ class pytomTm(templateMatchingWrapperBase):
         print("--------------generate files for pytom---------------------------")
         sys.stdout.flush()  
         self.generatePytomInputFiles(columnName="rlnTomoNominalStageTiltAngle",tag="tiltAngle",ext=".tlt")
-        self.generatePytomInputFiles(columnName="rlnDefocusU",tag="defocus")
+        self.generatePytomInputFiles(columnName="rlnDefocusU",tag="defocus",fact=10000)
         self.generatePytomInputFiles(columnName="rlnMicrographPreExposure",tag="dose")
 
      
@@ -25,6 +25,22 @@ class pytomTm(templateMatchingWrapperBase):
         sys.stdout.flush()  
         os.makedirs(self.args.out_dir + "tmResults",exist_ok=True)
         
+        numGPU,vram,gpuId=self.get_gpu_info()
+        
+        print("self.args.gpu_ids"+self.args.gpu_ids)
+        if self.args.gpu_ids!="auto":
+            print("gpu Id overwirte")
+            gpuId=self.args.gpu_ids.split(":")
+        print("self.args.gpu_ids"+self.args.gpu_ids)
+        
+        if self.args.split=="auto":    
+            if vram>24: #take volume size into account
+                volumeSplit=['2','2','1']
+            else:
+                volumeSplit=['4','4','2']
+        else:
+             volumeSplit=self.args.split.split(":")
+        
         constParams=["-t",self.args.template,
                      "-d",self.args.out_dir + "tmResults",
                      "-m",self.args.templateMask,
@@ -33,17 +49,20 @@ class pytomTm(templateMatchingWrapperBase):
                      "--spherical-aberration",str(self.st.tsInfo.cs),
                      "--amplitude-contrast",str(self.st.tsInfo.cAmp),
                      "--per-tilt-weighting",
-                     "-g", "0",
                      "--log","debug"]
+        constParams.extend(["-g"] + gpuId)
+        if self.args.split!="None":
+            constParams.extend(["-s"] + volumeSplit)
+        
         if bool(strtobool(self.args.spectralWhitening)):            
             constParams.extend(["--spectral-whitening"])
         if bool(strtobool(self.args.randomPhaseCorrection)):            
             constParams.extend(["--random-phase-correction"])
         if bool(strtobool(self.args.nonSphericalMask)):            
             constParams.extend(["--non-spherical-mask"])
-        if self.args.bandPassFilter is not None:
-            constParams.extend(["--low-pass",str(self.args.bandPassFiler).split(":")[0]])
-            constParams.extend(["--high-pass",str(self.args.bandPassFiler).spli(":")[1]])
+        if self.args.bandPassFilter!="None":
+            constParams.extend(["--low-pass",str(self.args.bandPassFilter).split(":")[0]])
+            constParams.extend(["--high-pass",str(self.args.bandPassFilter).split(":")[1]])
             
             
         if self.args.templateSym!="C1":
@@ -52,7 +71,8 @@ class pytomTm(templateMatchingWrapperBase):
             else:
                 constParams.extend("--z-axis-rotational-symmetry",self.args.templateSym)
         
-        volumes=self.st.tilt_series_df[[self.args.volume_column,"rlnTomoName"]]
+        volumes=self.st.tilt_series_df[[self.args.volumeColumn,"rlnTomoName"]]
+        print("starting to match " + str(len(volumes)))
         z=0
         for row in volumes.itertuples():
             z+=1
@@ -68,19 +88,36 @@ class pytomTm(templateMatchingWrapperBase):
             if bool(strtobool(self.args.doseWeight)):            
                     command.extend(["--dose-accumulation",self.args.out_dir+"/doseFiles/"+tomoName+".txt",])
            
-            
             command.extend(constParams)
             self.result=run_wrapperCommand(command,tag="run_template_matching",relionProj=self.relProj)
     
-    
-    def generatePytomInputFiles(self,columnName,tag,ext=".txt"):
+    def get_gpu_info(self):
+        try:
+            output = subprocess.check_output(['nvidia-smi', '--query-gpu=index,memory.total', '--format=csv,noheader,nounits'])
+            gpu_info = output.decode('utf-8').strip().split('\n')
+            num_gpus = len(gpu_info)
+            vram = int(gpu_info[0].split(',')[1])  # Get VRAM from first GPU
+            vram = round(vram / 1024, 2)
+            gpuID = [str(i) for i in range(num_gpus)]
+            cuda_visible_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
+            if cuda_visible_devices is not None and cuda_visible_devices != '-1':
+                print(" ##CUDA_VISIBLE_DEVICE is set ==> gpu ids accordingly")
+                gpuID = cuda_visible_devices.split(',')
+            print(f" ##Found {num_gpus} GPUs:")
+            print(f" ##Available GPU IDs: {gpuID}")
+            print(f" ##VRAM per GPU: {vram} GB")
+            return num_gpus, vram, gpuID
+        except:
+            return 0, 0, []
+        
+    def generatePytomInputFiles(self,columnName,tag,ext=".txt",fact=1):
         
         outFold=self.args.out_dir + os.path.sep + tag + "Files" + os.path.sep
         os.makedirs(outFold,exist_ok=True)
         tomoNames=self.st.tilt_series_df["rlnTomoName"]
         print("  --> generating " + str(len(tomoNames)) + " " + tag + " Files",end="", flush=True)
         for tomoName in tomoNames:
-            OneColumnOneTomo=self.st.all_tilts_df.query("rlnTomoName == @tomoName")[columnName]
+            OneColumnOneTomo=self.st.all_tilts_df.query("rlnTomoName == @tomoName")[columnName]/fact
             OneColumnOneTomo.to_csv(outFold + tomoName + ext, index=False, header=False)
             print(".", end="",flush=True)
         print("done!")     

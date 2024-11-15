@@ -1,3 +1,5 @@
+#!/usr/bin/env crboost_python 
+
 import argparse
 import os
 import sys
@@ -9,17 +11,20 @@ def parse_arguments():
     parser.add_argument("--in_mics", "-in_mic", required=True, help="Input tilt series STAR file")
     parser.add_argument("--o", dest="out_dir", required=True, help="Output directory name")
     parser.add_argument("--j", "-nr_threads",dest="threads" ,required=False, default=None, help="Nr of threads used. Ignore!")
+    parser.add_argument("--gpu_ids","-g",required=False,dest="gpu_ids", default="auto", help="Gpu Id's seperated by semicolon e.g 0:1")
     
     parser.add_argument("--implementation", required=False,default="pytom", help="Default: pytom implementation to use")
     parser.add_argument("--volumeColumn", required=False,default="rlnTomoReconstructedTomogram", help="Folder containing the masks for the volumes") 
+    parser.add_argument("--split","-s",required=False, default="4:4:2", help="split the search volume switch off with None")
     parser.add_argument("--volumeMaskFold", required=False,default=None, help="Folder containing the masks for the volumes")
-    parser.add_argument("--template", required=True,default=None ,help="Volume,pdb or pdb code")
-    parser.add_argument("--templateSym", required=False,default="C1", help="Symmetry of the template for pytom only Cn implemented")
-    parser.add_argument("--templateMask", required=False,default="Sphere", help="Path to Volume,Diameter or Auto")
-    parser.add_argument("--angularSearch", required=True,default="12", help="Default: 12 Angular increment or a list of euler angles in zxz comma seperated")
-    parser.add_argument("--nonSphericalMask", required=False,default=False, help="Default: Set to true for non spherical masks")
+    parser.add_argument("--in_3dref","-templ",dest="template", required=True,default=None ,help="Volume,pdb or pdb code")
     
-    parser.add_argument("--bandPassFilter", required=False,default=None, help="two comma separated values low,high")
+    parser.add_argument("--templateSym", required=False,default="C1", help="Symmetry of the template for pytom only Cn implemented")
+    parser.add_argument("--in_mask","-templMask",dest="templateMask", required=False,default="Sphere", help="Path to Volume,Diameter or Auto")
+    parser.add_argument("--angularSearch", required=True,default="12", help="Default: 12 Angular increment or a list of euler angles in zxz comma seperated")
+    parser.add_argument("--nonSphericalMask", required=False,default=True, help="Default: Set to true for non spherical masks")
+    
+    parser.add_argument("--bandPassFilter", required=False,default="None", help="two comma separated values low,high")
     parser.add_argument("--ctfWeight", required=False,default=True, help="Default True Apply ctf correction ")
     parser.add_argument("--doseWeight", required=False,default=True, help="Default True Apply dose weighting")
     parser.add_argument("--spectralWhitening", required=False,default=True, help="Default True Apply spectral whitening")
@@ -31,6 +36,7 @@ def parse_arguments():
 def main():
     
     args,addArg = parse_arguments()
+    print(args)
     
     print("launching")
     if args.implementation=="pytom":

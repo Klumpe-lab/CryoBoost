@@ -88,21 +88,25 @@ computing:
       NrGPU: 2
       NrCPU: 24
       RAM: 370G
-  
+      VRAM: 16G
+
   p.hpcl9:
       NrGPU: 4
       NrCPU: 72
       RAM: 970G
+      VRAM: 48G
 
   p.hpcl93:
       NrGPU: 4
       NrCPU: 128
-      RAM: 740G  
+      RAM: 740G
+      VRAM: 48G  
   
   local.hpcl58:
       NrGPU: 2
       NrCPU: 32
       RAM: 300G
+      VRAM: 48G
 
 
   NODE-Sharing:
@@ -121,6 +125,7 @@ computing:
         - fs_motion_and_ctf
         - ts_ctf
         - ts_reconstruct
+        - templatematching
       GPU-OneProcessOneGPU:
         - denoisetrain
         - denoisepredict
@@ -151,4 +156,4 @@ computing:
            p.hpcl9: 4
            p.hpcl93: 4
            p.hpcl8: 2
-           local.hpcl58*: 4             
+           local.hpcl58*: 4

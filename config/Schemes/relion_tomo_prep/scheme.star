@@ -52,6 +52,7 @@ motioncorr motioncorr   continue            0
 reconstruction reconstruction   continue            0 
 denoisetrain    denoisetrain    continue        0      
 denoisepredict    denoisepredict    continue        0 
+templatematching  templatematching   continue      0 
 
 # version 50001
 
@@ -72,4 +73,5 @@ filtertilts aligntilts            0  undefined  undefined
 aligntilts reconstruction            0  undefined  undefined 
 reconstruction  denoisetrain            0  undefined  undefined 
 denoisetrain    denoisepredict                    0 undefined
-denoisepredict    EXIT                    0 undefined
+reconstruction  templatematching                0 undefined
+templatematching    EXIT                    0 undefined
