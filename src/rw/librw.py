@@ -857,68 +857,106 @@ class schemeMeta:
   def getJobOptions(self, jobName):
     return self.job_star[jobName].dict["joboptions_values"]   
   
-  def filterSchemeByNodes(self, nodes):
+  def filterSchemeByNodes(self, nodes_df):
+    
+   
+    filtEdges_df=self.filterEdgesByNodes(self.scheme_star.dict["scheme_edges"], nodes_df)
+    jobStar_dict=self.job_star
+    jobStar_dictFilt=self.filterjobStarByNodes(jobStar_dict,nodes_df)
+    schemeJobs_dfFilt=self._filterSchemeJobsByNodes(self.scheme_star.dict["scheme_jobs"],nodes_df)
     
     scFilt=copy.deepcopy(self)
-    filtEdges_df=self.filterEdgesByNodes(self.scheme_star.dict["scheme_edges"], nodes)
-    jobStar_dict=self.job_star
-    schemeJobs_df=self.scheme_star.dict["scheme_jobs"]
-    jobStar_dictFilt=self.filterjobStarByNodes(jobStar_dict,nodes)
-    #schemeJobs_dfFilt=self.filterSchemeJobsByNodes(schemeJobs_df,nodes)
     scFilt.scheme_star.dict["scheme_edges"]=filtEdges_df
+    scFilt.scheme_star.dict["scheme_jobs"]=schemeJobs_dfFilt
     scFilt.job_star=jobStar_dictFilt
     scFilt.nrJobs =len(scFilt.job_star)
     scFilt.jobs_in_scheme = scFilt.scheme_star.dict["scheme_edges"].rlnSchemeEdgeOutputNodeName.iloc[1:-1]
     
+    
     return scFilt   
   
-  
-  def filterjobStarByNodes(self,jobStarDict,nodes): 
+  def _filterSchemeJobsByNodes(self,schemJobs,nodes_df):
+    
+    schemeJobs_dfFilt = pd.DataFrame(columns=schemJobs.columns)
+    for index, row in nodes_df.iterrows():
+        new_row=copy.deepcopy(schemJobs.head(1))
+        new_row['rlnSchemeJobNameOriginal']=row['type'] + ('_' + row['tag'] if row['tag'] != 'None' else '')
+        new_row['rlnSchemeJobName']=row['type'] + ('_' + row['tag'] if row['tag'] != 'None' else '')
+        schemeJobs_dfFilt=pd.concat([schemeJobs_dfFilt,new_row])
+    return schemeJobs_dfFilt
+    
+  def filterjobStarByNodes(self,jobStarDict,nodes_df): 
     
     schemeJobs_dfFilt={}
-    for nodeid, node in nodes.items():
-      schemeJobs_dfFilt[node]=jobStarDict[node]
-      if (nodeid>0):
-          indMinusOne=nodes[nodeid-1]
-          input=self.scheme_star.dict["scheme_general"]["rlnSchemeName"]+self.conf.getJobOutput(indMinusOne)
-          
-          df=schemeJobs_dfFilt[node].dict["joboptions_values"]
+    schemeName=self.scheme_star.dict["scheme_general"]["rlnSchemeName"]
+    #for nodeid, node in nodes.items():
+    for index, row in nodes_df.iterrows():
+      jobNameWithTag=jobNameWithTag = row['type'] + ('_' + row['tag'] if row['tag'] != 'None' else '')
+      schemeJobs_dfFilt[jobNameWithTag]=copy.deepcopy(jobStarDict[row['type']])
+      df=schemeJobs_dfFilt[jobNameWithTag].dict["joboptions_values"]
+      ## adapt input
+      if row['inputType'] is not None:
+        #input=schemeName+row['inputType'] + ('_' + row['inputTag'] if row['inputTag'] != 'None' else '')
+          input=schemeName+row['inputType'] + ('_' + str(row['inputTag']) if row['inputTag'] not in [None, 'None'] else '')
           ind=df.rlnJobOptionVariable=="input_star_mics"
           if not any(ind):
-             ind=df.rlnJobOptionVariable=="in_tiltseries" 
+              ind=df.rlnJobOptionVariable=="in_tiltseries" 
           if not any(ind):
-             ind=df.rlnJobOptionVariable=="in_mic"
+              ind=df.rlnJobOptionVariable=="in_mic"
           if not any(ind):
-             ind=df.rlnJobOptionVariable=="in_tomoset"
+              ind=df.rlnJobOptionVariable=="in_tomoset"
+          if not any(ind):
+              raise Exception("nether input_star_mics nor in_tiltseries found")
+          print(" ")      
+          row_index = schemeJobs_dfFilt[jobNameWithTag].dict["joboptions_values"].index[ind]
+          schemeJobs_dfFilt[jobNameWithTag].dict["joboptions_values"].loc[row_index, "rlnJobOptionValue"] = input
           
-          if not any(ind):
-             raise Exception("nether input_star_mics nor in_tiltseries found")
           
-          # Get the index of the row to update
-          row_index = schemeJobs_dfFilt[node].dict["joboptions_values"].index[ind]
-          schemeJobs_dfFilt[node].dict["joboptions_values"].loc[row_index, "rlnJobOptionValue"] = input
+      # if (index>0):
+      #     indMinusOne=nodes[nodeid-1]
+      #     indMinusOneTarget=nodesTarget[nodeid-1]
+      #     jobN=indMinusOneTarget+os.path.sep+os.path.basename(self.conf.getJobOutput(indMinusOne))
+      #     input=self.scheme_star.dict["scheme_general"]["rlnSchemeName"]+jobN
+          
+      #     df=schemeJobs_dfFilt[nodeT].dict["joboptions_values"]
+      #     ind=df.rlnJobOptionVariable=="input_star_mics"
+      #     if not any(ind):
+      #        ind=df.rlnJobOptionVariable=="in_tiltseries" 
+      #     if not any(ind):
+      #        ind=df.rlnJobOptionVariable=="in_mic"
+      #     if not any(ind):
+      #        ind=df.rlnJobOptionVariable=="in_tomoset" 
+          
+      #     if not any(ind):
+      #        raise Exception("nether input_star_mics nor in_tiltseries found")
+          
+      #     # Get the index of the row to update
+      #     row_index = schemeJobs_dfFilt[nodeT].dict["joboptions_values"].index[ind]
+      #     schemeJobs_dfFilt[nodeT].dict["joboptions_values"].loc[row_index, "rlnJobOptionValue"] = input
           #schemeJobs_dfFilt[node].dict["joboptions_values"].loc[ind].rlnJobOptionValue=input  
           
           
     return schemeJobs_dfFilt 
   
   
-  def filterSchemeJobsByNodes(self,jobs_df,jobStarDict,nodes): 
-    pass
-    return 1 
   
-  def filterEdgesByNodes(self,edge_df, nodes):     
+  def filterEdgesByNodes(self,edge_df, nodes_df):     
     
-    tmpEdge=edge_df.loc[0:0].copy(deep=True)
-    schemeEdge_df=tmpEdge
-    for nodeid, node in nodes.items(): 
-        dfOneEdge=tmpEdge.copy(deep=True)
-        dfOneEdge["rlnSchemeEdgeInputNodeName"]=schemeEdge_df.loc[nodeid].rlnSchemeEdgeOutputNodeName
-        dfOneEdge["rlnSchemeEdgeOutputNodeName"]=node
+    firstEdge=edge_df.loc[0:0].copy(deep=True)
+    jobNameWithTagOld=firstEdge["rlnSchemeEdgeOutputNodeName"].item()
+    #for nodeid, node in nodes.items(): 
+    schemeEdge_df=firstEdge
+    for index, row in nodes_df.iterrows():
+        jobNameWithTag=jobNameWithTag = row['type'] + ('_' + row['tag'] if row['tag'] != 'None' else '')
+        dfOneEdge=firstEdge.copy(deep=True)
+        dfOneEdge["rlnSchemeEdgeInputNodeName"]=jobNameWithTagOld
+        dfOneEdge["rlnSchemeEdgeOutputNodeName"]=jobNameWithTag
         schemeEdge_df=pd.concat([schemeEdge_df,dfOneEdge],ignore_index=True) 
-    dfOneEdge=tmpEdge
-    dfOneEdge["rlnSchemeEdgeInputNodeName"]=schemeEdge_df.iloc[-1].rlnSchemeEdgeOutputNodeName
-    dfOneEdge["rlnSchemeEdgeOutputNodeName"]="EXIT" #was "WAIT"
+        jobNameWithTagOld=jobNameWithTag
+   
+    dfOneEdge=firstEdge.copy(deep=True)
+    dfOneEdge["rlnSchemeEdgeInputNodeName"]=jobNameWithTag
+    dfOneEdge["rlnSchemeEdgeOutputNodeName"]="EXIT"
     schemeEdge_df=pd.concat([schemeEdge_df,dfOneEdge],ignore_index=True) 
     
     return schemeEdge_df
