@@ -880,8 +880,8 @@ class schemeMeta:
     schemeJobs_dfFilt = pd.DataFrame(columns=schemJobs.columns)
     for index, row in nodes_df.iterrows():
         new_row=copy.deepcopy(schemJobs.head(1))
-        new_row['rlnSchemeJobNameOriginal']=row['type'] + ('_' + row['tag'] if row['tag'] != 'None' else '')
-        new_row['rlnSchemeJobName']=row['type'] + ('_' + row['tag'] if row['tag'] != 'None' else '')
+        new_row['rlnSchemeJobNameOriginal']=row['type'] + ('_' + row['tag'] if row['tag'] != None else '')
+        new_row['rlnSchemeJobName']=row['type'] + ('_' + row['tag'] if row['tag'] != None else '')
         schemeJobs_dfFilt=pd.concat([schemeJobs_dfFilt,new_row])
     return schemeJobs_dfFilt
     
@@ -891,13 +891,14 @@ class schemeMeta:
     schemeName=self.scheme_star.dict["scheme_general"]["rlnSchemeName"]
     #for nodeid, node in nodes.items():
     for index, row in nodes_df.iterrows():
-      jobNameWithTag=jobNameWithTag = row['type'] + ('_' + row['tag'] if row['tag'] != 'None' else '')
+      jobNameWithTag=jobNameWithTag = row['type'] + ('_' + row['tag'] if row['tag'] != None else '')
       schemeJobs_dfFilt[jobNameWithTag]=copy.deepcopy(jobStarDict[row['type']])
       df=schemeJobs_dfFilt[jobNameWithTag].dict["joboptions_values"]
       ## adapt input
       if row['inputType'] is not None:
         #input=schemeName+row['inputType'] + ('_' + row['inputTag'] if row['inputTag'] != 'None' else '')
           input=schemeName+row['inputType'] + ('_' + str(row['inputTag']) if row['inputTag'] not in [None, 'None'] else '')
+          input=input+os.path.sep+os.path.basename(self.conf.getJobOutput(row['inputType']))
           ind=df.rlnJobOptionVariable=="input_star_mics"
           if not any(ind):
               ind=df.rlnJobOptionVariable=="in_tiltseries" 
@@ -907,7 +908,7 @@ class schemeMeta:
               ind=df.rlnJobOptionVariable=="in_tomoset"
           if not any(ind):
               raise Exception("nether input_star_mics nor in_tiltseries found")
-          print(" ")      
+          
           row_index = schemeJobs_dfFilt[jobNameWithTag].dict["joboptions_values"].index[ind]
           schemeJobs_dfFilt[jobNameWithTag].dict["joboptions_values"].loc[row_index, "rlnJobOptionValue"] = input
           
@@ -947,7 +948,7 @@ class schemeMeta:
     #for nodeid, node in nodes.items(): 
     schemeEdge_df=firstEdge
     for index, row in nodes_df.iterrows():
-        jobNameWithTag=jobNameWithTag = row['type'] + ('_' + row['tag'] if row['tag'] != 'None' else '')
+        jobNameWithTag=jobNameWithTag = row['type'] + ('_' + row['tag'] if row['tag'] != None else '')
         dfOneEdge=firstEdge.copy(deep=True)
         dfOneEdge["rlnSchemeEdgeInputNodeName"]=jobNameWithTagOld
         dfOneEdge["rlnSchemeEdgeOutputNodeName"]=jobNameWithTag

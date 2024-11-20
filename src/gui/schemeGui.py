@@ -170,7 +170,7 @@ class MainUI(QMainWindow):
         self.table_scheme.setRowCount(len(self.cbdat.scheme.jobs_in_scheme))    
         for i, job in enumerate(self.cbdat.scheme.jobs_in_scheme):
             self.table_scheme.setItem(i, 0, QTableWidgetItem(str(job))) 
-            #self.table_scheme.setItem(i, 1, QTableWidgetItem())
+            self.table_scheme.setItem(i, 1, QTableWidgetItem())
             #self.table_scheme.item(i, 1).setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
             #self.table_scheme.item(i, 1).setCheckState(Qt.CheckState.Unchecked)
             #self.table_scheme.setItem(i, 2, QTableWidgetItem(str("undefined")))
@@ -182,10 +182,12 @@ class MainUI(QMainWindow):
         file in the ["joboptions_values"] df.
         """
         if ((self.check_edit_scheme.isChecked()) and (self.cbdat.args.autoGen == False) and (self.cbdat.args.skipSchemeEdit == False)):
-            EditScheme(self.table_scheme, self).exec()
-        
-        inputNodes=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
-        self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes)
+            dialog=EditScheme(self.cbdat.scheme)
+            res=dialog.exec()
+            self.cbdat.scheme = dialog.getResult()
+            self.genSchemeTable()      
+        #inputNodes=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
+        #self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes)
         
         insertPosition=1
         for job in self.cbdat.scheme.jobs_in_scheme:
