@@ -11,7 +11,7 @@ class pytomTm(templateMatchingWrapperBase):
        #pass
         
     def prepareInputs(self):
-        
+
         print("--------------generate files for pytom---------------------------")
         sys.stdout.flush()  
         self.generatePytomInputFiles(columnName="rlnTomoNominalStageTiltAngle",tag="tiltAngle",ext=".tlt")
@@ -69,7 +69,7 @@ class pytomTm(templateMatchingWrapperBase):
             if self.args.templateSym[0]!="C":
                 raise("Only C symmetrz allowed")
             else:
-                constParams.extend("--z-axis-rotational-symmetry",self.args.templateSym)
+                constParams.extend("--z-axis-rotational-symmetry",str(self.args.templateSym[1]))
         
         volumes=self.st.tilt_series_df[[self.args.volumeColumn,"rlnTomoName"]]
         print("starting to match " + str(len(volumes)))

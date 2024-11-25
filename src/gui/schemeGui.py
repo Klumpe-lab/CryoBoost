@@ -48,6 +48,7 @@ class MainUI(QMainWindow):
         self.groupBox_Setup.setEnabled(False)
         #self.groupBox_Project.setEnabled(False)
         self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setTabVisible(1, False)
         
         if (self.cbdat.args.autoGen or self.cbdat.args.skipSchemeEdit):
             self.makeJobTabsFromScheme()
@@ -181,6 +182,9 @@ class MainUI(QMainWindow):
         insert a new tab for every job and place a table with the parameters found in the respective job.star
         file in the ["joboptions_values"] df.
         """
+        
+        self.tabWidget.setTabVisible(1,True)
+        
         if ((self.check_edit_scheme.isChecked()) and (self.cbdat.args.autoGen == False) and (self.cbdat.args.skipSchemeEdit == False)):
             dialog=EditScheme(self.cbdat.scheme)
             res=dialog.exec()
@@ -188,11 +192,29 @@ class MainUI(QMainWindow):
             self.genSchemeTable()      
         #inputNodes=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
         #self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes)
+       
+        self.jobTapNrSetUpTaps=1
+        for job in self.cbdat.scheme.jobs_in_scheme:
+            if job.startswith("templatematching"):
+                if self.jobTapNrSetUpTaps==1:
+                    self.tabWidget.setTabVisible(1,True)
+                else:
+                    tm_widget = QtWidgets.QWidget()
+                    self.tabWidget.insertTab(self.jobTapNrSetUpTaps,tm_widget,"testSetup")    
+                    print("adding tab")
+                self.jobTapNrSetUpTaps+=1   
         
-        insertPosition=1
+       
+        insertPosition=self.jobTapNrSetUpTaps
         for job in self.cbdat.scheme.jobs_in_scheme:
            self.schemeJobToTab(job,self.cbdat.conf,insertPosition)
            insertPosition += 1 
+        
+        
+        self.groupBox_WorkFlow.setEnabled(True)
+        self.groupBox_Setup.setEnabled(True)
+        self.groupBox_Project.setEnabled(True)
+        
         
         if (self.cbdat.args.mdocs != None):
             self.line_path_mdocs.setText(self.cbdat.args.mdocs)
@@ -210,14 +232,13 @@ class MainUI(QMainWindow):
             else:
                 self.line_path_gain.setText(self.cbdat.args.gain)
              
-        self.groupBox_WorkFlow.setEnabled(True)
-        self.groupBox_Setup.setEnabled(True)
-        self.groupBox_Project.setEnabled(True)
+        
         
         if "denoisetrain" in self.cbdat.scheme.jobs_in_scheme.values  or "denoisepredict" in self.cbdat.scheme.jobs_in_scheme.values:
             params_dict = {"generate_split_tomograms": "Yes" }
             self.setParamsDictToJobTap(params_dict)
               
+    
         
     def schemeJobToTab(self,job,conf,insertPosition):
         # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
@@ -545,7 +566,8 @@ class MainUI(QMainWindow):
         partion=self.dropDown_partitionName.currentText()
         shareNodes=self.checkBox_shareNodes.isChecked()
         for job in self.cbdat.scheme.jobs_in_scheme:
-            comDict=self.cbdat.conf.getJobComputingParams([job,nrNodes,partion],shareNodes)
+            jobNoTag=jobNoTabs=job.split("_")[0]
+            comDict=self.cbdat.conf.getJobComputingParams([jobNoTag,nrNodes,partion],shareNodes)
             if (comDict is not None):
                 self.setParamsDictToJobTap(comDict,applyToJobs=job)
          
@@ -568,7 +590,7 @@ class MainUI(QMainWindow):
             #print(current_tab in applyToJobs)
             if current_tab in applyToJobs:
                 index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
-                self.tabWidget.setCurrentIndex(index_import.item())
+                self.tabWidget.setCurrentIndex(index_import.item()+self.jobTapNrSetUpTaps-1)
                 table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
                 change_values(table_widget, params_dict, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
         self.tabWidget.setCurrentIndex(0)

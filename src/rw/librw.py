@@ -64,6 +64,7 @@ class cbconfig:
       self.confdata = yaml.load(f, Loader=yaml.FullLoader)
   
   def getJobComputingParams(self,comReq,doNodeSharing):    
+       
        self.confdata["computing"]["JOBTypes"]
        confComp=self.confdata["computing"]
        jobType=None
@@ -871,7 +872,7 @@ class schemeMeta:
     scFilt.job_star=jobStar_dictFilt
     scFilt.nrJobs =len(scFilt.job_star)
     scFilt.jobs_in_scheme = scFilt.scheme_star.dict["scheme_edges"].rlnSchemeEdgeOutputNodeName.iloc[1:-1]
-    
+    #scFilt.jobTypes_in_scheme = nodes_df["type"].iloc[:]
     
     return scFilt   
   
@@ -911,31 +912,6 @@ class schemeMeta:
           
           row_index = schemeJobs_dfFilt[jobNameWithTag].dict["joboptions_values"].index[ind]
           schemeJobs_dfFilt[jobNameWithTag].dict["joboptions_values"].loc[row_index, "rlnJobOptionValue"] = input
-          
-          
-      # if (index>0):
-      #     indMinusOne=nodes[nodeid-1]
-      #     indMinusOneTarget=nodesTarget[nodeid-1]
-      #     jobN=indMinusOneTarget+os.path.sep+os.path.basename(self.conf.getJobOutput(indMinusOne))
-      #     input=self.scheme_star.dict["scheme_general"]["rlnSchemeName"]+jobN
-          
-      #     df=schemeJobs_dfFilt[nodeT].dict["joboptions_values"]
-      #     ind=df.rlnJobOptionVariable=="input_star_mics"
-      #     if not any(ind):
-      #        ind=df.rlnJobOptionVariable=="in_tiltseries" 
-      #     if not any(ind):
-      #        ind=df.rlnJobOptionVariable=="in_mic"
-      #     if not any(ind):
-      #        ind=df.rlnJobOptionVariable=="in_tomoset" 
-          
-      #     if not any(ind):
-      #        raise Exception("nether input_star_mics nor in_tiltseries found")
-          
-      #     # Get the index of the row to update
-      #     row_index = schemeJobs_dfFilt[nodeT].dict["joboptions_values"].index[ind]
-      #     schemeJobs_dfFilt[nodeT].dict["joboptions_values"].loc[row_index, "rlnJobOptionValue"] = input
-          #schemeJobs_dfFilt[node].dict["joboptions_values"].loc[ind].rlnJobOptionValue=input  
-          
           
     return schemeJobs_dfFilt 
   
