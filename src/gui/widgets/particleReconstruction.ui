@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>889</width>
+    <height>110</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QGroupBox" name="groupBox_32">
+   <property name="geometry">
+    <rect>
+     <x>2</x>
+     <y>8</y>
+     <width>881</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Particle Reconstruction</string>
+   </property>
+   <widget class="QGroupBox" name="groupBox_36">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>831</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Particles</string>
+    </property>
+    <widget class="QLabel" name="label_66">
+     <property name="geometry">
+      <rect>
+       <x>11</x>
+       <y>30</y>
+       <width>60</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Dia in Ang</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_path_movies_11">
+     <property name="geometry">
+      <rect>
+       <x>76</x>
+       <y>28</y>
+       <width>30</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>250</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_67">
+     <property name="geometry">
+      <rect>
+       <x>124</x>
+       <y>30</y>
+       <width>81</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Box Size PiIxel</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_path_movies_14">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>28</y>
+       <width>30</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>250</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_68">
+     <property name="geometry">
+      <rect>
+       <x>262</x>
+       <y>30</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>PixelSize in Ang.</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_path_movies_15">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>27</y>
+       <width>30</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>2.5</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

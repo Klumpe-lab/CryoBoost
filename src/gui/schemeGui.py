@@ -6,7 +6,7 @@ import glob,random
 from PyQt6 import QtWidgets
 from PyQt6.QtGui import QTextCursor
 from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QListWidget,QPushButton,QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QDialog, QComboBox, QTabWidget, QWidget,QScrollArea ,QCheckBox, QAbstractItemView
+from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QWidget,QLineEdit,QSizePolicy 
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
 from src.rw.librw import starFileMeta,mdocMeta
@@ -193,24 +193,13 @@ class MainUI(QMainWindow):
         #inputNodes=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
         #self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes)
        
-        self.jobTapNrSetUpTaps=1
-        for job in self.cbdat.scheme.jobs_in_scheme:
-            if job.startswith("templatematching"):
-                if self.jobTapNrSetUpTaps==1:
-                    self.tabWidget.setTabVisible(1,True)
-                else:
-                    tm_widget = QtWidgets.QWidget()
-                    self.tabWidget.insertTab(self.jobTapNrSetUpTaps,tm_widget,"testSetup")    
-                    print("adding tab")
-                self.jobTapNrSetUpTaps+=1   
-        
+        self.genParticleSetups()        
        
         insertPosition=self.jobTapNrSetUpTaps
         for job in self.cbdat.scheme.jobs_in_scheme:
            self.schemeJobToTab(job,self.cbdat.conf,insertPosition)
            insertPosition += 1 
-        
-        
+
         self.groupBox_WorkFlow.setEnabled(True)
         self.groupBox_Setup.setEnabled(True)
         self.groupBox_Project.setEnabled(True)
@@ -238,7 +227,63 @@ class MainUI(QMainWindow):
             params_dict = {"generate_split_tomograms": "Yes" }
             self.setParamsDictToJobTap(params_dict)
               
-    
+   
+    def genParticleSetups(self):
+        
+        self.jobTapNrSetUpTaps=1
+        self.tabWidget.removeTab(self.jobTapNrSetUpTaps)
+        self.tabs = []
+        self.layouts = []
+        self.tm_widgets = []  # Lis
+        for job in self.cbdat.scheme.jobs_in_scheme:
+            if job.startswith("templatematching"):
+                
+                container_widget = QtWidgets.QWidget()
+                container_widget.setContentsMargins(0, 0, 0, 0)
+
+                
+                layout = QVBoxLayout(container_widget)
+                layout.setSpacing(0)
+                layout.setContentsMargins(0, 0, 0, 0)
+                
+                tm_widget = QtWidgets.QWidget()
+                widgetPath='/fs//pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/src/gui/widgets/templateMatching.ui'
+                tm_widget = loadUi(widgetPath,tm_widget)
+                tm_widget.setContentsMargins(0, 0, 0, 0)
+                tm_widget.setMinimumSize(100,320)
+                tm_widget.line_path_tm_template_volume.textChanged.connect(self.setTmVolumeTemplateToJobTap)
+                self.tm_widgets.append(tm_widget)   
+                layout.addWidget(tm_widget,stretch=0)#, alignment=Qt.AlignmentFlag.AlignTop)
+               
+                ce_widget = QtWidgets.QWidget()
+                widgetPath='/fs//pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/src/gui/widgets/candidateExtraction.ui'
+                ce_widget = loadUi(widgetPath,ce_widget)
+                ce_widget.setContentsMargins(0, 0, 0, 0)
+                #ce_widget.setMinimumSize(100, 170)
+                layout.addWidget(ce_widget,stretch=0)#1,alignment=Qt.AlignmentFlag.AlignTop)
+                
+                pr_widget = QtWidgets.QWidget()
+                widgetPath='/fs//pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/src/gui/widgets/particleReconstruction.ui'
+                pr_widget = loadUi(widgetPath,pr_widget)
+                pr_widget.setContentsMargins(0, 0, 0, 0)
+                #pr_widget.setMinimumSize(100, 150)
+                layout.addWidget(pr_widget,stretch=0)#1,alignment=Qt.AlignmentFlag.AlignTop)
+               
+                
+                tag=job.split("_")
+                if len(tag)>1:
+                    tabName="ParticleSetup_"+tag[1]
+                else:
+                    tabName="ParticleSetup"
+                
+                self.tabWidget.insertTab(self.jobTapNrSetUpTaps,container_widget,tabName)
+                self.jobTapNrSetUpTaps+=1   
+                
+                
+                
+                
+                
+                            
         
     def schemeJobToTab(self,job,conf,insertPosition):
         # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
@@ -287,6 +332,26 @@ class MainUI(QMainWindow):
         
         params_dict = {"movie_files": "frames/*" + os.path.splitext(self.line_path_movies.text())[1] }
         self.setParamsDictToJobTap(params_dict)
+    
+    def setTmVolumeTemplateToJobTap(self):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume")  # Find QTextEdit named "text1"
+        text = text_field.text()  # Get text content
+        params_dict = {"in_3dref":text }
+        jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
+        self.setParamsDictToJobTap(params_dict,"templatematching"+jobTag)
+    
+    
         
     def setPathMdocsToJobTap(self):
         """
@@ -585,6 +650,7 @@ class MainUI(QMainWindow):
         """
         if (applyToJobs == "all"):
            applyToJobs = list(self.cbdat.scheme.jobs_in_scheme)
+        idxOrg=self.tabWidget.currentIndex()
            
         for current_tab in self.cbdat.scheme.jobs_in_scheme:
             #print(current_tab in applyToJobs)
@@ -593,7 +659,7 @@ class MainUI(QMainWindow):
                 self.tabWidget.setCurrentIndex(index_import.item()+self.jobTapNrSetUpTaps-1)
                 table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
                 change_values(table_widget, params_dict, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(idxOrg)
     
     
     def browsePathMovies(self):
