@@ -232,58 +232,66 @@ class MainUI(QMainWindow):
         
         self.jobTapNrSetUpTaps=1
         self.tabWidget.removeTab(self.jobTapNrSetUpTaps)
-        self.tabs = []
-        self.layouts = []
-        self.tm_widgets = []  # Lis
+        self.widgets = []  # Lis
         for job in self.cbdat.scheme.jobs_in_scheme:
             if job.startswith("templatematching"):
                 
                 container_widget = QtWidgets.QWidget()
                 container_widget.setContentsMargins(0, 0, 0, 0)
-
-                
                 layout = QVBoxLayout(container_widget)
                 layout.setSpacing(0)
                 layout.setContentsMargins(0, 0, 0, 0)
-                
-                tm_widget = QtWidgets.QWidget()
-                widgetPath='/fs//pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/src/gui/widgets/templateMatching.ui'
-                tm_widget = loadUi(widgetPath,tm_widget)
-                tm_widget.setContentsMargins(0, 0, 0, 0)
-                tm_widget.setMinimumSize(100,320)
-                tm_widget.line_path_tm_template_volume.textChanged.connect(self.setTmVolumeTemplateToJobTap)
-                self.tm_widgets.append(tm_widget)   
-                layout.addWidget(tm_widget,stretch=0)#, alignment=Qt.AlignmentFlag.AlignTop)
-               
-                ce_widget = QtWidgets.QWidget()
-                widgetPath='/fs//pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/src/gui/widgets/candidateExtraction.ui'
-                ce_widget = loadUi(widgetPath,ce_widget)
-                ce_widget.setContentsMargins(0, 0, 0, 0)
-                #ce_widget.setMinimumSize(100, 170)
-                layout.addWidget(ce_widget,stretch=0)#1,alignment=Qt.AlignmentFlag.AlignTop)
-                
-                pr_widget = QtWidgets.QWidget()
-                widgetPath='/fs//pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/src/gui/widgets/particleReconstruction.ui'
-                pr_widget = loadUi(widgetPath,pr_widget)
-                pr_widget.setContentsMargins(0, 0, 0, 0)
-                #pr_widget.setMinimumSize(100, 150)
-                layout.addWidget(pr_widget,stretch=0)#1,alignment=Qt.AlignmentFlag.AlignTop)
-               
-                
                 tag=job.split("_")
                 if len(tag)>1:
                     tabName="ParticleSetup_"+tag[1]
                 else:
                     tabName="ParticleSetup"
                 
+                widget=self.iniWidget(job)
+                layout.addWidget(widget,stretch=0)
+                self.widgets.append(widget)
                 self.tabWidget.insertTab(self.jobTapNrSetUpTaps,container_widget,tabName)
                 self.jobTapNrSetUpTaps+=1   
+               
+            if job.startswith("candidateextraction"):    
+                widget=self.iniWidget("candidateextraction")
+                layout.addWidget(widget,stretch=0)
+                self.widgets.append(widget)
+                #self.tabWidget.insertTab(self.jobTapNrSetUpTaps,container_widget,tabName)
+                
+           
                 
                 
                 
-                
-                
-                            
+    def iniWidget(self,jobName):             
+        
+        if len(jobName.split('_'))>1:
+            jobName=jobName.split("_")[0]
+
+        print(jobName)
+        srcBasePase=self.cbdat.CRYOBOOST_HOME
+        widget = QtWidgets.QWidget()
+        if jobName=="templatematching":
+            widgetPath=srcBasePase+'/src/gui/widgets/templateMatching.ui'
+        if jobName=="candidateextraction":
+            widgetPath=srcBasePase+'/src/gui/widgets/candidateExtraction.ui'
+        if jobName=="particlereconstruction":
+            widgetPath=srcBasePase+'/src/gui/widgets/particleReconstruction.ui'
+        
+        widget = loadUi(widgetPath,widget)
+        widget.setContentsMargins(0, 0, 0, 0)
+        widget=self.setCallbacksPartcileSetup(widget,jobName)
+        
+        return widget
+           
+       
+        
+    def setCallbacksPartcileSetup(self,widget,jobName):
+        
+        if jobName=="templatematching":
+            widget.line_path_tm_template_volume.textChanged.connect(self.setTmVolumeTemplateToJobTap)
+        
+        return widget                    
         
     def schemeJobToTab(self,job,conf,insertPosition):
         # arguments: insertTab(index where it's inserted, widget that's inserted, name of tab)
@@ -348,8 +356,12 @@ class MainUI(QMainWindow):
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume")  # Find QTextEdit named "text1"
         text = text_field.text()  # Get text content
         params_dict = {"in_3dref":text }
-        jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
-        self.setParamsDictToJobTap(params_dict,"templatematching"+jobTag)
+        if len(self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_"))>1:
+            jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
+        else:
+            jobTag=""
+        print(jobTag)
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
     
     
         
@@ -651,9 +663,10 @@ class MainUI(QMainWindow):
         if (applyToJobs == "all"):
            applyToJobs = list(self.cbdat.scheme.jobs_in_scheme)
         idxOrg=self.tabWidget.currentIndex()
-           
+        
+        
         for current_tab in self.cbdat.scheme.jobs_in_scheme:
-            #print(current_tab in applyToJobs)
+            print(current_tab in applyToJobs)
             if current_tab in applyToJobs:
                 index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
                 self.tabWidget.setCurrentIndex(index_import.item()+self.jobTapNrSetUpTaps-1)
