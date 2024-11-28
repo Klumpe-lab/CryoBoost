@@ -1050,8 +1050,9 @@ class tiltSeriesMeta:
             i += 1
 
         all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
-        all_tilts_df.dropna(inplace=True)  # check !!
-        #generte key to merge later on
+        columns_to_check = [col for col in all_tilts_df.columns if col not in ['rlnCtfScalefactor']]
+        all_tilts_df.dropna(subset=columns_to_check,inplace=True)  # check !!
+        #generte key to merge later on  
         #if ()
         if 'rlnMicrographName' in all_tilts_df.columns:
           k=all_tilts_df['rlnMicrographName'].apply(os.path.basename)

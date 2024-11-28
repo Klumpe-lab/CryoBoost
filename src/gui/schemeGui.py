@@ -6,7 +6,7 @@ import glob,random
 from PyQt6 import QtWidgets
 from PyQt6.QtGui import QTextCursor
 from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QWidget,QLineEdit,QSizePolicy 
+from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QWidget,QLineEdit,QComboBox,QRadioButton,QCheckBox,QSizePolicy 
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
 from src.rw.librw import starFileMeta,mdocMeta
@@ -290,7 +290,29 @@ class MainUI(QMainWindow):
         
         if jobName=="templatematching":
             widget.line_path_tm_template_volume.textChanged.connect(self.setTmVolumeTemplateToJobTap)
-        
+            widget.line_path_tm_template_volumeMask.textChanged.connect(self.setTmVolumeTemplateMaskToJobTap)    
+            widget.btn_browse_tm_template_volume.clicked.connect(self.browseTmVolumeTemplate)
+            widget.btn_browse_tm_template_volumeMask.clicked.connect(self.browseTmVolumeTemplateMask)
+            widget.btn_view_tm_template_volume.clicked.connect(self.viewTmVolumeTemplate)
+            widget.btn_view_tm_template_volumeMask.clicked.connect(self.viewTmVolumeTemplateMask)
+            widget.btn_generate_tm_template_volume.clicked.connect(self.generateTmVolumeTemplate)
+            widget.btn_generate_tm_template_volumeMask.clicked.connect(self.generateTmVolumeTemplateMask)
+            widget.line_path_tm_template_volumeSym.textChanged.connect(self.setTmVolumeTemplateSymToJobTap)
+            widget.chkbox_tm_template_volumeMaskNonSph.stateChanged.connect(self.setTmVolumeTemplateMaskNonSpToJobTap)
+            widget.dropDown_tm_SearchVolType.currentTextChanged.connect(self.setTmVolumeTypeToJobTap)
+            widget.line_path_tm_SearchVolSplit.textChanged.connect(self.setTmSearchVolSplitToJobTap)            
+            widget.line_path_tm_SearchVolMaskFold.textChanged.connect(self.setTmSearchVolMaskFoldToJobTap)
+            widget.btn_browse_tm_SearchVolMaskFold.clicked.connect(self.browseSearchVolMaskFold)
+            widget.checkBox_tm_CtfWeight.stateChanged.connect(self.setTmCtfWeightToJobTap)
+            widget.checkBox_tm_DoseWeight.stateChanged.connect(self.setTmDoseWeightToJobTap)
+            widget.checkBox_tm_RandomPhaseCorrection.toggled.connect(self.setTmRandomPhaseCorrectionToJobTap)
+            widget.checkBox_tm_SpectralWhitening.toggled.connect(self.setTmSpectralWhiteningToJobTap)
+            widget.line_path_tm_BandPass.textChanged.connect(self.setTmBandPassToJobTap)            
+            widget.line_path_tm_AngSamp.textChanged.connect(self.setTmAngSampToJobTap)            
+            widget.btn_browse_tm_AngList.clicked.connect(self.browseTmAngList)
+            
+            
+                
         return widget                    
         
     def schemeJobToTab(self,job,conf,insertPosition):
@@ -325,7 +347,35 @@ class MainUI(QMainWindow):
         tab_layout.addWidget(self.table)
         #self.table.setMinimumSize(1500, 400)            
         
+    def getTagFromCurrentTab(self):
+         
+        if len(self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_"))>1:
+            jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
+        else:
+            jobTag=""
+        
+        return jobTag
+   
+    def setTmSearchVolMaskFoldToJobTap(self,textLine):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
 
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        widget = self.tabWidget.currentWidget().findChild(QComboBox, "dropDown_tm_implementation")  # Find QTextEdit named "text1"
+        imp = widget.currentText()
+        argsFull="--implementation " + imp + " --volumeMaskFold " + textLine + " --gpu_ids auto"
+        
+        params_dict = {"other_args":argsFull }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+        
+        
     def setPathMoviesToJobTap(self):
         """
         Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
@@ -360,9 +410,286 @@ class MainUI(QMainWindow):
             jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
         else:
             jobTag=""
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+    def setTmVolumeTypeToJobTap(self,textDropDown):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        if textDropDown=="Uncorrected":
+            text="rlnTomoReconstructedTomogram"       
+        if textDropDown=="Deconv (Warp)":
+            text="rlnTomoReconstructedTomogramDeconv"
+        if textDropDown=="Filtered":
+            text="rlnTomoReconstructedTomogramDenoised"
+       
+        params_dict = {"param1_value":text }
+        
+        if len(self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_"))>1:
+            jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
+        else:
+            jobTag=""
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+    def setTmSearchVolSplitToJobTap(self,textLine):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+    
+        params_dict = {"param10_value":textLine }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+    def setTmCtfWeightToJobTap(self,state):
+    
+        if state==0:
+            flag="False"
+        else:
+            flag="True"
+        params_dict = {"param6_value":str(flag) }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+    def setTmDoseWeightToJobTap(self,state):
+    
+        if state==0:
+            flag="False"
+        else:
+            flag="True"
+        params_dict = {"param7_value":str(flag) }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+    def setTmRandomPhaseCorrectionToJobTap(self,state):
+    
+        params_dict = {"param9_value":str(state) }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+    def setTmBandPassToJobTap(self,text):
+        
+        params_dict = {"param5_value":str(text) }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    def browseTmAngList(self):
+        
+        targetFold=os.getcwd()
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_AngSamp") 
+        dirName=browse_files(text_field,self.system.filebrowser)
+        
+        
+    def setTmAngSampToJobTap(self,text):
+        
+        params_dict = {"param3_value":str(text) }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+    
+        
+    
+    def setTmSpectralWhiteningToJobTap(self,state):
+    
+        # if state==0:
+        #     flag="False"
+        # else:
+        #     flag="True"
+        params_dict = {"param8_value":str(state) }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+    
+    
+    def browseSearchVolMaskFold(self):
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_SearchVolMaskFold") 
+        targetFold=os.getcwd()
+        dirName=browse_dirs(text_field,targetFold,self.system.filebrowser)
+        
+    
+    def setTmVolumeTemplateMaskNonSpToJobTap(self):
+        
+        widget = self.tabWidget.currentWidget()
+        chk = widget.findChild(QCheckBox, "chkbox_tm_template_volumeMaskNonSph")  # Find QTextEdit named "text1"
+        text = str(chk.isChecked())  # Get text content
+        params_dict = {"param4_value":text }
+        if len(self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_"))>1:
+            jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
+        else:
+            jobTag=""
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+    
+    def setTmVolumeTemplateMaskToJobTap(self):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_template_volumeMask")  # Find QTextEdit named "text1"
+        text = text_field.text()  # Get text content
+        params_dict = {"in_mask":text }
+        if len(self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_"))>1:
+            jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
+        else:
+            jobTag=""
         print(jobTag)
         self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
     
+    def browseTmVolumeTemplateMask(self):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        targetFold=os.getcwd()
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_template_volumeMask") 
+        dirName=browse_files(text_field,self.system.filebrowser)
+    
+    def viewTmVolumeTemplateMask(self):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_template_volumeMask") 
+        self.viewVolume(text_field.text())    
+    
+    def viewTmVolumeTemplate(self):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
+        self.viewVolume(text_field.text())    
+    
+    def generateTmVolumeTemplate(self):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
+        print("generate Volume not jet implemented")    
+    
+    def generateTmVolumeTemplateMask(self):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_template_volumeMask") 
+        print("generate Volume Mask not jet implemented")    
+    
+    def setTmVolumeTemplateSymToJobTap(self):
+        
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_template_volumeSym")  # Find QTextEdit named "text1"
+        text = text_field.text()  # Get text content
+        params_dict = {"param2_value":text }
+        if len(self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_"))>1:
+            jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
+        else:
+            jobTag=""
+        print(jobTag)
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+        
+    def viewVolume(self,volume):
+        
+       os.system("imod " + volume)
+        
+    def setTmVolumeTemplateToJobTap(self):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume")  # Find QTextEdit named "text1"
+        text = text_field.text()  # Get text content
+        params_dict = {"in_3dref":text }
+        if len(self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_"))>1:
+            jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
+        else:
+            jobTag=""
+        print(jobTag)
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
+    
+    def browseTmVolumeTemplate(self):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        targetFold=os.getcwd()
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
+        dirName=browse_files(text_field,self.system.filebrowser)
+        
+       
     
         
     def setPathMdocsToJobTap(self):
@@ -996,13 +1323,13 @@ class MainUI(QMainWindow):
         """
         
         for job_tab_index in range(1, len(scheme.jobs_in_scheme) + 1):
-            tabWidget.setCurrentIndex(job_tab_index)
+            tabWidget.setCurrentIndex(job_tab_index+self.jobTapNrSetUpTaps-1)
             table_widget = tabWidget.currentWidget().findChild(QTableWidget)
             jobName = scheme.jobs_in_scheme[job_tab_index]
             scheme.job_star[jobName]=self.updateSchemeJobFromTable(scheme.job_star[jobName], table_widget,jobName,self.cbdat.conf)
 
             
-        tabWidget.setCurrentIndex(len(self.cbdat.scheme.jobs_in_scheme) + 1)
+        tabWidget.setCurrentIndex(len(self.cbdat.scheme.jobs_in_scheme) + self.jobTapNrSetUpTaps)
         return scheme    
     
     def updateSchemeJobFromTable(self,job, table_widget, jobName, conf):

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>861</width>
-    <height>302</height>
+    <height>295</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,7 +53,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_browse_movies_3">
+    <widget class="QPushButton" name="btn_browse_tm_template_volume">
      <property name="geometry">
       <rect>
        <x>520</x>
@@ -79,7 +79,7 @@
       <string>Volume</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_path_movies_4">
+    <widget class="QLineEdit" name="line_path_tm_template_volumeMask">
      <property name="geometry">
       <rect>
        <x>90</x>
@@ -92,7 +92,7 @@
       <string>Auto</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_browse_movies_4">
+    <widget class="QPushButton" name="btn_browse_tm_template_volumeMask">
      <property name="geometry">
       <rect>
        <x>520</x>
@@ -118,19 +118,6 @@
       <string>Volume Mask</string>
      </property>
     </widget>
-    <widget class="QRadioButton" name="radioButton">
-     <property name="geometry">
-      <rect>
-       <x>709</x>
-       <y>61</y>
-       <width>100</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Non Spherical</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_55">
      <property name="geometry">
       <rect>
@@ -144,7 +131,7 @@
       <string>Sym.</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_path_mdocs_4">
+    <widget class="QLineEdit" name="line_path_tm_template_volumeSym">
      <property name="geometry">
       <rect>
        <x>746</x>
@@ -155,19 +142,6 @@
      </property>
      <property name="text">
       <string>C1</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_56">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>140</y>
-       <width>80</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Volume/PDB</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_57">
@@ -196,7 +170,7 @@
       <string>Bandpss low high in Ang.</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_browse_movies_7">
+    <widget class="QPushButton" name="btn_generate_tm_template_volume">
      <property name="geometry">
       <rect>
        <x>590</x>
@@ -209,7 +183,7 @@
       <string>Generate</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_browse_movies_8">
+    <widget class="QPushButton" name="btn_generate_tm_template_volumeMask">
      <property name="geometry">
       <rect>
        <x>590</x>
@@ -222,7 +196,7 @@
       <string>Generate</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_browse_movies_9">
+    <widget class="QPushButton" name="btn_view_tm_template_volume">
      <property name="geometry">
       <rect>
        <x>652</x>
@@ -235,7 +209,7 @@
       <string>View</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_browse_movies_10">
+    <widget class="QPushButton" name="btn_view_tm_template_volumeMask">
      <property name="geometry">
       <rect>
        <x>653</x>
@@ -248,6 +222,25 @@
       <string>View</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="chkbox_tm_template_volumeMaskNonSph">
+     <property name="geometry">
+      <rect>
+       <x>700</x>
+       <y>60</y>
+       <width>121</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Non Sph. Mask</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="tristate">
+      <bool>false</bool>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_29">
     <property name="geometry">
@@ -255,13 +248,13 @@
       <x>10</x>
       <y>110</y>
       <width>831</width>
-      <height>71</height>
+      <height>61</height>
      </rect>
     </property>
     <property name="title">
      <string>Volume</string>
     </property>
-    <widget class="QComboBox" name="dropDown_gainFlip_4">
+    <widget class="QComboBox" name="dropDown_tm_SearchVolType">
      <property name="geometry">
       <rect>
        <x>40</x>
@@ -286,17 +279,17 @@
       </property>
      </item>
     </widget>
-    <widget class="QLineEdit" name="line_path_movies_5">
+    <widget class="QLineEdit" name="line_path_tm_SearchVolSplit">
      <property name="geometry">
       <rect>
-       <x>188</x>
-       <y>29</y>
-       <width>40</width>
+       <x>182</x>
+       <y>30</y>
+       <width>51</width>
        <height>25</height>
       </rect>
      </property>
      <property name="text">
-      <string>4x4x2</string>
+      <string>4:4:2</string>
      </property>
     </widget>
     <widget class="QPushButton" name="btn_browse_movies_5">
@@ -315,22 +308,22 @@
     <widget class="QLabel" name="label_60">
      <property name="geometry">
       <rect>
-       <x>240</x>
-       <y>25</y>
-       <width>101</width>
-       <height>30</height>
+       <x>246</x>
+       <y>33</y>
+       <width>61</width>
+       <height>20</height>
       </rect>
      </property>
      <property name="text">
       <string>Mask Fold</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_path_movies_6">
+    <widget class="QLineEdit" name="line_path_tm_SearchVolMaskFold">
      <property name="geometry">
       <rect>
        <x>311</x>
        <y>30</y>
-       <width>340</width>
+       <width>351</width>
        <height>25</height>
       </rect>
      </property>
@@ -338,7 +331,7 @@
       <string>None</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_browse_movies_6">
+    <widget class="QPushButton" name="btn_browse_tm_SearchVolMaskFold">
      <property name="geometry">
       <rect>
        <x>665</x>
@@ -368,7 +361,7 @@
      <property name="geometry">
       <rect>
        <x>150</x>
-       <y>30</y>
+       <y>33</y>
        <width>31</width>
        <height>20</height>
       </rect>
@@ -382,7 +375,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>180</y>
+      <y>170</y>
       <width>831</width>
       <height>61</height>
      </rect>
@@ -390,12 +383,12 @@
     <property name="title">
      <string>Filter</string>
     </property>
-    <widget class="QRadioButton" name="radioButton_2">
+    <widget class="QCheckBox" name="checkBox_tm_SpectralWhitening">
      <property name="geometry">
       <rect>
-       <x>4</x>
-       <y>30</y>
-       <width>121</width>
+       <x>369</x>
+       <y>28</y>
+       <width>141</width>
        <height>23</height>
       </rect>
      </property>
@@ -403,46 +396,52 @@
       <string>Spectral Whitening</string>
      </property>
     </widget>
-    <widget class="QRadioButton" name="radioButton_3">
+    <widget class="QCheckBox" name="checkBox_tm_DoseWeight">
      <property name="geometry">
       <rect>
-       <x>131</x>
-       <y>26</y>
+       <x>95</x>
+       <y>20</y>
        <width>100</width>
-       <height>30</height>
+       <height>40</height>
       </rect>
      </property>
      <property name="text">
       <string>Dose Weight</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
-    <widget class="QRadioButton" name="radioButton_4">
+    <widget class="QCheckBox" name="checkBox_tm_CtfWeight">
      <property name="geometry">
       <rect>
-       <x>233</x>
+       <x>10</x>
        <y>25</y>
-       <width>100</width>
+       <width>81</width>
        <height>30</height>
       </rect>
      </property>
      <property name="text">
       <string>Ctf Weight</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
-    <widget class="QRadioButton" name="radioButton_5">
+    <widget class="QCheckBox" name="checkBox_tm_RandomPhaseCorrection">
      <property name="geometry">
       <rect>
-       <x>325</x>
-       <y>24</y>
+       <x>194</x>
+       <y>30</y>
        <width>180</width>
-       <height>30</height>
+       <height>20</height>
       </rect>
      </property>
      <property name="text">
       <string>Random Phase Correction</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_path_movies_7">
+    <widget class="QLineEdit" name="line_path_tm_BandPass">
      <property name="geometry">
       <rect>
        <x>670</x>
@@ -459,7 +458,7 @@
      <property name="geometry">
       <rect>
        <x>510</x>
-       <y>30</y>
+       <y>29</y>
        <width>151</width>
        <height>20</height>
       </rect>
@@ -473,20 +472,20 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>240</y>
-      <width>541</width>
+      <y>230</y>
+      <width>651</width>
       <height>61</height>
      </rect>
     </property>
     <property name="title">
      <string>Sampling</string>
     </property>
-    <widget class="QLineEdit" name="line_path_movies_8">
+    <widget class="QLineEdit" name="line_path_tm_AngSamp">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>180</x>
        <y>27</y>
-       <width>191</width>
+       <width>311</width>
        <height>25</height>
       </rect>
      </property>
@@ -499,7 +498,7 @@
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>161</width>
+       <width>171</width>
        <height>20</height>
       </rect>
      </property>
@@ -507,11 +506,11 @@
       <string>Ang. Increment or Ang. List</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_browse_movies_11">
+    <widget class="QPushButton" name="btn_browse_tm_AngList">
      <property name="geometry">
       <rect>
-       <x>370</x>
-       <y>26</y>
+       <x>491</x>
+       <y>27</y>
        <width>150</width>
        <height>25</height>
       </rect>
@@ -524,9 +523,9 @@
    <widget class="QLabel" name="label_64">
     <property name="geometry">
      <rect>
-      <x>565</x>
-      <y>272</y>
-      <width>91</width>
+      <x>668</x>
+      <y>260</y>
+      <width>100</width>
       <height>15</height>
      </rect>
     </property>
@@ -534,11 +533,11 @@
      <string>Implementation</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="dropDown_tomoAlignProgram_2">
+   <widget class="QComboBox" name="dropDown_tm_implementation">
     <property name="geometry">
      <rect>
-      <x>663</x>
-      <y>269</y>
+      <x>760</x>
+      <y>257</y>
       <width>80</width>
       <height>20</height>
      </rect>
