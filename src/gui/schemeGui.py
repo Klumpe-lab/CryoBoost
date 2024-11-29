@@ -253,8 +253,8 @@ class MainUI(QMainWindow):
                 self.tabWidget.insertTab(self.jobTapNrSetUpTaps,container_widget,tabName)
                 self.jobTapNrSetUpTaps+=1   
                
-            if job.startswith("candidateextraction"):    
-                widget=self.iniWidget("candidateextraction")
+            if job.startswith("tmextractcand"):    
+                widget=self.iniWidget(job)
                 layout.addWidget(widget,stretch=0)
                 self.widgets.append(widget)
                 #self.tabWidget.insertTab(self.jobTapNrSetUpTaps,container_widget,tabName)
@@ -273,7 +273,7 @@ class MainUI(QMainWindow):
         widget = QtWidgets.QWidget()
         if jobName=="templatematching":
             widgetPath=srcBasePase+'/src/gui/widgets/templateMatching.ui'
-        if jobName=="candidateextraction":
+        if jobName=="tmextractcand":
             widgetPath=srcBasePase+'/src/gui/widgets/candidateExtraction.ui'
         if jobName=="particlereconstruction":
             widgetPath=srcBasePase+'/src/gui/widgets/particleReconstruction.ui'

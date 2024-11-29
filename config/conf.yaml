@@ -76,6 +76,8 @@ star_file:
   aligntiltsWarp: aligntiltsWarp/aligned_tilt_series.star
   ts_ctf: ts_ctf/ts_ctf_tilt_series.star
   ts_reconstruct: ts_reconstruct/tomograms.star
+  templatematching: templatematching/tomograms.star
+  tmextractcand: tmextractcand/candidates.star
 
 computing:
    
@@ -133,6 +135,8 @@ computing:
         - filtertilts
       CPU-2MPIThreads:
         - reconstruction 
+        - tmextractcand
+
   JOBMaxNodes:
         motioncorr:
          - 4          

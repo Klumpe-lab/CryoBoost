@@ -1,0 +1,353 @@
+{
+    "mask": "tmpOut/test_pytomExtractCandidatesFull/input/tmResults/rec_Position_1.mrc",
+    "mask_is_spherical": false,
+    "output_dir": "tmpOut/test_pytomExtractCandidatesFull/tmResults/xxx",
+    "tomogram": "tmpOut/test_pytomExtractCandidatesFull/input/tmResults/rec_Position_1.mrc",
+    "template": "tmpOut/test_pytomExtractCandidatesFull/input/tmResults/rec_Position_1.mrc",
+    "tomo_id": "rec_Position_1",
+    "tomo_shape": [
+        96,
+        96,
+        96
+    ],
+    "template_shape": [
+        96,
+        96,
+        96
+    ],
+    "voxel_size": 11.8,
+    "tomogram_mask": null,
+    "whole_start": null,
+    "sub_start": [
+        0,
+        0,
+        0
+    ],
+    "sub_step": [
+        96,
+        96,
+        96
+    ],
+    "start_slice": 0,
+    "steps_slice": 1,
+    "rotational_symmetry": 1,
+    "particle_diameter": null,
+    "rotation_file": "30",
+    "n_rotations": 576,
+    "tilt_angles": [
+        -32.01,
+        -29.01,
+        -26.01,
+        -23.01,
+        -20.0,
+        -17.01,
+        -14.0,
+        -11.01,
+        -8.01,
+        -5.0,
+        -2.01,
+        1.0,
+        3.99,
+        6.99,
+        9.98,
+        12.99,
+        15.99,
+        18.99,
+        21.99,
+        24.99,
+        27.99,
+        30.99,
+        33.99,
+        36.99,
+        39.99,
+        42.99,
+        45.99,
+        48.99
+    ],
+    "tilt_weighting": true,
+    "low_pass": null,
+    "high_pass": null,
+    "dose_accumulation": [
+        83.7,
+        80.6,
+        71.3,
+        68.2,
+        58.9,
+        55.8,
+        46.5,
+        43.4,
+        34.1,
+        31.0,
+        21.7,
+        18.6,
+        9.3,
+        6.2,
+        0.0,
+        3.1,
+        12.4,
+        15.5,
+        24.8,
+        27.9,
+        37.2,
+        40.3,
+        49.6,
+        52.7,
+        62.0,
+        65.1,
+        74.4,
+        77.5
+    ],
+    "ctf_data": [
+        {
+            "defocus": 4.683736718799999e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 4.99410625e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 6.1951601562e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 4.8143410156e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.4891683593999994e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.2705390624999995e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.5100515624999996e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.310364843799999e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.348861718799999e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.137286718799999e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.281277343799999e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.3319441406e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.3077824218999995e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.3108878906e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.3606570312000004e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.372612499999999e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.348571875e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.3514480469e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.3622191406e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.3948210937999995e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.4302441406e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.4422328125e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.329490234400001e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.5867773438e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.185067968799999e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.2373976562000006e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 6.3864378905999996e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        },
+        {
+            "defocus": 5.229424218799999e-06,
+            "amplitude_contrast": 0.1,
+            "voltage": 300000.0,
+            "spherical_aberration": 0.0027,
+            "flip_phase": false,
+            "phase_shift_deg": 0.0
+        }
+    ],
+    "defocus_handedness": 0,
+    "whiten_spectrum": false,
+    "whitening_filter": "External/job007/tmResults/rec_Position_1_whitening_filter.npy",
+    "random_phase_correction": false,
+    "rng_seed": 4695006910707114357,
+    "job_key": "0",
+    "leader": null,
+    "job_stats": {
+        "search_space": 309237645312,
+        "variance": 0.0005240899708698837,
+        "std": 0.02289301139802022
+    },
+    "log_level": 10,
+    "pytom_tm_version_number": "0.7.8",
+    "output_dtype": "float32",
+    "search_x": [
+        0,
+        96
+    ],
+    "search_y": [
+        0,
+        96
+    ],
+    "search_z": [
+        0,
+        96
+    ]
+}

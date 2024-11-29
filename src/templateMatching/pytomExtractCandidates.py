@@ -1,0 +1,62 @@
+import sys,os,glob,subprocess
+from distutils.util import strtobool
+from src.misc.system import run_wrapperCommand
+from src.templateMatching.libTemplateMatching import templateMatchingWrapperBase
+
+
+class pytomExtractCandidates(templateMatchingWrapperBase):
+    def __init__(self,args,runFlag=None):
+        super().__init__(args,runFlag=runFlag)
+       #pass
+        
+    def prepareInputs(self):
+        
+        print("--------------prepare inputs for candiate extraction---------------------------")
+        sys.stdout.flush()  
+        tmOutFold=self.args.out_dir + "tmResults"
+        os.makedirs(tmOutFold,exist_ok=True)    
+        self.getFilesByWildCard(self.inputFold+"/tmResults/*.mrc",tmOutFold)
+        self.getFilesByWildCard(self.inputFold+"/tmResults/*.json",tmOutFold,copy_files=True)
+        
+    def runMainApp(self):
+        print("--------------run candidate extraction---------------------------")
+        sys.stdout.flush() 
+        if self.args.apixScoreMap=="auto":
+            pixs=self.st.tilt_series_df["rlnTomoTiltSeriesPixelSize"][0]*self.st.tilt_series_df["rlnTomoTomogramBinning"][0]
+        else:
+            pixs=float(self.args.apixScoreMap)
+        
+        radiusInPix=int(self.args.particleDiameterInAng/2.0/pixs)
+        constParams=["-n",str(self.args.maxNumParticles),
+                     "-r",str(radiusInPix), #pytom radius in pixel
+                     "--relion5-compat",
+                     "--log","debug"]
+      
+        if self.args.cutOffMethod=="NumberOfFalsePositives":            
+            constParams.extend(["--number-of-false-positives",str(self.args.cutOffValue)])
+        if self.args.cutOffMethod=="ManualCutOff":            
+            constParams.extend(["-c",str(self.args.cutOffValue)])
+        if self.args.scoreFilter=="tophat":
+            constParams.extend(["--tophat-filter"])
+        tmOutFold=self.args.out_dir + "tmResults"
+        jobFiles=glob.glob(tmOutFold+"/*_job.json") 
+        print("starting to extract " + str(len(jobFiles)))
+        z=1
+        for job in jobFiles:    
+            print("  --> processing " + job + ": " + str(z) + " of " + str(len(jobFiles)) + " scores", flush=True)
+            command=["pytom_extract_candidates.py", 
+                     "-j", job] 
+            command.extend(constParams)
+            self.result=run_wrapperCommand(command,tag="run_candidate_extraction",relionProj=self.relProj)
+            z+=1
+            
+    def updateMetaData(self):
+        print("--------------combining outputs---------------------------")
+        tmOutFold=self.args.out_dir + "tmResults"
+        command=["pytom_merge_stars.py", 
+                    "-i", tmOutFold,
+                    "-o",self.args.out_dir + "/candidates.star"] 
+        self.result=run_wrapperCommand(command,tag="run_combineFiles",relionProj=self.relProj)
+        
+    def checkResults(self):
+        pass

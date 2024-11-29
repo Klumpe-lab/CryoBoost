@@ -124,7 +124,7 @@ class pytomTm(templateMatchingWrapperBase):
     
     
     def updateMetaData(self):
-        pass
+        self.st.writeTiltSeries(self.args.out_dir+"/tomograms.star")    
         
     def checkResults(self):
         #check if important results exists and values are in range

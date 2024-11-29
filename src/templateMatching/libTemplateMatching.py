@@ -1,6 +1,7 @@
 from src.rw.librw import tiltSeriesMeta
-import shlex,os,subprocess,sys,pathlib
+import shlex,os,shutil,glob,subprocess,sys,pathlib
 from abc import ABC, abstractmethod
+import json
 
 
 class templateMatchingWrapperBase(ABC):
@@ -11,7 +12,8 @@ class templateMatchingWrapperBase(ABC):
         
         self.getRelionProjPath(args.in_mics)
         self.st=tiltSeriesMeta(args.in_mics,self.relProj)
-
+        self.inputFold=os.path.dirname(args.in_mics)
+        
         sys.stdout.flush()
         if runFlag=="Full":
             self.run()
@@ -50,3 +52,24 @@ class templateMatchingWrapperBase(ABC):
             relProj="./"
         
         self.relProj=relProj
+    
+    def getFilesByWildCard(self,source_pattern, target_dir, copy_files=False):
+        
+        for source_file in glob.glob(source_pattern):
+        
+            file_name = os.path.basename(source_file)
+            target_path = os.path.join(target_dir, file_name)
+            try:
+                if copy_files:
+                    #shutil.copy2(source_file, target_path)
+                    with open(source_file, 'r') as file:
+                        data = json.load(file)
+                        data["output_dir"]=os.path.dirname(target_path)
+                        with open(target_path, 'w') as fileOut:
+                            json.dump(data, fileOut)
+                else:
+                    os.symlink(os.path.abspath(source_file), target_path)
+            except FileExistsError:
+                print(f"File already exists: {target_path}")
+            except Exception as e:
+                print(f"Error processing {source_file}: {e}")      

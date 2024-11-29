@@ -67,7 +67,7 @@
       <rect>
        <x>8</x>
        <y>25</y>
-       <width>101</width>
+       <width>61</width>
        <height>30</height>
       </rect>
      </property>
@@ -162,39 +162,73 @@
     <widget class="QComboBox" name="dropDown_gainFlip_5">
      <property name="geometry">
       <rect>
-       <x>216</x>
-       <y>27</y>
-       <width>181</width>
+       <x>269</x>
+       <y>28</y>
+       <width>171</width>
        <height>25</height>
       </rect>
      </property>
      <item>
       <property name="text">
-       <string>Number of False Positives</string>
+       <string>NumberOfFalsePositives</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Manual Cut off</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Number of Particles </string>
+       <string>ManualCutOff</string>
       </property>
      </item>
     </widget>
     <widget class="QLineEdit" name="line_path_movies_10">
      <property name="geometry">
       <rect>
-       <x>409</x>
-       <y>26</y>
+       <x>454</x>
+       <y>28</y>
        <width>40</width>
        <height>25</height>
       </rect>
      </property>
      <property name="text">
-      <string>1.5</string>
+      <string>1.2</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_72">
+     <property name="geometry">
+      <rect>
+       <x>222</x>
+       <y>25</y>
+       <width>50</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Cut Off</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_73">
+     <property name="geometry">
+      <rect>
+       <x>504</x>
+       <y>24</y>
+       <width>111</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Max Num Particles</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_path_movies_11">
+     <property name="geometry">
+      <rect>
+       <x>618</x>
+       <y>27</y>
+       <width>41</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1500</string>
      </property>
     </widget>
    </widget>
