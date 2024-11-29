@@ -26,7 +26,7 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
         else:
             pixs=float(self.args.apixScoreMap)
         
-        radiusInPix=int(self.args.particleDiameterInAng/2.0/pixs)
+        radiusInPix=int(float(self.args.particleDiameterInAng)/2.0/pixs)
         constParams=["-n",str(self.args.maxNumParticles),
                      "-r",str(radiusInPix), #pytom radius in pixel
                      "--relion5-compat",

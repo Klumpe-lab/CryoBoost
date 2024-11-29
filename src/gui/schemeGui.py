@@ -258,10 +258,7 @@ class MainUI(QMainWindow):
                 layout.addWidget(widget,stretch=0)
                 self.widgets.append(widget)
                 #self.tabWidget.insertTab(self.jobTapNrSetUpTaps,container_widget,tabName)
-                
-           
-                
-                
+                                    
                 
     def iniWidget(self,jobName):             
         
