@@ -6,7 +6,7 @@ import glob,random
 from PyQt6 import QtWidgets
 from PyQt6.QtGui import QTextCursor
 from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QWidget,QLineEdit,QComboBox,QRadioButton,QCheckBox,QSizePolicy 
+from PyQt6.QtWidgets import QTableWidget,QScrollArea,QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QWidget,QLineEdit,QComboBox,QRadioButton,QCheckBox,QSizePolicy 
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
 from src.rw.librw import starFileMeta,mdocMeta
@@ -232,15 +232,22 @@ class MainUI(QMainWindow):
         
         self.jobTapNrSetUpTaps=1
         self.tabWidget.removeTab(self.jobTapNrSetUpTaps)
-        self.widgets = []  # Lis
+        self.widgets = [] 
+        self.layouts = []
         for job in self.cbdat.scheme.jobs_in_scheme:
             if job.startswith("templatematching"):
                 
+                scroll_area = QScrollArea()
+                scroll_area.setWidgetResizable(True)
+                scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+                scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+                
                 container_widget = QtWidgets.QWidget()
-                container_widget.setContentsMargins(0, 0, 0, 0)
+                scroll_area.setWidget(container_widget)
                 layout = QVBoxLayout(container_widget)
-                layout.setSpacing(0)
-                layout.setContentsMargins(0, 0, 0, 0)
+                layout.setSpacing(1)
+                layout.setContentsMargins(1,1, 1, 1)
+                self.layouts.append(layout)
                 tag=job.split("_")
                 if len(tag)>1:
                     tabName="ParticleSetup_"+tag[1]
@@ -250,14 +257,17 @@ class MainUI(QMainWindow):
                 widget=self.iniWidget(job)
                 layout.addWidget(widget,stretch=0)
                 self.widgets.append(widget)
-                self.tabWidget.insertTab(self.jobTapNrSetUpTaps,container_widget,tabName)
+                scroll_area.setWidget(container_widget)
+                self.tabWidget.insertTab(self.jobTapNrSetUpTaps, scroll_area, tabName)
                 self.jobTapNrSetUpTaps+=1   
-               
+
             if job.startswith("tmextractcand"):    
                 widget=self.iniWidget(job)
-                layout.addWidget(widget,stretch=0)
-                self.widgets.append(widget)
-                #self.tabWidget.insertTab(self.jobTapNrSetUpTaps,container_widget,tabName)
+                layout.addWidget(widget,stretch=0)             
+        
+        for layout in self.layouts:   
+            spacer = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding)
+            layout.addItem(spacer)    
                                     
                 
     def iniWidget(self,jobName):             
