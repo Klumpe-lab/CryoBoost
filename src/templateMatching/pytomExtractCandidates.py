@@ -11,7 +11,7 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
         
     def prepareInputs(self):
         
-        print("--------------prepare inputs for candiate extraction---------------------------")
+        print("--------------prepare inputs for candiate extraction-----------------")
         sys.stdout.flush()  
         tmOutFold=self.args.out_dir + "tmResults"
         os.makedirs(tmOutFold,exist_ok=True)    
@@ -36,8 +36,13 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
             constParams.extend(["--number-of-false-positives",str(self.args.cutOffValue)])
         if self.args.cutOffMethod=="ManualCutOff":            
             constParams.extend(["-c",str(self.args.cutOffValue)])
-        if self.args.scoreFilter=="tophat":
+        if self.args.scoreFilterMethod=="tophat":
             constParams.extend(["--tophat-filter"])
+            if self.args.scoreFilterValue!="None":
+                constParams.extend(["--tophat-connectivity",self.args.scoreFilterValue.split[0]])
+                constParams.extend(["--tophat-bins",self.args.scoreFilterValue.split[1]])
+                
+        
         tmOutFold=self.args.out_dir + "tmResults"
         jobFiles=glob.glob(tmOutFold+"/*_job.json") 
         print("starting to extract " + str(len(jobFiles)))

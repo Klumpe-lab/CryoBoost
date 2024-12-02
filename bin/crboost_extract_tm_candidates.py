@@ -17,7 +17,11 @@ def parse_arguments():
     parser.add_argument("--maxNumParticles", required=True,default=1500, help="Max number of particles per tomo")
     parser.add_argument("--cutOffMethod", required=True,default="NumberOfFalsePositives", help="Default: NumberOfFalsePositives or ManualCutOff")
     parser.add_argument("--cutOffValue", required=True,default=1, help="Cut off value")
-    parser.add_argument("--scoreFilter", required=False,default=None, help="Filter for score function opt. tophat")
+    parser.add_argument("--scoreFilterMethod", required=False,default="None", help="Filter for score function type opt. tophat")
+    parser.add_argument("--scoreFilterValue", required=False,default="None", help="Filter for score function Value tophat connectivity:bins")
+    parser.add_argument("--maskFoldPath", required=False,default="None", help="Folder containing masks for scores")
+    
+     
      
     args,unkArgs=parser.parse_known_args()
     return args,unkArgs

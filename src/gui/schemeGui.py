@@ -307,7 +307,18 @@ class MainUI(QMainWindow):
             widget.line_path_tm_BandPass.textChanged.connect(self.setTmBandPassToJobTap)            
             widget.line_path_tm_AngSamp.textChanged.connect(self.setTmAngSampToJobTap)            
             widget.btn_browse_tm_AngList.clicked.connect(self.browseTmAngList)
-            
+        
+        if jobName=="tmextractcand":
+            widget.line_path_ce_diaInAng.textChanged.connect(self.setCeDiaInAngToJobTap)
+            widget.dropDown_cutOffType.currentTextChanged.connect(self.setCeScoreCutOffTypeToJobTap)
+            widget.line_path_ce_cutOffVal.textChanged.connect(self.setCeScoreCutOffValueToJobTap)
+            widget.line_path_ce_maxNumParticles.textChanged.connect(self.setCeMaxNumParticlesToJobTap)
+            widget.line_path_ce_maskFold.textChanged.connect(self.setCeMaskFoldPathToJobTap)
+            widget.btn_browse_ce_maskFold.clicked.connect(self.browseCeMaskFold)
+            widget.dropDown_scoreFiltType.currentTextChanged.connect(self.setCeScoreFiltTypeToJobTap)
+            widget.line_path_ce_scoreFiltVal.textChanged.connect(self.setCeScoreFiltValueToJobTap)
+            widget.dropDown_ce_implementation.currentTextChanged.connect(self.setCeImplementationToJobTap)
+
             
                 
         return widget                    
@@ -686,7 +697,65 @@ class MainUI(QMainWindow):
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
         dirName=browse_files(text_field,self.system.filebrowser)
         
-       
+    def setCeScoreCutOffTypeToJobTap(self,text):   
+        params_dict = {"param1_value":text }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["tmextractcand"+jobTag])
+   
+    def setCeScoreCutOffValueToJobTap(self,text):   
+        params_dict = {"param2_value":text }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["tmextractcand"+jobTag])
+   
+    def setCeDiaInAngToJobTap(self,text):
+        params_dict = {"param3_value":text }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["tmextractcand"+jobTag])
+    
+    def setCeMaxNumParticlesToJobTap(self,text):
+        params_dict = {"param4_value":text }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["tmextractcand"+jobTag])
+    
+    def setCeScoreFiltTypeToJobTap(self,text):   
+        params_dict = {"param6_value":text }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["tmextractcand"+jobTag])
+    
+    def setCeScoreFiltValueToJobTap(self,text):   
+        params_dict = {"param7_value":text }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["tmextractcand"+jobTag])
+   
+    def setCeMaskFoldPathToJobTap(self,text):
+        params_dict = {"param8_value":text }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["tmextractcand"+jobTag])
+    
+    def setCeImplementationToJobTap(self,text):
+        
+        print("setting Imp")
+        textToSet="--implementation " + text + "\'"
+        params_dict = {"other_args": textToSet }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["tmextractcand"+jobTag])
+    
+    
+    def browseCeMaskFold(self):
+        """
+        Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
+        Then, sets the parameters dictionary to the jobs in the tab widget.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        targetFold=os.getcwd()
+        widget = self.tabWidget.currentWidget()
+        text_field = widget.findChild(QLineEdit, "line_path_ce_maskFold") 
+        dirName=browse_dirs(text_field,targetFold,self.system.filebrowser)
     
         
     def setPathMdocsToJobTap(self):
