@@ -72,10 +72,10 @@ star_file:
   reconstruction: reconstruction/tomograms.star
   denoisetrain:   reconstruction/tomograms.star   #is not the result but the reconstruction is used as result   
   denoisepredict: denoise/denoised_tilt_series.star #maybe switch to reconstruction
-  fs_motion_and_ctf: fs_motion_and_ctf/fs_motion_and_ctf.star
+  fsMotionAndCtf: fs_motion_and_ctf/fs_motion_and_ctf.star
   aligntiltsWarp: aligntiltsWarp/aligned_tilt_series.star
-  ts_ctf: ts_ctf/ts_ctf_tilt_series.star
-  ts_reconstruct: ts_reconstruct/tomograms.star
+  tsCtf: ts_ctf/ts_ctf_tilt_series.star
+  tsReconstruct: ts_reconstruct/tomograms.star
   templatematching: templatematching/tomograms.star
   tmextractcand: tmextractcand/candidates.star
 
@@ -124,9 +124,9 @@ computing:
       GPU-OneProcess: 
         - aligntiltsWarp
         - aligntilts
-        - fs_motion_and_ctf
-        - ts_ctf
-        - ts_reconstruct
+        - fsMotionAndCtf
+        - tsCtf
+        - tsReconstruct
         - templatematching
         - tmextractcand
       GPU-OneProcessOneGPU:
@@ -142,7 +142,7 @@ computing:
         motioncorr:
          - 4          
   JOBsPerDevice: 
-        fs_motion_and_ctf:
+        fsMotionAndCtf:
            p.hpcl9: 4
            p.hpcl93: 4
            p.hpcl8: 2
@@ -152,12 +152,12 @@ computing:
            p.hpcl93: 1
            p.hpcl8: 1
            local.hpcl58*: 4
-        ts_ctf:
+        tsCtf:
            p.hpcl9: 4
            p.hpcl93: 4
            p.hpcl8: 2
            local.hpcl58*: 4 
-        ts_reconstruct:
+        tsReconstruct:
            p.hpcl9: 4
            p.hpcl93: 4
            p.hpcl8: 2

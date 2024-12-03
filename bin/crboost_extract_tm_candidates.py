@@ -32,7 +32,7 @@ def main():
     print(args)
     
     print("launching")
-    if args.implementation=="pytom":
+    if args.implementation=="Pytom":
         tm=pytomExtractCandidates(args,runFlag="Full")
     
     if tm.result.returncode==1:

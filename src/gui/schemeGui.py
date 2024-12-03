@@ -373,7 +373,19 @@ class MainUI(QMainWindow):
             jobTag=""
         
         return jobTag
-   
+    
+    def splitJobByTag(self,jobName):
+        
+        if len(jobName.split("_"))>1:
+            jobBase=jobName.split("_")[0]
+            jobTag="_"+jobName.split("_")[1]
+        else: 
+            jobBase=jobName
+            jobTag=""
+        
+        return jobBase,jobTag
+    
+        
     def setTmSearchVolMaskFoldToJobTap(self,textLine):
         """
         Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
@@ -1046,7 +1058,7 @@ class MainUI(QMainWindow):
         partion=self.dropDown_partitionName.currentText()
         shareNodes=self.checkBox_shareNodes.isChecked()
         for job in self.cbdat.scheme.jobs_in_scheme:
-            jobNoTag=jobNoTabs=job.split("_")[0]
+            jobNoTag,_=self.splitJobByTag(job) 
             comDict=self.cbdat.conf.getJobComputingParams([jobNoTag,nrNodes,partion],shareNodes)
             if (comDict is not None):
                 self.setParamsDictToJobTap(comDict,applyToJobs=job)

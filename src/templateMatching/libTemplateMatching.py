@@ -55,6 +55,7 @@ class templateMatchingWrapperBase(ABC):
     
     def getFilesByWildCard(self,source_pattern, target_dir, copy_files=False):
         
+        print("  import " + source_pattern + " to " + target_dir)
         print("  found " + str(len(glob.glob(source_pattern))) + " files")
         for source_file in glob.glob(source_pattern):
         

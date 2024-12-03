@@ -11,7 +11,7 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
         
     def prepareInputs(self):
         
-        print("--------------prepare inputs for candiate extraction-----------------")
+        print("--------------prepare inputs for extraction-------------------")
         sys.stdout.flush()  
         tmOutFold=self.args.out_dir + "tmResults"
         os.makedirs(tmOutFold,exist_ok=True)    

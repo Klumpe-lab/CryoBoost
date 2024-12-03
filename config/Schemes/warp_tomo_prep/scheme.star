@@ -45,11 +45,14 @@ _rlnSchemeJobName #2
 _rlnSchemeJobMode #3 
 _rlnSchemeJobHasStarted #4 
 importmovies importmovies   continue            0 
-fs_motion_and_ctf fs_motion_and_ctf continue 0 
+fsMotionAndCtf fsMotionAndCtf continue 0 
 filtertilts  filtertilts continue 0
 aligntiltsWarp aligntiltsWarp continue 0 
-ts_ctf ts_ctf continue 0 
-ts_reconstruct ts_reconstruct continue 0
+tsCtf tsCtf continue 0 
+tsReconstruct tsReconstruct continue 0
+templatematching  templatematching   continue      0 
+tmextractcand  tmextractcand   continue      0 
+
 # version 50001
 
 data_scheme_edges
@@ -62,9 +65,11 @@ _rlnSchemeEdgeOutputNodeNameIfTrue #4
 _rlnSchemeEdgeBooleanVariable #5 
 WAIT EXIT_maxtime            0  undefined  undefined 
 EXIT_maxtime importmovies            0  undefined  undefined 
-importmovies fs_motion_and_ctf       0 undefined  undefined 
-fs_motion_and_ctf filtertilts        0 undefined  undefine
+importmovies fsMotionAndCtf       0 undefined  undefined 
+fsMotionAndCtf filtertilts        0 undefined  undefine
 filtertilts aligntiltsWarp           0 undefined  undefine   
-aligntiltsWarp    ts_ctf               0 undefined  undefine
-ts_ctf ts_reconstruct                  0 undefined  undefine
-ts_reconstruct     EXIT                0 undefined
+aligntiltsWarp    tsCtf               0 undefined  undefine
+tsCtf tsReconstruct                  0 undefined  undefine
+tsReconstruct templatematching        0 undefined  undefine
+templatematching tmextractcand         0 undefined undefined
+tmextractcand     EXIT                0 undefined

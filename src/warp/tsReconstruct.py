@@ -25,6 +25,7 @@ class tsReconstruct(warpWrapperBase):
                 "--halfmap_frames" ,str(self.args.halfmap_frames),
                 "--deconv" ,str(self.args.deconv),
                 "--perdevice" ,str(self.args.perdevice),
+                "--dont_invert"
                 ]
         self.result=run_wrapperCommand(command,tag="run_tsReconstruct",relionProj=self.relProj)
     
@@ -39,17 +40,17 @@ class tsReconstruct(warpWrapperBase):
             #TODO Add information for each tilt here
             
         self.st.writeTiltSeries(self.args.out_dir+"/tomograms.star")
-        #update information for template matching
+        #Just udate the master tilseries star
         st=starFileMeta(self.args.out_dir+"/tomograms.star")
         for index, row in st.df.iterrows():
-            tN=st.df.at(index,['rlnTomoName'])
-            print("tN"+tN)
-            recName=self.args.out_dir + os.path.sep + self.tsFolderName + "/reconstruction/" + tN + recRes +"Apx.mrc"
-            print("rN"+recName)
-            st.df.at(index,['rlnTomoReconstructedTomogram'])=recName
-        
-                                    
-        
+            #tN=st.df.at(index,['rlnTomoName'])
+            tN = st.df.at[index, 'rlnTomoName']
+            recName=self.args.out_dir + os.path.sep + self.tsFolderName + "/reconstruction/" + tN + "_" + recRes +"Apx.mrc"
+            st.df.at[index, 'rlnTomoReconstructedTomogram'] = recName
+            st.df.at[index, 'rlnTomoTiltSeriesPixelSize'] = self.args.rescale_angpixs
+            st.df.at[index, 'rlnTomoTomogramBinning']=float(self.args.rescale_angpixs)/float(self.st.tsInfo.framePixS)
+        print("writing updated star")                            
+        st.writeStar(self.args.out_dir+"/tomograms.star")
             
     def checkResults(self):
         #check if important results exists and values are in range
