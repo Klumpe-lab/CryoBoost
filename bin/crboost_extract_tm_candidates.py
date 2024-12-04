@@ -7,7 +7,7 @@ from src.templateMatching.pytomExtractCandidates import pytomExtractCandidates
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="filter tilts")
+    parser = argparse.ArgumentParser(description="extract candidates")
     parser.add_argument("--in_mics", "-in_mic", required=True, help="Input tilt series STAR file")
     parser.add_argument("--o", dest="out_dir", required=True, help="Output directory name")
     parser.add_argument("--j", "-nr_threads",dest="threads" ,required=False, default=None, help="Nr of threads used. Ignore!")
@@ -20,6 +20,7 @@ def parse_arguments():
     parser.add_argument("--scoreFilterMethod", required=False,default="None", help="Filter for score function type opt. tophat")
     parser.add_argument("--scoreFilterValue", required=False,default="None", help="Filter for score function Value tophat connectivity:bins")
     parser.add_argument("--maskFoldPath", required=False,default="None", help="Folder containing masks for scores")
+    #parser.add_argument("--outputFormat", required=False,default="relion5", help="defualt relion5 use warp for warp part extraction Format for coordiante .star file")
     
      
      

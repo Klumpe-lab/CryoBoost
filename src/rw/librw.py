@@ -9,6 +9,7 @@ import glob
 import tempfile
 import pandas as pd
 import xml.etree.ElementTree as ET
+import mrcfile
 
 class warpMetaData:
   
@@ -1236,6 +1237,15 @@ class tiltSeriesMeta:
           else:
               print(f"Warning: {df_attr} not found in tilt_series_df")
             
-      
+      self.tsInfo.tomoSize = None
+      if "rlnTomoReconstructedTomogram" in self.all_tilts_df.columns:
+        tomoName = self.all_tilts_df["rlnTomoReconstructedTomogram"].iloc[0]
+        if os.path.exists(tomoName):
+            with mrcfile.open(tomoName, header_only=True) as mrc:
+                self.tsInfo.tomoSize = [mrc.header.nx, mrc.header.ny, mrc.header.nz]
+        else:
+            print(f"Warning: Tomogram file {tomoName} does not exist.")
+            
+        
       
       
