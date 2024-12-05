@@ -68,7 +68,7 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
         
         pl=particleListMeta(self.args.out_dir + "/candidates.star")    
         pl.writeImodModel(self.args.out_dir + "/vis/imodPartRad/",int(self.args.particleDiameterInAng),self.st.tsInfo.tomoSize)
-        pl.writeImodModel(self.args.out_dir + "/vis/imodCenter/",int(8*self.pixs),self.st.tsInfo.tomoSize,color=[255,0,0])
+        pl.writeImodModel(self.args.out_dir + "/vis/imodCenter/",int(8*self.pixs),self.st.tsInfo.tomoSize,color=[255,0,0],thick=4)
         pl.writeList(self.args.out_dir + "/candidatesWarp/",'warpCoords',self.st.tsInfo.tomoSize)
         
     def checkResults(self):
