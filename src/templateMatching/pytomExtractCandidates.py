@@ -66,9 +66,11 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
                     "-o",self.args.out_dir + "/candidates.star"] 
         self.result=run_wrapperCommand(command,tag="run_combineFiles",relionProj=self.relProj)
         
+        print("-----generating visualisation---------------------------")
         pl=particleListMeta(self.args.out_dir + "/candidates.star")    
         pl.writeImodModel(self.args.out_dir + "/vis/imodPartRad/",int(self.args.particleDiameterInAng),self.st.tsInfo.tomoSize)
         pl.writeImodModel(self.args.out_dir + "/vis/imodCenter/",int(8*self.pixs),self.st.tsInfo.tomoSize,color=[255,0,0],thick=4)
+        print("-----generating warp output---------------------------")
         pl.writeList(self.args.out_dir + "/candidatesWarp/",'warpCoords',self.st.tsInfo.tomoSize)
         
     def checkResults(self):

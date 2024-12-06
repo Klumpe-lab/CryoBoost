@@ -25,6 +25,7 @@ Install dependencies
    pip3 install --ignore-installed torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu118 --no-cache-dir
    pip3 install pyqt6==6.7.0
    pip install starfile
+   pip install biopython
    conda install conda-forge::timm
    conda install seaborn mrcfile 
    pip install scikit-learn scikit-image
