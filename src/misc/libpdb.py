@@ -99,8 +99,11 @@ class pdb:
         
         pdbLocal=os.path.splitext(outPath)[0] + "." + pdbOutFormat 
         self.writePDB(pdbLocal,pdbOutFormat)
+        pdbLocal=os.path.basename(pdbLocal)
+        outFold=os.path.dirname(outPath)
+        outName=os.path.basename(outPath)
         full_dict={}
-        full_dict['outFile']=outPath
+        full_dict['outFile']=outName
         full_dict['scPotential']='Yes'
         full_dict['boxSize']=outBox
         full_dict['threads']=25
@@ -120,7 +123,7 @@ class pdb:
             for value in full_dict.values():
                  f.write(f"{value}\n")
 
-        call="simulate < " + paramFileName
+        call="cd " + outFold + ";simulate < " + os.path.basename(paramFileName)
         print(call)
         result=subprocess.run(call,shell=True,capture_output=True, text=True, check=True)
         print(result.stdout)

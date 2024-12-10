@@ -26,6 +26,7 @@ Install dependencies
    pip3 install pyqt6==6.7.0
    pip install starfile
    pip install biopython
+   conda install -c conda-forge pymol-open-source
    conda install conda-forge::timm
    conda install seaborn mrcfile 
    pip install scikit-learn scikit-image
