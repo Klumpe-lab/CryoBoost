@@ -4,6 +4,7 @@ import numpy as np
 import subprocess
 import tempfile
 from Bio.PDB import MMCIFParser, MMCIFIO
+from PyQt6.QtWidgets import QMessageBox,QApplication
 
 class pdb:
     """
@@ -13,7 +14,7 @@ class pdb:
       
     """
 
-    def __init__(self,pdbIn):
+    def __init__(self,pdbIn,fetchPath="tmpDir"):
         """
         Initializes the tiltSeriesMeta class.
         """
@@ -29,7 +30,7 @@ class pdb:
         else:
             self.pdbName = None
             self.pdbCode = pdbIn
-            self.fetchPDB(pdbIn)
+            self.fetchPDB(pdbIn,fetchPath)
         self.pymol.cmd.center(self.modelName)    
     
     def fetchPDB(self,pdbCode,output="tmpDir"):
@@ -38,15 +39,24 @@ class pdb:
         """
         if output=="tmpDir":
             self.pymol.cmd.set('fetch_path',tempfile.gettempdir())
-            self.pymol.cmd.fetch(pdbCode)
         else:
-            self.pymol.cmd.fetch(pdbCode,filename=output)
+            self.pymol.cmd.set('fetch_path',output)
             
+        self.pymol.cmd.fetch(pdbCode)
         self.model = self.pymol.cmd.get_model(pdbCode)
         self.modelName=pdbCode
         
         
-    def writePDB(self,outputName,outputFormat="cif"):
+        
+    def writePDB(self,outputName,outputFormat="cif",verboseQt=0):
+        
+        if verboseQt==1:
+            msg = QMessageBox(text="Writing " +outputName)
+            msg.setWindowTitle("Status")
+            msg.setStandardButtons(QMessageBox.StandardButton.NoButton)
+            msg.show()
+            QApplication.processEvents()
+        
         self.outputName=outputName
         self.pymol.cmd.save(outputName, self.modelName,format=outputFormat)
         parser = MMCIFParser()
@@ -54,6 +64,8 @@ class pdb:
         io = MMCIFIO()
         io.set_structure(structure)
         io.save(outputName)
+        if verboseQt==1:
+            msg.close()
         
         
     def readPDB(self,inputName):

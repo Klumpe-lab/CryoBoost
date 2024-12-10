@@ -93,6 +93,23 @@ def checkGainOptions(gainPath,rot,flip):
             msg_box.resize(2000, 400) 
             msg_box.exec()
 
+class statusMessageBox():
+    def __init__(self,text,title="Status "):
+        msg = QMessageBox()
+        msg.setText(text)
+        msg.setWindowTitle(title)
+        msg.setStandardButtons(QMessageBox.StandardButton.NoButton)
+        msg.show()
+        QApplication.processEvents()
+        self.msg=msg            
+    def close(self):
+        self.msg.close()
+        
+    def update(self,text):    
+        self.msg.setText(text)
+        QApplication.processEvents()
+
+        
 def messageBox(title, text):
     """
     Shows a message box with the specified title and text.
