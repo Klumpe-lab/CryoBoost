@@ -2,43 +2,47 @@ import numpy as np
 import mrcfile
 from scipy.ndimage import distance_transform_edt
 
-def ellipsoid_mask(box_size, radii, decay_width=5.0, voxel_size=1.0,output_path=None):
+def ellipsoid_mask(box_size, radii, outer_radii=None, decay_width=5.0, voxel_size=1.0, output_path=None, dtype=np.float32):
     """
-    Create ellipsoid mask with specific Gaussian decay width at edges
-    
+    Create ellipsoid mask with specific Gaussian decay width at edges and outer cutoff
     Parameters:
     box_size: tuple (nx, ny, nz) - size of volume in voxels
-    radii: tuple (rx, ry, rz) - radii of ellipsoid in voxels
+    radii: tuple (rx, ry, rz) - inner radii of ellipsoid in voxels
+    outer_radii: tuple (rx, ry, rz) - outer radii where mask becomes zero (default: radii + 3*decay_width)
     decay_width: float - width of Gaussian decay in voxels
     voxel_size: float - voxel size in Angstroms
     """
+    # Set default outer radii if not provided
+    if outer_radii is None:
+        outer_radii = tuple(r + 3*decay_width for r in radii)
+
     # Create coordinate grids
-    x = np.linspace(-box_size[0]/2, box_size[0]/2, box_size[0])
-    y = np.linspace(-box_size[1]/2, box_size[1]/2, box_size[1])
-    z = np.linspace(-box_size[2]/2, box_size[2]/2, box_size[2])
-    
+    x = np.linspace(-box_size/2, box_size/2, box_size)
+    y = np.linspace(-box_size/2, box_size/2, box_size)
+    z = np.linspace(-box_size/2, box_size/2, box_size)
     x, y, z = np.meshgrid(x, y, z)
+
+    # Create inner and outer ellipsoid masks
+    inner_ellipsoid = ((x/radii[0])**2 + (y/radii[1])**2 + (z/radii[2])**2)
+    outer_ellipsoid = ((x/outer_radii[0])**2 + (y/outer_radii[1])**2 + (z/outer_radii[2])**2)
+
+    # Create mask with smooth transition
+    mask = np.ones_like(inner_ellipsoid, dtype=dtype)
+    transition_region = (inner_ellipsoid > 1.0) & (outer_ellipsoid <= 1.0)
     
-    # Create binary ellipsoid mask
-    binary_mask = ((x/radii[0])**2 + (y/radii[1])**2 + (z/radii[2])**2) <= 1.0
-    binary_mask = binary_mask.astype(np.float32)
+    # Calculate smooth transition in the region between inner and outer radii
+    mask[transition_region] = 0.5 * (1.0 + np.cos(np.pi * 
+        (np.sqrt(inner_ellipsoid[transition_region]) - 1.0) / 
+        (np.sqrt(outer_ellipsoid[transition_region]) - 1.0)))
     
-    # Calculate distance from mask edge
-    distance_inside = distance_transform_edt(binary_mask)
-    distance_outside = distance_transform_edt(1.0 - binary_mask)
-    
-    # Combine distances
-    distance = distance_outside - distance_inside
-    
-    # Create smooth transition using error function
-    smooth_mask = 0.5 * (1.0 - np.tanh(distance / decay_width))
-    
+    # Set outer region to zero
+    mask[outer_ellipsoid > 1.0] = 0.0
+
     # Write to MRC file
     if output_path is not None:
+       
         with mrcfile.new(output_path, overwrite=True) as mrc:
-            mrc.set_data(smooth_mask)
+            mrc.set_data(mask)
             mrc.voxel_size = voxel_size
-    
-        
-    return smooth_mask
 
+    return mask

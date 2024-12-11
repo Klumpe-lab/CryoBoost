@@ -1,4 +1,3 @@
-
 import sys
 import os
 import pandas as pd
@@ -6,7 +5,7 @@ import glob,random
 from PyQt6 import QtWidgets
 from PyQt6.QtGui import QTextCursor
 from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QTableWidget,QScrollArea,QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QWidget,QLineEdit,QComboBox,QRadioButton,QCheckBox,QSizePolicy 
+from PyQt6.QtWidgets import QDialog,QTableWidget,QScrollArea,QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QWidget,QLineEdit,QComboBox,QRadioButton,QCheckBox,QSizePolicy 
 from PyQt6.QtCore import Qt
 from src.pipe.libpipe import pipe
 from src.rw.librw import starFileMeta,mdocMeta
@@ -14,6 +13,7 @@ from src.misc.system import run_command_async
 from src.gui.libGui import get_user_selection,externalTextViewer,browse_dirs,browse_files,checkDosePerTilt,browse_filesOrFolders,change_values,change_bckgrnd,checkGainOptions,get_inputNodesFromSchemeTable,messageBox 
 from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
+from src.gui.generateTemplate import TemplateGen
 import subprocess, shutil
 from PyQt6.QtCore import QTimer 
 import mrcfile
@@ -645,6 +645,15 @@ class MainUI(QMainWindow):
         """
         widget = self.tabWidget.currentWidget()
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
+        self.template_dialog = TemplateGen()
+        self.template_dialog.line_edit_templatePixelSize.setText(self.textEdit_pixelSize.toPlainText())
+        self.template_dialog.line_edit_outputFolder.setText(self.line_path_new_project.text()+ os.pathsep+"templates")
+        result = self.template_dialog.exec()
+        if result == QDialog.DialogCode.Accepted:  # OK was pressed
+           new_pixelsize = self.template_dialog.getPixelSize()
+        else:
+          pass
+        
         print("generate Volume not jet implemented")    
     
     def generateTmVolumeTemplateMask(self):

@@ -1,17 +1,16 @@
 import sys,requests,os
 import numpy as np
 from src.misc.libpdb import pdb
+from src.misc.libimVol import gaussian_lowpass_mrc
 from src.misc.libmask import ellipsoid_mask
-from libGui import statusMessageBox
-
-
+from src.gui.libGui import statusMessageBox
 
 import subprocess
 from PyQt6.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, 
-                            QPushButton, QVBoxLayout, QHBoxLayout, 
+                            QPushButton, QDialog, QHBoxLayout, 
                             QFileDialog, QGridLayout,QInputDialog,QMessageBox)
 
-class SimulateForm(QWidget):
+class SimulateForm(QDialog):
     def __init__(self, main_form):
         super().__init__()
         self.main_form = main_form
@@ -19,10 +18,10 @@ class SimulateForm(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Simulate Form')
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(600)
         layout = QGridLayout()
         self.setLayout(layout)
-       
+        
         self.fields = []
         
         layout.addWidget(QLabel('PDB File:'), 0, 0)
@@ -59,7 +58,7 @@ class SimulateForm(QWidget):
         
         layout.addWidget(QLabel('Oversample Factor'), 6, 0)
         self.OverSampleFactor =QLineEdit()
-        self.OverSampleFactor .setText("2")
+        self.OverSampleFactor .setText("3")
         layout.addWidget(self.OverSampleFactor , 6, 1)
         self.fields.append(self.OverSampleFactor)
         
@@ -76,13 +75,14 @@ class SimulateForm(QWidget):
 
     def GenAndExit(self):
         
+        tag=self.pdbCode+"_apix"+self.pixel_size_field.text()+"_ares"+self.resolution_field.text()+"_box"+self.box_size_field.text()
         text, ok = QInputDialog.getText(self, 'Tag Input', 'Enter tag:', 
-                              QLineEdit.EchoMode.Normal, 'default_tag')
+                              QLineEdit.EchoMode.Normal,tag )
         
         name=os.path.basename(self.pdb_field.text())
         name=os.path.splitext(name)[0]+".mrc"
         name=text
-        outpath=self.outFold+os.path.sep+name
+        self.outpath=self.outFold+os.path.sep+name + ".mrc"
         pixS=float(self.pixel_size_field.text())
         outBox=float(self.box_size_field.text())
         modScaleBF=float(self.LinearscalingofperatombFactor.text())
@@ -90,20 +90,26 @@ class SimulateForm(QWidget):
         oversamp=self.OverSampleFactor.text()
         numOfFrames=self.numOfFrames.text()
         
-        
         self.pdb=pdb(self.pdb_field.text())
-        self.pdb.simulateMapFromPDB(outpath,pixS,outBox,modScaleBF,modBf,oversamp,numOfFrames)
-        self.close()
+        msg=statusMessageBox("Generating Map: " + self.outpath)
+        self.pdb.simulateMapFromPDB(self.outpath,pixS,outBox,modScaleBF,modBf,oversamp,numOfFrames)
+        msg=statusMessageBox("Filtering Map: " + self.outpath + " to " + self.resolution_field.text() + "Ang.")
+        self.outpathBlack=os.path.splitext(self.outpath)[0] + "_black"  + os.path.splitext(self.outpath)[1]
+        gaussian_lowpass_mrc(self.outpath,self.outpathBlack,float(self.resolution_field.text())+0.5,invert_contrast=True) #hard_cutoff_angstrom=float(self.resolution_field.text())+2)
+        msg.close()
+        self.accept()
 
-class App(QWidget):
+class TemplateGen(QDialog):
     def __init__(self):
+        import warnings
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
         super().__init__()
         self.initUI()
         self.simulate_form = None
 
     def initUI(self):
         self.setWindowTitle('Generate Template')
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(500)
         layout = QGridLayout()
         self.setLayout(layout)
         self.pdbDefaultName="pdb4Template.cif"
@@ -120,9 +126,9 @@ class App(QWidget):
     def generateOutputColumn(self,layout):
         
         layout.addWidget(QLabel('Template Pixelsize'), 0, 0)
-        self.templatePixelSize = QLineEdit()
-        self.templatePixelSize.setPlaceholderText('pixelsize of template')
-        layout.addWidget(self.templatePixelSize, 0, 1)
+        self.line_edit_templatePixelSize = QLineEdit()
+        self.line_edit_templatePixelSize.setPlaceholderText('pixelsize of template')
+        layout.addWidget(self.line_edit_templatePixelSize, 0, 1)
         output_folder_layout = QHBoxLayout()
         output_folder_layout.addWidget(QLabel('OutputFolder'))
         self.line_edit_outputFolder = QLineEdit()
@@ -164,7 +170,8 @@ class App(QWidget):
         
     def generateVolumeColumn(self,layout):
         
-         # Field 2 with four buttons
+         # Field 2 with four buttons 4, 0)
+        self.LinearscalingofperatombFactor = QLineEdit()
         layout.addWidget(QLabel('Map File:'), 3, 0)
         self.line_edit_mapFile = QLineEdit()
         self.line_edit_mapFile.setPlaceholderText('Enter map file path')
@@ -175,7 +182,7 @@ class App(QWidget):
         push_button_simulate_map = QPushButton('Sim from Pdb')
         push_button_basicShape_map = QPushButton('Use basic shape')
         push_button_view_map = QPushButton('View')
-        
+         #self.simulate_form.show()
         push_button_browse_map.clicked.connect(self.browseMap)
         push_button_basicShape_map.clicked.connect(self.basicShape)
         push_button_simulate_map.clicked.connect(self.openSimulateForm)
@@ -252,29 +259,61 @@ class App(QWidget):
             self.line_edit_mapFile.setText(filename)
 
     def basicShape(self):
-        pass
+        pixS = float(self.line_edit_templatePixelSize.text())
+        outFold = self.line_edit_outputFolder.text()
+        szStr, ok = QInputDialog.getText(None, 'Enter sz:sy:sz Diameter in Ang', 'Input', text='100:500:100')
+        outputName = outFold + os.path.sep + 'ellipsoid_' + szStr.replace(":", "_") + "_apix" + str(pixS) +".mrc"
+        szPix = np.array(szStr.split(":"), dtype=float)/pixS   
+        offset = 32
+        max_size = int(np.ceil(np.max(szPix*1.2) + offset - 1) // offset) * offset
+        box_size = int(max_size)
+        if box_size<128:
+            box_size=128
+        msg=statusMessageBox("Generating Mask: " + outputName)
+        ellipsoid_mask(box_size,np.round(szPix/2),np.round(szPix/2),decay_width=0.0, voxel_size=pixS, output_path=outputName)
+        outputNameBlack=os.path.splitext(outputName)[0] + "_black"  + os.path.splitext(outputName)[1]
+        msg=statusMessageBox("Filtering And Inverting Mask: " + outputNameBlack)
+        gaussian_lowpass_mrc(outputName,outputNameBlack,45,invert_contrast=1)
+        self.line_edit_mapFile.setText(outputNameBlack)
+        msg.close()
         
     def viewMap(self):
-        pass
-        
-    
+        try:
+            mapName = self.line_edit_mapFile.text()
+            pdbName = os.path.splitext(mapName)[0] + ".cif"
+            pdbName = pdbName.replace("_black.cif",".cif")
+            call = 'pymol -d "'
+            print(pdbName)
+            if os.path.exists(pdbName):
+                call += 'load ' + pdbName + ' ;'  
+            if os.path.exists(mapName):
+                call += 'load ' + mapName + ', map; isomesh mesh_obj, map, level=-1.0"'
+                subprocess.Popen(call, shell=True)
+            else:
+                print("No map to view")
+        except Exception as e:
+            print(f"Error launching PyMOL: {str(e)}")
+            
     def openSimulateForm(self):
         if self.simulate_form is None:
             self.simulate_form = SimulateForm(self)
-        self.simulate_form.pixel_size_field.setText(self.templatePixelSize.text())
+        self.simulate_form.pixel_size_field.setText(self.line_edit_templatePixelSize.text())
         self.simulate_form.pdb_field.setText(self.line_edit_pdbFile.text())
-        self.simulate_form.resolution_field.setText(str(float(self.templatePixelSize.text())*2))
-        self.simulate_form.box_size_field.setText(str(self.pdb.getOptBoxSize(float(self.templatePixelSize.text())))) 
+        self.simulate_form.resolution_field.setText(str(float(self.line_edit_templatePixelSize.text())*2.2))
+        self.simulate_form.box_size_field.setText(str(self.pdb.getOptBoxSize(float(self.line_edit_templatePixelSize.text())))) 
         self.simulate_form.outFold=self.line_edit_outputFolder.text()
+        self.simulate_form.pdbCode=self.pdbCode
        
-        self.simulate_form.show()
-    
+        result=self.simulate_form.exec()  # Use 
+        if result == QDialog.DialogCode.Accepted:  # Check if OK was clicked
+            self.line_edit_mapFile.setText(self.simulate_form.outpathBlack)
+        
+        
     def checkAndExit(self):
         self.close()
     
-    
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = App()
+    ex = TemplateGen()
     ex.show()
     sys.exit(app.exec())

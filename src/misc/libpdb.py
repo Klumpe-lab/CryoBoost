@@ -31,7 +31,9 @@ class pdb:
             self.pdbName = None
             self.pdbCode = pdbIn
             self.fetchPDB(pdbIn,fetchPath)
-        self.pymol.cmd.center(self.modelName)    
+        com = self.pymol.cmd.get_position(self.modelName)
+        self.pymol.cmd.translate([-com[0], -com[1], -com[2]], self.modelName)
+        #self.pymol.cmd.center(self.modelName)    
     
     def fetchPDB(self,pdbCode,output="tmpDir"):
         """
@@ -106,10 +108,15 @@ class pdb:
         cmd.delete('aligned_temp')
         cmd.load_coords(aligned_coords, model_name)
 
+   
+        
     
     def simulateMapFromPDB(self,outPath,outPix,outBox,modScaleBf=1,modBf=0,oversamp=2,numOfFrames=7,pdbOutFormat="cif"):
         
         pdbLocal=os.path.splitext(outPath)[0] + "." + pdbOutFormat 
+       
+        off=(outBox/2)*outPix
+        self.pymol.cmd.translate([off,off,off], self.modelName)
         self.writePDB(pdbLocal,pdbOutFormat)
         pdbLocal=os.path.basename(pdbLocal)
         outFold=os.path.dirname(outPath)
