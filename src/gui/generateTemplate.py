@@ -1,9 +1,9 @@
 import sys,requests,os
 import numpy as np
 from src.misc.libpdb import pdb
-from src.misc.libimVol import gaussian_lowpass_mrc
+from src.misc.libimVol import processVolume,gaussian_lowpass_mrc
 from src.misc.libmask import ellipsoid_mask
-from src.gui.libGui import statusMessageBox
+from src.gui.libGui import statusMessageBox,messageBox
 
 import subprocess
 from PyQt6.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, 
@@ -29,73 +29,101 @@ class SimulateForm(QDialog):
         layout.addWidget(self.pdb_field, 0, 1)
         self.fields.append(self.pdb_field)
         
-        layout.addWidget(QLabel('Pixel Size  (Å):'), 1, 0)
-        self.pixel_size_field = QLineEdit()
-        layout.addWidget(self.pixel_size_field, 1, 1)
-        self.fields.append(self.pixel_size_field)
+        layout.addWidget(QLabel('Simulation Pixel Size (max 4) (Å):'), 1, 0)
+        self.smpixel_size_field = QLineEdit()
+        layout.addWidget(self.smpixel_size_field, 1, 1)
+        self.fields.append(self.smpixel_size_field)
         
-        layout.addWidget(QLabel('Box Size: (Voxel)'), 2, 0)
-        self.box_size_field = QLineEdit()
-        layout.addWidget(self.box_size_field, 2, 1)
-        self.fields.append(self.box_size_field)
+        layout.addWidget(QLabel('Template Pixel Size  (Å):'), 2, 0)
+        self.tmpixel_size_field = QLineEdit()
+        layout.addWidget(self.tmpixel_size_field, 2, 1)
+        self.fields.append(self.tmpixel_size_field)
         
-        layout.addWidget(QLabel('Resolution (Å):'), 3, 0)
+        layout.addWidget(QLabel('Simulation Box Size : (Voxel)'), 3, 0)
+        self.smbox_size_field = QLineEdit()
+        layout.addWidget(self.smbox_size_field, 3, 1)
+        self.fields.append(self.smbox_size_field)
+        
+        layout.addWidget(QLabel('Template Box Size : (Voxel)'), 4, 0)
+        self.tmbox_size_field = QLineEdit()
+        layout.addWidget(self.tmbox_size_field, 4, 1)
+        self.fields.append(self.tmbox_size_field)
+        
+        layout.addWidget(QLabel('Resolution (Å):'), 5, 0)
         self.resolution_field = QLineEdit()
-        layout.addWidget(self.resolution_field, 3, 1)
+        layout.addWidget(self.resolution_field, 5, 1)
         self.fields.append(self.resolution_field)
         
-        layout.addWidget(QLabel('Linear scaling of per atom bFactor'), 4, 0)
+        layout.addWidget(QLabel('Linear scaling of per atom bFactor'), 6, 0)
         self.LinearscalingofperatombFactor = QLineEdit()
         self.LinearscalingofperatombFactor.setText("1") 
-        layout.addWidget(self.LinearscalingofperatombFactor, 4, 1)
+        layout.addWidget(self.LinearscalingofperatombFactor, 6, 1)
         self.fields.append(self.LinearscalingofperatombFactor)
         
-        layout.addWidget(QLabel('Per atom (xtal) bFactor added to all atoms'), 5, 0)
+        layout.addWidget(QLabel('Per atom (xtal) bFactor added to all atoms'), 7, 0)
         self.PeratombFactoraddedtoallatoms = QLineEdit()
         self.PeratombFactoraddedtoallatoms.setText("0")
-        layout.addWidget(self.PeratombFactoraddedtoallatoms, 5, 1)
+        layout.addWidget(self.PeratombFactoraddedtoallatoms, 7, 1)
         self.fields.append(self.PeratombFactoraddedtoallatoms)
         
-        layout.addWidget(QLabel('Oversample Factor'), 6, 0)
+        layout.addWidget(QLabel('Oversample Factor'), 8, 0)
         self.OverSampleFactor =QLineEdit()
-        self.OverSampleFactor .setText("3")
-        layout.addWidget(self.OverSampleFactor , 6, 1)
+        self.OverSampleFactor .setText("4")
+        layout.addWidget(self.OverSampleFactor , 8, 1)
         self.fields.append(self.OverSampleFactor)
         
-        layout.addWidget(QLabel('Number of Frames per movie'), 7, 0)
+        layout.addWidget(QLabel('Number of Frames per movie'), 9, 0)
         self.numOfFrames = QLineEdit()
         self.numOfFrames.setText("7")
-        layout.addWidget(self.numOfFrames , 7, 1)
+        layout.addWidget(self.numOfFrames , 9, 1)
         self.fields.append(self.numOfFrames )
         
         # Add Simulate button
         GenAndExit_btn = QPushButton('GenAndExit')
         GenAndExit_btn.clicked.connect(self.GenAndExit)
-        layout.addWidget(GenAndExit_btn, 7, 0, 1, 2)
+        layout.addWidget(GenAndExit_btn, 10, 0, 1, 2)
 
     def GenAndExit(self):
         
-        tag=self.pdbCode+"_apix"+self.pixel_size_field.text()+"_ares"+self.resolution_field.text()+"_box"+self.box_size_field.text()
-        text, ok = QInputDialog.getText(self, 'Tag Input', 'Enter tag:', 
+        tag=self.pdbCode+"_apix"+self.tmpixel_size_field.text()+"_ares"+self.resolution_field.text()+"_box"+self.tmbox_size_field.text()
+        text, ok = QInputDialog.getText(self, 'Tag for template', 'Enter tag:', 
                               QLineEdit.EchoMode.Normal,tag )
+        if ok==False:
+            return
         
+        nameTemplate=text
+        nameSim=self.pdbCode+"_apix"+self.smpixel_size_field.text()+"_box"+self.smbox_size_field.text()
         name=os.path.basename(self.pdb_field.text())
         name=os.path.splitext(name)[0]+".mrc"
-        name=text
-        self.outpath=self.outFold+os.path.sep+name + ".mrc"
-        pixS=float(self.pixel_size_field.text())
-        outBox=float(self.box_size_field.text())
+       
+        self.outpath=self.outFold+os.path.sep+nameTemplate+".mrc"
+        self.simOutpath=self.outFold+os.path.sep+nameSim+".mrc"
+        pixS=float(self.smpixel_size_field.text())
+        outBox=float(self.smbox_size_field.text())
         modScaleBF=float(self.LinearscalingofperatombFactor.text())
         modBf=self.PeratombFactoraddedtoallatoms.text()
         oversamp=self.OverSampleFactor.text()
         numOfFrames=self.numOfFrames.text()
         
         self.pdb=pdb(self.pdb_field.text())
-        msg=statusMessageBox("Generating Map: " + self.outpath)
-        self.pdb.simulateMapFromPDB(self.outpath,pixS,outBox,modScaleBF,modBf,oversamp,numOfFrames)
-        msg=statusMessageBox("Filtering Map: " + self.outpath + " to " + self.resolution_field.text() + "Ang.")
+        msg=statusMessageBox("Simulating Map: " + self.simOutpath)
+        self.pdb.simulateMapFromPDB(self.simOutpath,pixS,outBox,modScaleBF,modBf,oversamp,numOfFrames)
+        
+        boxTm=float(self.tmbox_size_field.text())
+        pixsTm=float(self.tmpixel_size_field.text())
+        resTm=float(self.resolution_field.text())
+        msg=statusMessageBox("Generating Template from Simulation: (white)" + self.outpath)
+        print('boxTm '+ str(boxTm))
+        processVolume(self.simOutpath,self.outpath,resTm,invert_contrast=0,voxel_size_angstrom_output=pixsTm,box_size_output=boxTm,voxel_size_angstrom=pixS,
+                      voxel_size_angstrom_out_header=pixsTm)
+        
         self.outpathBlack=os.path.splitext(self.outpath)[0] + "_black"  + os.path.splitext(self.outpath)[1]
-        gaussian_lowpass_mrc(self.outpath,self.outpathBlack,float(self.resolution_field.text())+0.5,invert_contrast=True) #hard_cutoff_angstrom=float(self.resolution_field.text())+2)
+        msg=statusMessageBox("Generating Template from Simulation: (black)" + self.outpath)
+        processVolume(self.simOutpath,self.outpathBlack,resTm,invert_contrast=1,voxel_size_angstrom_output=pixsTm,box_size_output=boxTm,voxel_size_angstrom=pixS,
+                      voxel_size_angstrom_out_header=pixsTm)
+        
+        # self.outpathBlack=os.path.splitext(self.outpath)[0] + "_black"  + os.path.splitext(self.outpath)[1]
+        # gaussian_lowpass_mrc(self.outpath,self.outpathBlack,float(self.resolution_field.text())+0.5,invert_contrast=True) #hard_cutoff_angstrom=float(self.resolution_field.text())+2)
         msg.close()
         self.accept()
 
@@ -106,7 +134,9 @@ class TemplateGen(QDialog):
         super().__init__()
         self.initUI()
         self.simulate_form = None
-
+        self.framePixs=2.95
+        self.minTemplateSize=96
+          
     def initUI(self):
         self.setWindowTitle('Generate Template')
         self.setMinimumWidth(500)
@@ -267,12 +297,13 @@ class TemplateGen(QDialog):
         offset = 32
         max_size = int(np.ceil(np.max(szPix*1.2) + offset - 1) // offset) * offset
         box_size = int(max_size)
-        if box_size<128:
-            box_size=128
+        if box_size<self.minTemplateSize:
+            box_size=self.minTemplateSize
         msg=statusMessageBox("Generating Mask: " + outputName)
         ellipsoid_mask(box_size,np.round(szPix/2),np.round(szPix/2),decay_width=0.0, voxel_size=pixS, output_path=outputName)
         outputNameBlack=os.path.splitext(outputName)[0] + "_black"  + os.path.splitext(outputName)[1]
         msg=statusMessageBox("Filtering And Inverting Mask: " + outputNameBlack)
+        
         gaussian_lowpass_mrc(outputName,outputNameBlack,45,invert_contrast=1)
         self.line_edit_mapFile.setText(outputNameBlack)
         msg.close()
@@ -295,12 +326,30 @@ class TemplateGen(QDialog):
             print(f"Error launching PyMOL: {str(e)}")
             
     def openSimulateForm(self):
+        
+        if self.line_edit_templatePixelSize.text().replace('.','').isnumeric()==False:
+            QMessageBox.critical(self, "Error", "Template Pixel Size must be a number")
+            print("in")
+            return
+        if not hasattr(self, 'pdb') or self.pdb is None:
+            QMessageBox.critical(self, "Error", "No PDB file loaded. Please load a PDB file first.")
+            return
+        
         if self.simulate_form is None:
             self.simulate_form = SimulateForm(self)
-        self.simulate_form.pixel_size_field.setText(self.line_edit_templatePixelSize.text())
+        
+        self.simulate_form.tmpixel_size_field.setText(self.line_edit_templatePixelSize.text())
+        self.simulate_form.tmbox_size_field.setText(str(self.pdb.getOptBoxSize(float(self.line_edit_templatePixelSize.text()),self.minTemplateSize))) 
+        if float(self.line_edit_templatePixelSize.text())>4:
+            pixFrame=str(self.framePixs)
+            self.simulate_form.smpixel_size_field.setText(pixFrame)
+            self.simulate_form.smbox_size_field.setText(str(self.pdb.getOptBoxSize(float(pixFrame),self.minTemplateSize))) 
+        else:
+            self.simulate_form.smpixel_size_field.setText(self.line_edit_templatePixelSize.text())
+            self.simulate_form.smbox_size_field.setText(str(self.pdb.getOptBoxSize(float(self.line_edit_templatePixelSize.text()),self.minTemplateSize))) 
+            
         self.simulate_form.pdb_field.setText(self.line_edit_pdbFile.text())
-        self.simulate_form.resolution_field.setText(str(float(self.line_edit_templatePixelSize.text())*2.2))
-        self.simulate_form.box_size_field.setText(str(self.pdb.getOptBoxSize(float(self.line_edit_templatePixelSize.text())))) 
+        self.simulate_form.resolution_field.setText(str(round(float(self.line_edit_templatePixelSize.text())*2.2)))
         self.simulate_form.outFold=self.line_edit_outputFolder.text()
         self.simulate_form.pdbCode=self.pdbCode
        

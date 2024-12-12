@@ -645,16 +645,32 @@ class MainUI(QMainWindow):
         """
         widget = self.tabWidget.currentWidget()
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
-        self.template_dialog = TemplateGen()
-        self.template_dialog.line_edit_templatePixelSize.setText(self.textEdit_pixelSize.toPlainText())
-        self.template_dialog.line_edit_outputFolder.setText(self.line_path_new_project.text()+ os.pathsep+"templates")
-        result = self.template_dialog.exec()
-        if result == QDialog.DialogCode.Accepted:  # OK was pressed
-           new_pixelsize = self.template_dialog.getPixelSize()
+        tag=self.getTagFromCurrentTab()
+        pixS=None
+        if "tsReconstruct"+tag in self.cbdat.scheme.jobs_in_scheme.values: 
+            pixS=self.cbdat.scheme.job_star['tsReconstruct'].dict['joboptions_values']['rlnJobOptionValue'][9]
+        if "reconstruction"+tag in self.cbdat.scheme.jobs_in_scheme.values: 
+            pixS = self.cbdat.scheme.job_star['reconstruction'].dict['joboptions_values'][
+            self.cbdat.scheme.job_star['reconstruction'].dict['joboptions_values']['rlnJobOptionVariable'] == 'binned_angpix'
+            ]['rlnJobOptionValue'].values[0]    
+        if pixS is None:
+            messageBox("Problem","No Reconstruction Job. You cannot run template matching")
+            return
+        if self.line_path_new_project.text()=="":
+             messageBox("Info","No Projcet Path. Specify Projcet Path")
+             projPath=browse_dirs()   
         else:
-          pass
+            projPath=self.line_path_new_project.text()
+        templateFolder=projPath+os.path.sep+"templates"+ os.path.sep + tag
+        os.makedirs(templateFolder, exist_ok=True)
         
-        print("generate Volume not jet implemented")    
+        self.template_dialog = TemplateGen()
+        self.template_dialog.line_edit_templatePixelSize.setText(pixS)
+        self.template_dialog.line_edit_outputFolder.setText(templateFolder)
+        self.template_dialog.framePixs=self.textEdit_pixelSize.toPlainText()
+        result = self.template_dialog.exec()
+        text_field.setText(self.template_dialog.line_edit_mapFile.text())
+       
     
     def generateTmVolumeTemplateMask(self):
         """
