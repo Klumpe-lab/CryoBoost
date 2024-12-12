@@ -4,7 +4,7 @@ from src.misc.libpdb import pdb
 from src.misc.libimVol import processVolume,gaussian_lowpass_mrc
 from src.misc.libmask import ellipsoid_mask
 from src.gui.libGui import statusMessageBox,messageBox
-
+from src.rw.librw import cbconfig
 import subprocess
 from PyQt6.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, 
                             QPushButton, QDialog, QHBoxLayout, 
@@ -136,6 +136,10 @@ class TemplateGen(QDialog):
         self.simulate_form = None
         self.framePixs=2.95
         self.minTemplateSize=96
+        CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
+        self.confPath=CRYOBOOST_HOME + "/config/conf.yaml"
+        self.conf=cbconfig(self.confPath)     
+        
           
     def initUI(self):
         self.setWindowTitle('Generate Template')
@@ -226,11 +230,18 @@ class TemplateGen(QDialog):
         layout.addWidget(button_widget2, 3, 2)
     
     def viewPdb(self):  
-    
-        #subprocess.Popen(['chimera', self.pdbFile.text()])
-        outputPath=self.line_edit_outputFolder.text()+os.path.sep+self.pdbDefaultName
-        self.pdb.writePDB(outputPath,verboseQt=1)
-        subprocess.Popen(['pymol', outputPath])
+        
+        try:
+            outputPath = self.line_edit_outputFolder.text() + os.path.sep + self.pdbDefaultName
+            self.pdb.writePDB(outputPath, verboseQt=1)
+            envStr = self.conf.confdata['local']['Environment']
+            call=envStr+';pymol ' + outputPath
+            subprocess.Popen(call,shell=True)
+        except Exception as e:
+            QMessageBox.critical(self, 
+                                "Error", 
+                                f"An error occurred:\n\nType: {type(e).__name__}\nDetails: {str(e)}")
+            print(f"Full error details:\n{type(e).__name__}: {str(e)}")
         
         
     def alignPdb(self):
@@ -311,16 +322,23 @@ class TemplateGen(QDialog):
     def viewMap(self):
         try:
             mapName = self.line_edit_mapFile.text()
-            pdbName = os.path.splitext(mapName)[0] + ".cif"
-            pdbName = pdbName.replace("_black.cif",".cif")
-            call = 'pymol -d "'
-            print(pdbName)
-            if os.path.exists(pdbName):
-                call += 'load ' + pdbName + ' ;'  
+            # pdbName = os.path.splitext(mapName)[0] + ".cif"
+            # pdbName = pdbName.replace("_black.cif",".cif")
+            envStr = self.conf.confdata['local']['Environment']
+            call=envStr + ';imod '
             if os.path.exists(mapName):
-                call += 'load ' + mapName + ', map; isomesh mesh_obj, map, level=-1.0"'
+                call+=mapName
                 subprocess.Popen(call, shell=True)
             else:
+                print("Map file not found")
+            # call = envStr + ';pymol -d "'
+            # print(pdbName)
+            # if os.path.exists(pdbName):
+            #     call += 'load ' + pdbName + ' ;'  
+            # if os.path.exists(mapName):
+            #     call += 'load ' + mapName + ', map; isomesh mesh_obj, map, level=-1.0"'
+            #     subprocess.Popen(call, shell=True)
+            # else:
                 print("No map to view")
         except Exception as e:
             print(f"Error launching PyMOL: {str(e)}")
@@ -356,7 +374,7 @@ class TemplateGen(QDialog):
         result=self.simulate_form.exec()  # Use 
         if result == QDialog.DialogCode.Accepted:  # Check if OK was clicked
             self.line_edit_mapFile.setText(self.simulate_form.outpathBlack)
-        
+            
         
     def checkAndExit(self):
         self.close()
