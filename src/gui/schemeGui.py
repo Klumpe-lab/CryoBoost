@@ -11,6 +11,8 @@ from src.pipe.libpipe import pipe
 from src.rw.librw import starFileMeta,mdocMeta
 from src.misc.system import run_command_async
 from src.gui.libGui import get_user_selection,externalTextViewer,browse_dirs,browse_files,checkDosePerTilt,browse_filesOrFolders,change_values,change_bckgrnd,checkGainOptions,get_inputNodesFromSchemeTable,messageBox 
+from src.gui.libGui import MultiInputDialog,statusMessageBox
+from src.misc.libmask import genMaskRelion
 from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
 from src.gui.generateTemplate import TemplateGen
@@ -116,7 +118,6 @@ class MainUI(QMainWindow):
         
         self.textEdit_areTomoPatch.textChanged.connect(self.setAreTomoPatchToJobTap)
         self.textEdit_algRescaleTilts.textChanged.connect(self.setAlgRescaleTiltsJobTap)
-        
         
         self.textEdit_ImodPatchSize.textChanged.connect(self.setImodPatchSizeToJobTap)
         self.textEdit_imodPatchOverlap.textChanged.connect(self.setImodPatchOverlapToJobTap)
@@ -644,14 +645,19 @@ class MainUI(QMainWindow):
             None
         """
         widget = self.tabWidget.currentWidget()
+        index = self.tabWidget.indexOf(widget)
+
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
         tag=self.getTagFromCurrentTab()
         pixS=None
-        if "tsReconstruct"+tag in self.cbdat.scheme.jobs_in_scheme.values: 
-            pixS=self.cbdat.scheme.job_star['tsReconstruct'].dict['joboptions_values']['rlnJobOptionValue'][9]
-        if "reconstruction"+tag in self.cbdat.scheme.jobs_in_scheme.values: 
-            pixS = self.cbdat.scheme.job_star['reconstruction'].dict['joboptions_values'][
-            self.cbdat.scheme.job_star['reconstruction'].dict['joboptions_values']['rlnJobOptionVariable'] == 'binned_angpix'
+        scheme=self.updateSchemeFromJobTabs(self.cbdat.scheme,self.tabWidget)
+        self.tabWidget.setCurrentIndex(index)
+        
+        if "tsReconstruct"+tag in scheme.jobs_in_scheme.values: 
+            pixS=scheme.job_star['tsReconstruct'].dict['joboptions_values']['rlnJobOptionValue'][9]
+        if "reconstruction"+tag in scheme.jobs_in_scheme.values: 
+            pixS = scheme.job_star['reconstruction'].dict['joboptions_values'][
+            scheme.job_star['reconstruction'].dict['joboptions_values']['rlnJobOptionVariable'] == 'binned_angpix'
             ]['rlnJobOptionValue'].values[0]    
         if pixS is None:
             messageBox("Problem","No Reconstruction Job. You cannot run template matching")
@@ -685,8 +691,34 @@ class MainUI(QMainWindow):
         """
         widget = self.tabWidget.currentWidget()
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volumeMask") 
-        print("generate Volume Mask not jet implemented")    
-    
+        text_fieldTempl = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
+        inputVol=text_fieldTempl.text().replace("_black.mrc",".mrc")
+        # if inputVol=="" or 1==2:
+        #     messageBox("Problem","No Template Volume. You cannot create a mask")
+        #     return
+        
+        maskName=os.path.splitext(inputVol)[0]+"_mask.mrc"
+        
+        fields = {
+        "MaskPath": maskName,
+        "Threshold": "0.001",
+        "Extend": "5",
+        "SoftEdge": "7",
+        "LowPass": "20.0"
+         }
+        dialog = MultiInputDialog(fields)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            val = dialog.getInputs()
+            msg=statusMessageBox("Generating Mask")
+            genMaskRelion(inputVol,
+                          val["MaskPath"],
+                          val["Threshold"],
+                          val["Extend"],
+                          val["SoftEdge"],  
+                          val["LowPass"],
+                           )
+            text_field.setText(val["MaskPath"])
+            msg.close()
     def setTmVolumeTemplateSymToJobTap(self):
         
         widget = self.tabWidget.currentWidget()

@@ -85,7 +85,10 @@ class SimulateForm(QDialog):
 
     def GenAndExit(self):
         
+        if self.pdbCode is None:
+            self.pdbCode = "template"
         tag=self.pdbCode+"_apix"+self.tmpixel_size_field.text()+"_ares"+self.resolution_field.text()+"_box"+self.tmbox_size_field.text()
+        
         text, ok = QInputDialog.getText(self, 'Tag for template', 'Enter tag:', 
                               QLineEdit.EchoMode.Normal,tag )
         if ok==False:
@@ -121,9 +124,6 @@ class SimulateForm(QDialog):
         msg=statusMessageBox("Generating Template from Simulation: (black)" + self.outpath)
         processVolume(self.simOutpath,self.outpathBlack,resTm,invert_contrast=1,voxel_size_angstrom_output=pixsTm,box_size_output=boxTm,voxel_size_angstrom=pixS,
                       voxel_size_angstrom_out_header=pixsTm)
-        
-        # self.outpathBlack=os.path.splitext(self.outpath)[0] + "_black"  + os.path.splitext(self.outpath)[1]
-        # gaussian_lowpass_mrc(self.outpath,self.outpathBlack,float(self.resolution_field.text())+0.5,invert_contrast=True) #hard_cutoff_angstrom=float(self.resolution_field.text())+2)
         msg.close()
         self.accept()
 
@@ -277,8 +277,15 @@ class TemplateGen(QDialog):
         outFold = self.line_edit_outputFolder.text()
         pdbCode, ok = QInputDialog.getText(None, 'Enter PDB Code', None)
         
+        if not ok or pdbCode=="":
+            return
+        
         msg=statusMessageBox("Fetching " + pdbCode)
         self.pdb=pdb(pdbCode,outFold)
+        if self.pdb.pdbFetchSuccess==-1:
+            messageBox("problem", pdbCode + " not found")
+            msg.close()
+            return
         msg.update("writing pdb: " + outFold+os.path.sep+self.pdbDefaultName)
         self.pdb.writePDB(outFold+os.path.sep+self.pdbDefaultName)
         self.line_edit_pdbFile.setText(outFold+os.path.sep+self.pdbDefaultName)
@@ -300,6 +307,9 @@ class TemplateGen(QDialog):
             self.line_edit_mapFile.setText(filename)
 
     def basicShape(self):
+        if self.line_edit_templatePixelSize.text().replace(".","").isdigit()==False:
+            messageBox("Problem","Pixelsize not numeric")
+            return
         pixS = float(self.line_edit_templatePixelSize.text())
         outFold = self.line_edit_outputFolder.text()
         szStr, ok = QInputDialog.getText(None, 'Enter sz:sy:sz Diameter in Ang', 'Input', text='100:500:100')
@@ -314,8 +324,8 @@ class TemplateGen(QDialog):
         ellipsoid_mask(box_size,np.round(szPix/2),np.round(szPix/2),decay_width=0.0, voxel_size=pixS, output_path=outputName)
         outputNameBlack=os.path.splitext(outputName)[0] + "_black"  + os.path.splitext(outputName)[1]
         msg=statusMessageBox("Filtering And Inverting Mask: " + outputNameBlack)
-        
         gaussian_lowpass_mrc(outputName,outputNameBlack,45,invert_contrast=1)
+        gaussian_lowpass_mrc(outputName,outputName,45,invert_contrast=0)
         self.line_edit_mapFile.setText(outputNameBlack)
         msg.close()
         
@@ -331,15 +341,7 @@ class TemplateGen(QDialog):
                 subprocess.Popen(call, shell=True)
             else:
                 print("Map file not found")
-            # call = envStr + ';pymol -d "'
-            # print(pdbName)
-            # if os.path.exists(pdbName):
-            #     call += 'load ' + pdbName + ' ;'  
-            # if os.path.exists(mapName):
-            #     call += 'load ' + mapName + ', map; isomesh mesh_obj, map, level=-1.0"'
-            #     subprocess.Popen(call, shell=True)
-            # else:
-                print("No map to view")
+           
         except Exception as e:
             print(f"Error launching PyMOL: {str(e)}")
             

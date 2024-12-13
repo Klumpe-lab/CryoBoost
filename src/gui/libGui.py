@@ -5,10 +5,10 @@ from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QTableWidgetItem, QTabWidget, QFileDialog,QPushButton
 from PyQt6.QtWidgets import QMessageBox,QDialog,QListWidget
 from PyQt6.QtWidgets import QMainWindow,QApplication, QWidget, QVBoxLayout, QTextEdit, QScrollBar
+from PyQt6.QtWidgets import QDialog, QFormLayout, QLineEdit, QDialogButtonBox
 from PyQt6.QtCore import Qt
 import glob
 import mrcfile
-
 
 
 current_dir = os.path.dirname(os.path.abspath(__name__))
@@ -130,6 +130,37 @@ def messageBox(title, text):
     message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
     message_box.exec()    
         
+class MultiInputDialog(QDialog):
+    def __init__(self, fields_dict):
+        """
+        fields_dict: dictionary with field names as keys and default values as values
+        Example: {'Name': 'John', 'Age': '25', 'Email': 'example@mail.com'}
+        """
+        super().__init__()
+        layout = QFormLayout()
+        
+        # Store fields in a dictionary
+        self.fields = {}
+        
+        # Create fields dynamically from the dictionary
+        for name, default in fields_dict.items():
+            self.fields[name] = QLineEdit()
+            self.fields[name].setText(str(default))  # Set default value
+            layout.addRow(f"{name}:", self.fields[name])
+        
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | 
+            QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+        
+        self.setLayout(layout)
+    
+    def getInputs(self):
+        return {name: field.text() for name, field in self.fields.items()}
+
 
 
 def browse_dirs(target_field,target_fold,dialog="qt"):

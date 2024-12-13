@@ -1,6 +1,7 @@
 import numpy as np
 import mrcfile
 from scipy.ndimage import distance_transform_edt
+import subprocess
 
 def ellipsoid_mask(box_size, radii, outer_radii=None, decay_width=5.0, voxel_size=1.0, output_path=None, dtype=np.float32):
     """
@@ -40,9 +41,28 @@ def ellipsoid_mask(box_size, radii, outer_radii=None, decay_width=5.0, voxel_siz
 
     # Write to MRC file
     if output_path is not None:
-       
         with mrcfile.new(output_path, overwrite=True) as mrc:
             mrc.set_data(mask)
             mrc.voxel_size = voxel_size
 
     return mask
+
+def genMaskRelion(inputVolume,outputMask=None,threshold=0.001,extend=3,softEdgeSize=6,lowpass=20,threads=20):
+    
+    program='relion_mask_create'
+    inp=' --i ' + inputVolume
+    outp=' --o ' + outputMask
+    thr=' --ini_threshold ' + str(threshold)
+    ext=' --extend_inimask ' + str(extend)
+    soft=' --width_soft_edge ' + str(softEdgeSize)
+    lowp=' --lowpass ' + str(lowpass)
+    threads=' --j ' + str(threads)
+    
+    call=program + inp + outp
+    call+=thr + ext + soft + lowp + threads 
+
+    print(call)
+    subprocess.run(call,shell=True)
+    
+def caclThreshold(inputVolume,method):
+    pass    

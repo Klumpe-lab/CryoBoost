@@ -22,7 +22,9 @@ class pdb:
         self.pdbCode = None
         self.pymol=pymol2.PyMOL()
         self.pymol.start()
-
+        self.pdbFetchSuccess=-1
+        
+        
         if os.path.isfile(pdbIn):
             self.pdbName = pdbIn
             self.pdbCode = pdbIn.split('.')[0]
@@ -30,24 +32,34 @@ class pdb:
         else:
             self.pdbName = None
             self.pdbCode = pdbIn
-            self.fetchPDB(pdbIn,fetchPath)
-        com = self.pymol.cmd.get_position(self.modelName)
-        self.pymol.cmd.translate([-com[0], -com[1], -com[2]], self.modelName)
+            self.pdbFetchSuccess=self.fetchPDB(pdbIn,fetchPath)
+        
+        if self.modelName is not None:
+            com = self.pymol.cmd.get_position(self.modelName)
+            self.pymol.cmd.translate([-com[0], -com[1], -com[2]], self.modelName)
         #self.pymol.cmd.center(self.modelName)    
     
-    def fetchPDB(self,pdbCode,output="tmpDir"):
+    def fetchPDB(self, pdbCode, output="tmpDir"):
         """
         Fetches the pdb file from the PDB server.
         """
-        if output=="tmpDir":
-            self.pymol.cmd.set('fetch_path',tempfile.gettempdir())
+        if output == "tmpDir":
+            self.pymol.cmd.set('fetch_path', tempfile.gettempdir())
         else:
-            self.pymol.cmd.set('fetch_path',output)
+            self.pymol.cmd.set('fetch_path', output)
+        try:
+            res = self.pymol.cmd.fetch(pdbCode)
+        except Exception as e:
+            print(str(e))
+            res =-1
             
-        self.pymol.cmd.fetch(pdbCode)
-        self.model = self.pymol.cmd.get_model(pdbCode)
-        self.modelName=pdbCode
-        
+        if res != -1: 
+            self.model = self.pymol.cmd.get_model(pdbCode)
+            self.modelName = pdbCode
+        else:
+            self.modelName = None
+
+        return res
         
         
     def writePDB(self,outputName,outputFormat="cif",verboseQt=0):
