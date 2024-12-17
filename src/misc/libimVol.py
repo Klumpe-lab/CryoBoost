@@ -100,4 +100,76 @@ def processVolume(input_mrc: str, output_mrc: str, cutoff_angstrom: float=None, 
     
     print(call)
     subprocess.run(call,shell=True)
+
+
+def tom_cart2sph(I):
+    """
+    Transform 3D-volumes from cartesian to spherical coordinates.
     
+    Parameters:
+    -----------
+    I : ndarray
+        3D input array in cartesian coordinates
+    
+    Returns:
+    --------
+    pol : ndarray
+        3D array in spherical coordinates
+    """
+    
+    # Get dimensions
+    nx, ny, nz = I.shape
+    
+    # Calculate parameters for spherical grid
+    nradius = max(max(nx, ny), nz) // 2
+    ntheta = 2 * nradius
+    nphi = 2 * ntheta
+    
+    # Create spherical coordinate grids
+    r = np.linspace(0, nradius-1, nradius)
+    phi = np.linspace(0, 2*np.pi*(1-1/nphi), nphi)
+    theta = np.linspace(0, np.pi, ntheta)
+    r, phi, theta = np.meshgrid(r, phi, theta, indexing='ij')
+    
+    # Convert to cartesian coordinates
+    eps = 0
+    px = r * np.cos(phi) * np.sin(theta) + nradius + 1 + eps
+    py = r * np.sin(phi) * np.sin(theta) + nradius + 1 + eps
+    pz = r * np.cos(theta) + nradius + 1
+    
+    # Clear memory
+    del r, phi, theta
+    
+    # Calculate interpolation weights
+    px_floor = np.floor(px).astype(int)
+    py_floor = np.floor(py).astype(int)
+    pz_floor = np.floor(pz).astype(int)
+    
+    px_ceil = np.ceil(px).astype(int)
+    py_ceil = np.ceil(py).astype(int)
+    pz_ceil = np.ceil(pz).astype(int)
+    
+    tx = px - px_floor
+    ty = py - py_floor
+    tz = pz - pz_floor
+    
+    # Perform trilinear interpolation
+    c000 = I[px_floor-1 + nx*(py_floor-1) + ny*nx*(pz_floor-1)]
+    c100 = I[px_ceil-1 + nx*(py_floor-1) + ny*nx*(pz_floor-1)]
+    c010 = I[px_floor-1 + nx*(py_ceil-1) + ny*nx*(pz_floor-1)]
+    c001 = I[px_floor-1 + nx*(py_floor-1) + ny*nx*(pz_ceil-1)]
+    c110 = I[px_ceil-1 + nx*(py_ceil-1) + ny*nx*(pz_floor-1)]
+    c101 = I[px_ceil-1 + nx*(py_floor-1) + ny*nx*(pz_ceil-1)]
+    c011 = I[px_floor-1 + nx*(py_ceil-1) + ny*nx*(pz_ceil-1)]
+    c111 = I[px_ceil-1 + nx*(py_ceil-1) + ny*nx*(pz_ceil-1)]
+    
+    pol = (1-tx)*(1-ty)*(1-tz)*c000 + \
+          tx*(1-ty)*(1-tz)*c100 + \
+          (1-tx)*ty*(1-tz)*c010 + \
+          (1-tx)*(1-ty)*tz*c001 + \
+          tx*ty*(1-tz)*c110 + \
+          tx*(1-ty)*tz*c101 + \
+          (1-tx)*ty*tz*c011 + \
+          tx*ty*tz*c111
+    
+    return pol    

@@ -46,7 +46,10 @@ class warpMetaData:
 
 #from lib.functions import calculate_dose_rate_per_pixel, extract_eer_from_header
 class cbconfig:
-  def __init__(self,configPath):
+  def __init__(self,configPath=None):
+    if configPath is None:
+        self.CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
+        configPath=self.CRYOBOOST_HOME + "/config/conf.yaml"
     self.configPath = configPath
     self.read_config()
     self.get_microscopePreSetNames()
@@ -63,6 +66,14 @@ class cbconfig:
     """
     with open(self.configPath) as f:
       self.confdata = yaml.load(f, Loader=yaml.FullLoader)
+  def getEnvSting(self,typeE):
+   
+    if typeE=="local":
+        envString=self.confdata["local"]['Environment']
+    if typeE=="submission":
+        self.conf.confdata['submission'][0]['Environment']
+    
+    return envString
   
   def getJobComputingParams(self,comReq,doNodeSharing):    
        

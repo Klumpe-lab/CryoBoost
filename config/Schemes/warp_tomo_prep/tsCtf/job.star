@@ -18,7 +18,7 @@ _rlnJobOptionValue #2
   in_3dref         "" 
  in_coords         "" 
    in_mask         "" 
-    in_mic         Schemes/warp_tomo_prep/aligntiltsWarp/aligned_series.star
+    in_mic         Schemes/warp_tomo_prep/aligntiltsWarp/aligned_tilt_series.star
     in_mov         "" 
    in_part         "" 
 other_args         "\" 

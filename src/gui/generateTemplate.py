@@ -87,7 +87,11 @@ class SimulateForm(QDialog):
         
         if self.pdbCode is None:
             self.pdbCode = "template"
-        tag=self.pdbCode+"_apix"+self.tmpixel_size_field.text()+"_ares"+self.resolution_field.text()+"_box"+self.tmbox_size_field.text()
+        tmPixs=f"{float(self.tmpixel_size_field.text()):.2f}"
+        tmRes=f"{float(self.resolution_field.text()):.2f}"
+        tmBox = str(int(float(self.tmbox_size_field.text())))
+        
+        tag=self.pdbCode+"_apix"+tmPixs+"_ares"+tmRes+"_box"+tmBox
         
         text, ok = QInputDialog.getText(self, 'Tag for template', 'Enter tag:', 
                               QLineEdit.EchoMode.Normal,tag )
@@ -99,8 +103,8 @@ class SimulateForm(QDialog):
         name=os.path.basename(self.pdb_field.text())
         name=os.path.splitext(name)[0]+".mrc"
        
-        self.outpath=self.outFold+os.path.sep+nameTemplate+".mrc"
-        self.simOutpath=self.outFold+os.path.sep+nameSim+".mrc"
+        self.outpath=self.outFold+os.path.sep+nameTemplate+"_white.mrc"
+        self.simOutpath=self.outFold+os.path.sep+nameSim+"_white.mrc"
         pixS=float(self.smpixel_size_field.text())
         outBox=float(self.smbox_size_field.text())
         modScaleBF=float(self.LinearscalingofperatombFactor.text())
@@ -112,15 +116,15 @@ class SimulateForm(QDialog):
         msg=statusMessageBox("Simulating Map: " + self.simOutpath)
         self.pdb.simulateMapFromPDB(self.simOutpath,pixS,outBox,modScaleBF,modBf,oversamp,numOfFrames)
         
-        boxTm=float(self.tmbox_size_field.text())
-        pixsTm=float(self.tmpixel_size_field.text())
-        resTm=float(self.resolution_field.text())
+        boxTm=int(float(self.tmbox_size_field.text()))
+        pixsTm=round(float(self.tmpixel_size_field.text()),2)
+        resTm=round(float(self.resolution_field.text()),2)
         msg=statusMessageBox("Generating Template from Simulation: (white)" + self.outpath)
         print('boxTm '+ str(boxTm))
         processVolume(self.simOutpath,self.outpath,resTm,invert_contrast=0,voxel_size_angstrom_output=pixsTm,box_size_output=boxTm,voxel_size_angstrom=pixS,
                       voxel_size_angstrom_out_header=pixsTm)
         
-        self.outpathBlack=os.path.splitext(self.outpath)[0] + "_black"  + os.path.splitext(self.outpath)[1]
+        self.outpathBlack=os.path.splitext(self.outpath.replace("_white.mrc",".mrc"))[0] + "_black"  + os.path.splitext(self.outpath)[1]
         msg=statusMessageBox("Generating Template from Simulation: (black)" + self.outpath)
         processVolume(self.simOutpath,self.outpathBlack,resTm,invert_contrast=1,voxel_size_angstrom_output=pixsTm,box_size_output=boxTm,voxel_size_angstrom=pixS,
                       voxel_size_angstrom_out_header=pixsTm)

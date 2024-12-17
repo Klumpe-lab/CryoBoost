@@ -19,7 +19,7 @@ _rlnJobOptionValue #2
   in_3dref         "" 
  in_coords         "" 
    in_mask         "" 
-    in_mic         Schemes/warp_tomo_prep/fs_motion_and_ctf/fs_motion_and_ctf.star
+    in_mic         Schemes/warp_tomo_prep/fsMotionAndCtf/fs_motion_and_ctf.star
     in_mov         "" 
    in_part         "" 
 other_args         "" 

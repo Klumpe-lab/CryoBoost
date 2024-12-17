@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import QDialog, QFormLayout, QLineEdit, QDialogButtonBox
 from PyQt6.QtCore import Qt
 import glob
 import mrcfile
+import pandas as pd
 
 
 current_dir = os.path.dirname(os.path.abspath(__name__))
@@ -21,7 +22,13 @@ def get_inputNodesFromSchemeTable(table_widget,jobsOnly=True):
     inputNodes={}
     for row in range(table_widget.rowCount()):
         inputNodes[row]=table_widget.item(row,0).text()        
-    return inputNodes
+    nodes_df = pd.DataFrame({
+    'type': list(inputNodes.values()),
+    'tag': [None] * len(inputNodes),
+    'inputType': [None] + list(inputNodes.values())[:-1],  # None for first row, then shifted type values
+    'inputTag': [None] * len(inputNodes)
+                        })
+    return inputNodes,nodes_df
 
 def checkDosePerTilt(mdocWk,dosePerTilt,thoneRingFade):
     

@@ -11,7 +11,7 @@ submission:
     Helpssh: c-wing-wiki.biochem.mpg.de/wiki/index.php/Ssh-keygen
     HelpConflict: "rmove relion/python from your .bashrc hpcl8 or global section"
 local:
-    Environment: "module purge; module load RELION/5.0-beta-3; module load WARP/2.0.0dev29; module load IMOD; module load PYMOL"
+    Environment: "module purge; module load RELION/5.0-beta-3; module load WARP/2.0.0dev29; module load IMOD; module load PYMOL; module load CISTEM "
 
 aliases:
   - Job: all
@@ -73,20 +73,18 @@ star_file:
   reconstruction: reconstruction/tomograms.star
   denoisetrain:   reconstruction/tomograms.star   #is not the result but the reconstruction is used as result   
   denoisepredict: denoise/denoised_tilt_series.star #maybe switch to reconstruction
-  fsMotionAndCtf: fs_motion_and_ctf/fs_motion_and_ctf.star
+  fsMotionAndCtf: fsMotionAndCtf/fs_motion_and_ctf.star
   aligntiltsWarp: aligntiltsWarp/aligned_tilt_series.star
-  tsCtf: ts_ctf/ts_ctf_tilt_series.star
-  tsReconstruct: ts_reconstruct/tomograms.star
+  tsCtf: tsCtf/ts_ctf_tilt_series.star
+  tsReconstruct: tsReconstruct/tomograms.star
   templatematching: templatematching/tomograms.star
   tmextractcand: tmextractcand/candidates.star
 
 computing:
-   
   QueSize: 
       large: 5
       medium: 3
       small: 1
-   
   p.hpcl8:
       NrGPU: 2
       NrCPU: 24
@@ -163,3 +161,5 @@ computing:
            p.hpcl93: 4
            p.hpcl8: 2
            local.hpcl58*: 4
+filepath: 
+   removePatternFromPath: 'gpfs\\d{2}/lv\\d{2}/fileset\\d{2}' 

@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 from Bio.PDB import MMCIFParser, MMCIFIO
 from PyQt6.QtWidgets import QMessageBox,QApplication
+from src.rw.librw import cbconfig
 
 class pdb:
     """
@@ -23,7 +24,7 @@ class pdb:
         self.pymol=pymol2.PyMOL()
         self.pymol.start()
         self.pdbFetchSuccess=-1
-        
+        self.conf=cbconfig()
         
         if os.path.isfile(pdbIn):
             self.pdbName = pdbIn
@@ -121,8 +122,6 @@ class pdb:
         cmd.load_coords(aligned_coords, model_name)
 
    
-        
-    
     def simulateMapFromPDB(self,outPath,outPix,outBox,modScaleBf=1,modBf=0,oversamp=2,numOfFrames=7,pdbOutFormat="cif"):
         
         pdbLocal=os.path.splitext(outPath)[0] + "." + pdbOutFormat 
@@ -153,8 +152,9 @@ class pdb:
         with open(paramFileName, 'w') as f:
             for value in full_dict.values():
                  f.write(f"{value}\n")
-
-        call="cd " + outFold + ";simulate < " + os.path.basename(paramFileName)
+        
+        envL=self.conf.getEnvSting("local")    
+        call=envL+";cd " + outFold + ";simulate < " + os.path.basename(paramFileName)
         print(call)
         result=subprocess.run(call,shell=True,capture_output=True, text=True, check=True)
         print(result.stdout)
