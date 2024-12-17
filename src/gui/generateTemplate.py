@@ -1,10 +1,15 @@
 import sys,requests,os
+import gzip,os
+import mrcfile
+from src.gui.libGui import MultiInputDialog
+import wget
 import numpy as np
 from src.misc.libpdb import pdb
 from src.misc.libimVol import processVolume,gaussian_lowpass_mrc
 from src.misc.libmask import ellipsoid_mask
 from src.gui.libGui import statusMessageBox,messageBox
 from src.rw.librw import cbconfig
+import pymol2
 import subprocess
 from PyQt6.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, 
                             QPushButton, QDialog, QHBoxLayout, 
@@ -216,17 +221,17 @@ class TemplateGen(QDialog):
         layout.addWidget(self.line_edit_mapFile, 3, 1)
         
         button_layout2 = QHBoxLayout()
-        push_button_browse_map = QPushButton('Browse')
+        push_button_fetch_map = QPushButton('Fetch')
         push_button_simulate_map = QPushButton('Sim from Pdb')
         push_button_basicShape_map = QPushButton('Use basic shape')
         push_button_view_map = QPushButton('View')
          #self.simulate_form.show()
-        push_button_browse_map.clicked.connect(self.browseMap)
+        push_button_fetch_map.clicked.connect(self.fetchMap)
         push_button_basicShape_map.clicked.connect(self.basicShape)
         push_button_simulate_map.clicked.connect(self.openSimulateForm)
         push_button_view_map.clicked.connect(self.viewMap)
         
-        for btn in [push_button_browse_map, push_button_basicShape_map, push_button_simulate_map, push_button_view_map]:
+        for btn in [push_button_fetch_map, push_button_basicShape_map, push_button_simulate_map, push_button_view_map]:
             button_layout2.addWidget(btn)
         
         button_widget2 = QWidget()
@@ -299,16 +304,117 @@ class TemplateGen(QDialog):
     def simulatePdb(self):
         self.openSimulateForm() 
     
+    def fetchMap(self):
+        if self.line_edit_templatePixelSize.text().replace(".","").isdigit()==False:
+            messageBox("Problem","Pixelsize not numeric")
+            return
+        
+        outFold = self.line_edit_outputFolder.text()
+        emdb_id, ok = QInputDialog.getText(None, 'Enter EMDB Code', None)
+        
+        if not ok or not emdb_id:  # Check if user canceled or entered empty string
+            return False
+        if not os.path.exists(outFold):
+            try:
+                os.makedirs(outFold)
+            except Exception as e:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Icon.Critical)
+                msg.setText("Folder Error")
+                msg.setInformativeText(f"Failed to create output folder: {str(e)}")
+                msg.setWindowTitle("Folder Error")
+                msg.exec()
+                return False
+
+        app = QApplication.instance()
+        if app is None:
+            app = QApplication(sys.argv)
+        
+        try:
+            url = f"https://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{emdb_id}/map/emd_{emdb_id}.map.gz"
+            response = requests.head(url)
+            
+            if response.status_code != 200:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Icon.Critical)
+                msg.setText("Error")
+                msg.setInformativeText(f"EMDB ID {emdb_id} not found or not accessible")
+                msg.setWindowTitle("Download Error")
+                msg.exec()
+                return False
+
+            # Define file paths with target folder
+            gz_file = os.path.join(outFold, f'emd_{emdb_id}.map.gz')
+            map_file = os.path.join(outFold, f'emd_{emdb_id}.map')
+
+            try:
+                wget.download(url, gz_file)
+            except Exception as e:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Icon.Critical)
+                msg.setText("Download Error")
+                msg.setInformativeText(f"Failed to download file: {str(e)}")
+                msg.setWindowTitle("Download Error")
+                msg.exec()
+                return False
+
+            try:
+                with gzip.open(gz_file, 'rb') as f_in:
+                    with open(map_file, 'wb') as f_out:
+                        f_out.write(f_in.read())
+                
+            except Exception as e:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Icon.Critical)
+                msg.setText("Extraction Error")
+                msg.setInformativeText(f"Failed to extract file: {str(e)}")
+                msg.setWindowTitle("Extraction Error")
+                msg.exec()
+                return False
+
+        except Exception as e:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Critical)
+            msg.setText("Error")
+            msg.setInformativeText(f"An unexpected error occurred: {str(e)}")
+            msg.setWindowTitle("Error")
+            msg.exec()
+            return False
+       
+        with mrcfile.open(map_file, header_only=True) as mrc:
+            pixsEMDB = mrc.voxel_size.x
+            boxsizeEMDB = mrc.header.nx  # or 
+        
+        pixsTm=round(float(self.line_edit_templatePixelSize.text()),2)
+        resTm=round(float(pixsTm*2.2),2)
+        calcBox=boxsizeEMDB*(float(pixsEMDB)/float(pixsTm))
+        offset=32
+        boxTM = ((calcBox + offset - 1) // offset)*offset
+        if boxTM<96:
+            boxTM=96
+        
+        fields = {
+        "ResolutionInAng": str(resTm),
+        "Box": str(int(boxTM)),
+        }
+        dialog = MultiInputDialog(fields)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            val = dialog.getInputs()
+            resTM=round(float(val['ResolutionInAng']),2)
+            boxTM=round(float(val['Box']),2)
+            mapWhite = os.path.splitext(map_file)[0]+"_white.mrc"
+            processVolume(map_file,mapWhite,resTM,invert_contrast=0,voxel_size_angstrom_output=pixsTm,box_size_output=boxTM,voxel_size_angstrom=pixsEMDB,
+                            voxel_size_angstrom_out_header=pixsTm)
+            mapBlack = os.path.splitext(map_file)[0]+"_black.mrc"
+            processVolume(map_file,mapBlack,resTM,invert_contrast=1,voxel_size_angstrom_output=pixsTm,box_size_output=boxTM,voxel_size_angstrom=pixsEMDB,
+                            voxel_size_angstrom_out_header=pixsTm)
+            
+            # Update the map file path in the UI
+            self.line_edit_mapFile.setText(mapBlack)
+        return True
    
-    def browseMap(self):
-        filename, _ = QFileDialog.getOpenFileName(
-            self, 
-            "Select Map File", 
-            "", 
-            "MRC Files (*.mrc);;All Files (*)"
-        )
-        if filename:
-            self.line_edit_mapFile.setText(filename)
+    
+        
 
     def basicShape(self):
         if self.line_edit_templatePixelSize.text().replace(".","").isdigit()==False:

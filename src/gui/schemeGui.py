@@ -6,7 +6,7 @@ from PyQt6 import QtWidgets
 from PyQt6.QtGui import QTextCursor
 from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QDialog,QTableWidget,QScrollArea,QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QWidget,QLineEdit,QComboBox,QRadioButton,QCheckBox,QSizePolicy 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt,QSignalBlocker
 from src.pipe.libpipe import pipe
 from src.rw.librw import starFileMeta,mdocMeta
 from src.misc.system import run_command_async
@@ -665,7 +665,8 @@ class MainUI(QMainWindow):
         self.template_dialog.line_edit_outputFolder.setText(templateFolder)
         self.template_dialog.framePixs=self.textEdit_pixelSize.toPlainText()
         result = self.template_dialog.exec()
-        text_field.setText(self.template_dialog.line_edit_mapFile.text())
+        with QSignalBlocker(text_field):
+            text_field.setText(self.template_dialog.line_edit_mapFile.text())
        
     
     def getReconstructionPixelSizeFromJobTab(self):
@@ -705,10 +706,7 @@ class MainUI(QMainWindow):
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volumeMask") 
         text_fieldTempl = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
         inputVol=text_fieldTempl.text().replace("_black.mrc","_white.mrc")
-        # if inputVol=="" or 1==2:
-        #     messageBox("Problem","No Template Volume. You cannot create a mask")
-        #     return
-        maskName=os.path.splitext(inputVol)[0]+"_mask.mrc"
+        maskName=os.path.splitext(inputVol.replace("_white.mrc",".mrc"))[0]+"_mask.mrc"
         
         fields = {
         "MaskPath": maskName,
@@ -728,7 +726,9 @@ class MainUI(QMainWindow):
                           val["SoftEdge"],  
                           val["LowPass"],
                            )
-            text_field.setText(val["MaskPath"])
+            with QSignalBlocker(text_field):
+                text_field.setText(val["MaskPath"])
+            
             msg.close()
     def setTmVolumeTemplateSymToJobTap(self):
         
@@ -761,15 +761,13 @@ class MainUI(QMainWindow):
         """
         widget = self.tabWidget.currentWidget()
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume")  # Find QTextEdit named "text1"
-        text = text_field.text()
-        if os.path.isfile(text):
+        tmVolName = text_field.text()
+        if os.path.isfile(tmVolName):
             pixSRec=self.getReconstructionPixelSizeFromJobTab()
-            with mrcfile.open(text, header_only=True) as mrc:
+            with mrcfile.open(tmVolName, header_only=True) as mrc:
                 pixSTemplate = mrc.voxel_size.x
                 boxsize = mrc.header.nx  # or 
-                #boxsize = mrc.data.shape[0] 
-            
-            
+               
             if pixSRec!=str(pixSTemplate):
                 msg = QMessageBox()
                 msg.setWindowTitle("Problem!")
@@ -778,42 +776,55 @@ class MainUI(QMainWindow):
                 msg.setMinimumWidth(300)
                 result = msg.exec()
                 if result == QMessageBox.StandardButton.Yes:
-                    if self.line_path_new_project.text()=="":
-                        msg=messageBox("Info","No Projcet Path. Specify Projcet Path")
-                        projPath=browse_dirs()   
-                    else:
-                        projPath=self.line_path_new_project.text()
-                    msg.setWindowTitle("Decision")
-                    msg.setText("Mass needs to black!\n\nDo you want to invert the template")
-                    msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                    result = msg.exec()
-                    if result == QMessageBox.StandardButton.Yes:
-                        invert=True
-                    else:
-                        invert=False
-                    calcBox=boxsize*(float(pixSTemplate)/float(pixSRec))
-                    offset=32
-                    newBox = ((calcBox + offset - 1) // offset)*offset
-                    if newBox<96:
-                        newBox=96
-                    os.makedirs(os.path.join(projPath,"templates"),exist_ok=True)
-                    resizedVolName=os.path.join(projPath,"templates/template_box" +str(newBox)+"_apix"+str(pixSRec) + ".mrc")
-                    processVolume(text,resizedVolName, voxel_size_angstrom=pixSTemplate,
-                                  voxel_size_angstrom_out_header=pixSRec,voxel_size_angstrom_output=pixSRec,
-                                  box_size_output=newBox,invert_contrast=invert)
-                   
-                    text=resizedVolName
-                else:
-                    print("User clicked No")
-            absPathToVol=os.path.abspath(text)
+                    importedVol=self.adaptVolume(tmVolName,boxsize,pixSTemplate,pixSRec)
+            else:
+                importedVol=self.adaptVolume(tmVolName,boxsize,pixSTemplate,pixSRec)
+            absPathToVol=os.path.abspath(importedVol)        
         else:
-            absPathToVol=text
+            absPathToVol=tmVolName
        
-        text_field.setText(absPathToVol)
+        with QSignalBlocker(text_field):
+            text_field.setText(absPathToVol)
+        
         params_dict = {"in_3dref":absPathToVol }
         jobTag=self.getTagFromCurrentTab()
         self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
     
+    def adaptVolume(self,inputVolName,boxsize,pixSTemplate,pixSRec):
+        
+        if self.line_path_new_project.text()=="":
+            msg=messageBox("Info","No Projcet Path. Specify Projcet Path")
+            projPath=browse_dirs()   
+        else:
+            projPath=self.line_path_new_project.text()
+        msg = QMessageBox()
+        msg.setWindowTitle("Decision")
+        msg.setText("Mass needs to black!\n\nDo you want to invert the template")
+        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        result = msg.exec()
+        if result == QMessageBox.StandardButton.Yes:
+            invert=True
+        else:
+            invert=False
+        calcBox=boxsize*(float(pixSTemplate)/float(pixSRec))
+        offset=32
+        newBox = ((calcBox + offset - 1) // offset)*offset
+        if newBox<96:
+            newBox=96
+        os.makedirs(os.path.join(projPath,"templates"),exist_ok=True)
+        resizedVolNameB=os.path.join(projPath,"templates/template_box" +str(newBox)+"_apix"+str(pixSRec) + "_black.mrc")
+        processVolume(inputVolName,resizedVolNameB, voxel_size_angstrom=pixSTemplate,
+                    voxel_size_angstrom_out_header=pixSRec,voxel_size_angstrom_output=pixSRec,
+                    box_size_output=newBox,invert_contrast=invert)
+        resizedVolNameW=os.path.join(projPath,"templates/template_box" +str(newBox)+"_apix"+str(pixSRec) + "_white.mrc")
+        invI=invert==False
+        processVolume(inputVolName,resizedVolNameW, voxel_size_angstrom=pixSTemplate,
+                    voxel_size_angstrom_out_header=pixSRec,voxel_size_angstrom_output=pixSRec,
+                    box_size_output=newBox,invert_contrast=invI)
+        
+        
+        return resizedVolNameB
+        
     
     def browseTmVolumeTemplate(self):
         """
