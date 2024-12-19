@@ -386,7 +386,7 @@ class TemplateGen(QDialog):
             boxsizeEMDB = mrc.header.nx  # or 
         
         pixsTm=round(float(self.line_edit_templatePixelSize.text()),2)
-        resTm=round(float(pixsTm*2.2),2)
+        resTm=round(float(pixsTm*2.1),2)
         calcBox=boxsizeEMDB*(float(pixsEMDB)/float(pixsTm))
         offset=32
         boxTM = ((calcBox + offset - 1) // offset)*offset
@@ -402,14 +402,19 @@ class TemplateGen(QDialog):
             val = dialog.getInputs()
             resTM=round(float(val['ResolutionInAng']),2)
             boxTM=round(float(val['Box']),2)
-            mapWhite = os.path.splitext(map_file)[0]+"_white.mrc"
+            tag=os.path.basename(os.path.splitext(map_file)[0])+"_apix"+str(pixsTm)+"_ares"+str(resTM)+"_box"+str(int(boxTM))
+            text, ok = QInputDialog.getText(self, 'Tag for template', 'Enter tag:', 
+                              QLineEdit.EchoMode.Normal,tag )
+            if ok==False:
+                return
+            tag=text
+            bseFoldName=os.path.dirname(map_file)+os.path.sep+tag
+            mapWhite= bseFoldName+"_white.mrc"
             processVolume(map_file,mapWhite,resTM,invert_contrast=0,voxel_size_angstrom_output=pixsTm,box_size_output=boxTM,voxel_size_angstrom=pixsEMDB,
                             voxel_size_angstrom_out_header=pixsTm)
-            mapBlack = os.path.splitext(map_file)[0]+"_black.mrc"
+            mapBlack = bseFoldName+"_black.mrc"
             processVolume(map_file,mapBlack,resTM,invert_contrast=1,voxel_size_angstrom_output=pixsTm,box_size_output=boxTM,voxel_size_angstrom=pixsEMDB,
                             voxel_size_angstrom_out_header=pixsTm)
-            
-            # Update the map file path in the UI
             self.line_edit_mapFile.setText(mapBlack)
         return True
    

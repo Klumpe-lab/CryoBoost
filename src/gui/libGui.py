@@ -18,15 +18,21 @@ root_dir = os.path.abspath(os.path.join(current_dir, '../'))
 sys.path.append(root_dir)
 
 def get_inputNodesFromSchemeTable(table_widget,jobsOnly=True):
-    
+    #except("need to split according to tag here")
     inputNodes={}
+    inputTags={}
     for row in range(table_widget.rowCount()):
-        inputNodes[row]=table_widget.item(row,0).text()        
+        jobAndTag=table_widget.item(row,0).text().split("_")
+        inputNodes[row]=jobAndTag[0]       
+        if len(jobAndTag)>1:
+            inputTags[row]=jobAndTag[1]
+        else:
+            inputTags[row]=None
     nodes_df = pd.DataFrame({
     'type': list(inputNodes.values()),
-    'tag': [None] * len(inputNodes),
+    'tag': list(inputTags.values()),
     'inputType': [None] + list(inputNodes.values())[:-1],  # None for first row, then shifted type values
-    'inputTag': [None] * len(inputNodes)
+    'inputTag': [None] +  list(inputTags.values())[:-1]
                         })
     return inputNodes,nodes_df
 

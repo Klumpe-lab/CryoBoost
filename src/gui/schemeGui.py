@@ -12,7 +12,7 @@ from src.rw.librw import starFileMeta,mdocMeta
 from src.misc.system import run_command_async
 from src.gui.libGui import get_user_selection,externalTextViewer,browse_dirs,browse_files,checkDosePerTilt,browse_filesOrFolders,change_values,change_bckgrnd,checkGainOptions,get_inputNodesFromSchemeTable,messageBox 
 from src.gui.libGui import MultiInputDialog,statusMessageBox
-from src.misc.libmask import genMaskRelion
+from src.misc.libmask import genMaskRelion,caclThreshold
 from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
 from src.gui.generateTemplate import TemplateGen
@@ -89,11 +89,13 @@ class MainUI(QMainWindow):
         cbdat.pipeRunner= None
         cbdat.conf=cbconfig(cbdat.confPath)     
         cbdat.args=args
+        cbdat.filtScheme=1
         if os.path.exists(str(args.proj) +  "/Schemes/" + args.scheme + "/scheme.star"):
             cbdat.scheme=schemeMeta(args.proj +  "/Schemes/" + args.scheme )
             args.scheme=cbdat.scheme
             cbdat.pipeRunner=pipe(args);
             cbdat.args.skipSchemeEdit=True
+            cbdat.filtScheme=0
         else:    
             cbdat.scheme=schemeMeta(cbdat.defaultSchemePath)
         
@@ -194,7 +196,8 @@ class MainUI(QMainWindow):
             self.genSchemeTable()      
         else:
             inputNodes,inputNodes_df=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
-            self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes_df)
+            if self.cbdat.filtScheme:
+                self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes_df)
        
         self.genParticleSetups()        
        
@@ -580,13 +583,35 @@ class MainUI(QMainWindow):
         """
         widget = self.tabWidget.currentWidget()
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volumeMask")  # Find QTextEdit named "text1"
-        text = text_field.text()  # Get text content
-        params_dict = {"in_mask":text }
-        if len(self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_"))>1:
-            jobTag="_"+self.tabWidget.tabText(self.tabWidget.currentIndex()).split("_")[1]
+        maskName = text_field.text()  # Get text content
+        tag=self.getTagFromCurrentTab()
+        tag=tag[1:]
+        if os.path.isfile(maskName):
+            pixSRec=self.getReconstructionPixelSizeFromJobTab()
+            with mrcfile.open(maskName, header_only=True) as mrc:
+                pixSMask = mrc.voxel_size.x
+                boxsize = mrc.header.nx  # or 
+               
+            if pixSRec!=str(pixSMask):
+                msg = QMessageBox()
+                msg.setWindowTitle("Problem!")
+                msg.setText("Pixelsize of template/mask and tomograms differ!\n\nDo you want to resize the template")
+                msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                msg.setMinimumWidth(300)
+                result = msg.exec()
+                if result == QMessageBox.StandardButton.Yes:
+                    importedVol=self.adaptVolume(maskName,boxsize,pixSMask,pixSRec,checkInvert=False,tag=tag)
+            else:
+                importedVol=self.adaptVolume(maskName,boxsize,pixSMask,pixSRec,checkInvert=False,tag=tag)
+            absPathToVol=os.path.abspath(importedVol)        
         else:
-            jobTag=""
-        print(jobTag)
+            absPathToVol=maskName
+       
+        with QSignalBlocker(text_field):
+            text_field.setText(absPathToVol)
+        
+        params_dict = {"in_mask":maskName }
+        jobTag=self.getTagFromCurrentTab()
         self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
     
     def browseTmVolumeTemplateMask(self):
@@ -657,7 +682,7 @@ class MainUI(QMainWindow):
              projPath=browse_dirs()   
         else:
             projPath=self.line_path_new_project.text()
-        templateFolder=projPath+os.path.sep+"templates"+ os.path.sep + tag
+        templateFolder=projPath+os.path.sep+"templates"+ os.path.sep + tag[1:]
         os.makedirs(templateFolder, exist_ok=True)
         
         self.template_dialog = TemplateGen()
@@ -667,7 +692,10 @@ class MainUI(QMainWindow):
         result = self.template_dialog.exec()
         with QSignalBlocker(text_field):
             text_field.setText(self.template_dialog.line_edit_mapFile.text())
-       
+        params_dict = {"in_3dref":os.path.abspath(text_field.text()) }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    
     
     def getReconstructionPixelSizeFromJobTab(self):
         
@@ -678,11 +706,22 @@ class MainUI(QMainWindow):
         tag=self.getTagFromCurrentTab()
         
         if "tsReconstruct"+tag in scheme.jobs_in_scheme.values: 
-            pixS=scheme.job_star['tsReconstruct'].dict['joboptions_values']['rlnJobOptionValue'][9]
+            pixS=scheme.job_star['tsReconstruct'+tag].dict['joboptions_values']['rlnJobOptionValue'][9]
+            return pixS
         if "reconstruction"+tag in scheme.jobs_in_scheme.values: 
+            pixS = scheme.job_star['reconstruction'+tag].dict['joboptions_values'][
+            scheme.job_star['reconstruction'].dict['joboptions_values']['rlnJobOptionVariable'] == 'binned_angpix'
+            ]['rlnJobOptionValue'].values[0]
+            return pixS    
+        if "tsReconstruct" in scheme.jobs_in_scheme.values: 
+            pixS=scheme.job_star['tsReconstruct'].dict['joboptions_values']['rlnJobOptionValue'][9]
+            return pixS
+        if "reconstruction" in scheme.jobs_in_scheme.values: 
             pixS = scheme.job_star['reconstruction'].dict['joboptions_values'][
             scheme.job_star['reconstruction'].dict['joboptions_values']['rlnJobOptionVariable'] == 'binned_angpix'
-            ]['rlnJobOptionValue'].values[0]    
+            ]['rlnJobOptionValue'].values[0]
+            return pixS    
+        
         if pixS is None:
             messageBox("Problem","No Reconstruction Job. You cannot run template matching")
             pixS=-1
@@ -707,13 +746,16 @@ class MainUI(QMainWindow):
         text_fieldTempl = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
         inputVol=text_fieldTempl.text().replace("_black.mrc","_white.mrc")
         maskName=os.path.splitext(inputVol.replace("_white.mrc",".mrc"))[0]+"_mask.mrc"
+        lowpass=20
+        thr=caclThreshold(inputVol,lowpass=None)
+        thr=round(thr['fb'],5)
         
         fields = {
         "MaskPath": maskName,
-        "Threshold": "0.001",
-        "Extend": "5",
-        "SoftEdge": "7",
-        "LowPass": "20.0"
+        "Threshold": str(thr),
+        "Extend": "3",
+        "SoftEdge": "4",
+        "LowPass": str(lowpass)
          }
         dialog = MultiInputDialog(fields)
         if dialog.exec() == QDialog.DialogCode.Accepted:
@@ -728,7 +770,9 @@ class MainUI(QMainWindow):
                            )
             with QSignalBlocker(text_field):
                 text_field.setText(val["MaskPath"])
-            
+            params_dict = {"in_mask":os.path.abspath(maskName) }
+            jobTag=self.getTagFromCurrentTab()
+            self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
             msg.close()
     def setTmVolumeTemplateSymToJobTap(self):
         
@@ -747,7 +791,8 @@ class MainUI(QMainWindow):
     def viewVolume(self,volume):
         
        os.system("imod " + volume)
-        
+       os.system("chimera " + volume) 
+       
     def setTmVolumeTemplateToJobTap(self):
         """
         Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
@@ -762,6 +807,8 @@ class MainUI(QMainWindow):
         widget = self.tabWidget.currentWidget()
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volume")  # Find QTextEdit named "text1"
         tmVolName = text_field.text()
+        tag=self.getTagFromCurrentTab()
+        tag=tag[1:]
         if os.path.isfile(tmVolName):
             pixSRec=self.getReconstructionPixelSizeFromJobTab()
             with mrcfile.open(tmVolName, header_only=True) as mrc:
@@ -776,51 +823,63 @@ class MainUI(QMainWindow):
                 msg.setMinimumWidth(300)
                 result = msg.exec()
                 if result == QMessageBox.StandardButton.Yes:
-                    importedVol=self.adaptVolume(tmVolName,boxsize,pixSTemplate,pixSRec)
+                    importedVol=self.adaptVolume(tmVolName,boxsize,pixSTemplate,pixSRec,tag=tag)
             else:
-                importedVol=self.adaptVolume(tmVolName,boxsize,pixSTemplate,pixSRec)
+                importedVol=self.adaptVolume(tmVolName,boxsize,pixSTemplate,pixSRec,tag=tag)
             absPathToVol=os.path.abspath(importedVol)        
         else:
             absPathToVol=tmVolName
        
         with QSignalBlocker(text_field):
             text_field.setText(absPathToVol)
-        
+            
         params_dict = {"in_3dref":absPathToVol }
         jobTag=self.getTagFromCurrentTab()
         self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
     
-    def adaptVolume(self,inputVolName,boxsize,pixSTemplate,pixSRec):
-        
+    def adaptVolume(self,inputVolName,boxsize,pixSTemplate,pixSRec,checkInvert=True,tag=""):
+        templateFold="templates/"+ tag 
+        tmBase= templateFold + "/template_box"
         if self.line_path_new_project.text()=="":
             msg=messageBox("Info","No Projcet Path. Specify Projcet Path")
             projPath=browse_dirs()   
         else:
             projPath=self.line_path_new_project.text()
-        msg = QMessageBox()
-        msg.setWindowTitle("Decision")
-        msg.setText("Mass needs to black!\n\nDo you want to invert the template")
-        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        result = msg.exec()
-        if result == QMessageBox.StandardButton.Yes:
-            invert=True
+        if checkInvert:
+            msg = QMessageBox()
+            msg.setWindowTitle("Decision")
+            msg.setText("Mass needs to black!\n\nDo you want to invert the template")
+            msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            result = msg.exec()
+            if result == QMessageBox.StandardButton.Yes:
+                invert=True
+            else:
+                invert=False
         else:
-            invert=False
+            invert=False        
+        
         calcBox=boxsize*(float(pixSTemplate)/float(pixSRec))
         offset=32
         newBox = ((calcBox + offset - 1) // offset)*offset
         if newBox<96:
             newBox=96
         os.makedirs(os.path.join(projPath,"templates"),exist_ok=True)
-        resizedVolNameB=os.path.join(projPath,"templates/template_box" +str(newBox)+"_apix"+str(pixSRec) + "_black.mrc")
+        
+        if checkInvert:
+            resizedVolNameB=os.path.join(projPath,tmBase +str(newBox)+"_apix"+str(pixSRec) + "_black.mrc")
+        else:
+            resizedVolNameB=os.path.join(projPath,tmBase +str(newBox)+"_apix"+str(pixSRec) + "_mask.mrc")
+        
         processVolume(inputVolName,resizedVolNameB, voxel_size_angstrom=pixSTemplate,
-                    voxel_size_angstrom_out_header=pixSRec,voxel_size_angstrom_output=pixSRec,
-                    box_size_output=newBox,invert_contrast=invert)
-        resizedVolNameW=os.path.join(projPath,"templates/template_box" +str(newBox)+"_apix"+str(pixSRec) + "_white.mrc")
-        invI=invert==False
-        processVolume(inputVolName,resizedVolNameW, voxel_size_angstrom=pixSTemplate,
-                    voxel_size_angstrom_out_header=pixSRec,voxel_size_angstrom_output=pixSRec,
-                    box_size_output=newBox,invert_contrast=invI)
+                voxel_size_angstrom_out_header=pixSRec,voxel_size_angstrom_output=pixSRec,
+                box_size_output=newBox,invert_contrast=invert)
+    
+        if checkInvert:
+            resizedVolNameW=os.path.join(projPath,tmBase +str(newBox)+"_apix"+str(pixSRec) + "_white.mrc")
+            invI=invert==False
+            processVolume(inputVolName,resizedVolNameW, voxel_size_angstrom=pixSTemplate,
+                        voxel_size_angstrom_out_header=pixSRec,voxel_size_angstrom_output=pixSRec,
+                        box_size_output=newBox,invert_contrast=invI)
         
         
         return resizedVolNameB

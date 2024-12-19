@@ -4,7 +4,7 @@ import mrcfile
 import subprocess
 
 
-def gaussian_lowpass_mrc(input_mrc: str, output_mrc: str, cutoff_angstrom: float, 
+def gaussian_lowpass_mrc(input_mrc, output_mrc: str=None, cutoff_angstrom: float=None, 
                         voxel_size_angstrom: float = None,invert_contrast: bool = False,hard_cutoff_angstrom: float = None):
     """
     Apply Gaussian low-pass filter to MRC file
@@ -17,11 +17,13 @@ def gaussian_lowpass_mrc(input_mrc: str, output_mrc: str, cutoff_angstrom: float
                                               If None, uses value from input MRC
     """
     
-    # Read input MRC
-    with mrcfile.open(input_mrc, permissive=True) as mrc:
-        volume = mrc.data.copy()
-        # Use provided voxel size or get from file
-        voxel_size = voxel_size_angstrom if voxel_size_angstrom is not None else mrc.voxel_size.x
+    if isinstance(input_mrc,str):
+         with mrcfile.open(input_mrc, permissive=True) as mrc:
+            volume = mrc.data.copy()
+            voxel_size = voxel_size_angstrom if voxel_size_angstrom is not None else mrc.voxel_size.x
+    else:
+        volume=input_mrc
+        voxel_size=voxel_size_angstrom
         
     # Calculate filter parameters in Ångströms
     nx, ny, nz = volume.shape
@@ -54,14 +56,18 @@ def gaussian_lowpass_mrc(input_mrc: str, output_mrc: str, cutoff_angstrom: float
     # Invert contrast if requested
     if invert_contrast:
         filtered_vol = -filtered_vol
+    
+    if output_mrc is None:
+        return filtered_vol
+    
     # Write output MRC
     with mrcfile.new(output_mrc, overwrite=True) as mrc:
         mrc.set_data(filtered_vol.astype(np.float32))
         mrc.voxel_size = voxel_size
     
-    
+    return filtered_vol
 
-def processVolume(input_mrc: str, output_mrc: str, cutoff_angstrom: float=None, cutoff_edge_width: float=3,
+def processVolume(input_mrc: str, output_mrc: str, cutoff_angstrom: float=None, cutoff_edge_width: float=6,
                   voxel_size_angstrom: float = None,voxel_size_angstrom_out_header: float = None ,invert_contrast: bool = False,voxel_size_angstrom_output: float = None,
                   box_size_output: float = None):
     program='relion_image_handler'
@@ -105,18 +111,15 @@ def processVolume(input_mrc: str, output_mrc: str, cutoff_angstrom: float=None, 
 def tom_cart2sph(I):
     """
     Transform 3D-volumes from cartesian to spherical coordinates.
-    
     Parameters:
     -----------
     I : ndarray
         3D input array in cartesian coordinates
-    
     Returns:
     --------
     pol : ndarray
         3D array in spherical coordinates
     """
-    
     # Get dimensions
     nx, ny, nz = I.shape
     
@@ -144,25 +147,33 @@ def tom_cart2sph(I):
     px_floor = np.floor(px).astype(int)
     py_floor = np.floor(py).astype(int)
     pz_floor = np.floor(pz).astype(int)
-    
     px_ceil = np.ceil(px).astype(int)
     py_ceil = np.ceil(py).astype(int)
     pz_ceil = np.ceil(pz).astype(int)
     
-    tx = px - px_floor
-    ty = py - py_floor
-    tz = pz - pz_floor
+    # Clip indices to valid range
+    px_floor = np.clip(px_floor-1, 0, nx-1)
+    py_floor = np.clip(py_floor-1, 0, ny-1)
+    pz_floor = np.clip(pz_floor-1, 0, nz-1)
+    px_ceil = np.clip(px_ceil-1, 0, nx-1)
+    py_ceil = np.clip(py_ceil-1, 0, ny-1)
+    pz_ceil = np.clip(pz_ceil-1, 0, nz-1)
     
-    # Perform trilinear interpolation
-    c000 = I[px_floor-1 + nx*(py_floor-1) + ny*nx*(pz_floor-1)]
-    c100 = I[px_ceil-1 + nx*(py_floor-1) + ny*nx*(pz_floor-1)]
-    c010 = I[px_floor-1 + nx*(py_ceil-1) + ny*nx*(pz_floor-1)]
-    c001 = I[px_floor-1 + nx*(py_floor-1) + ny*nx*(pz_ceil-1)]
-    c110 = I[px_ceil-1 + nx*(py_ceil-1) + ny*nx*(pz_floor-1)]
-    c101 = I[px_ceil-1 + nx*(py_floor-1) + ny*nx*(pz_ceil-1)]
-    c011 = I[px_floor-1 + nx*(py_ceil-1) + ny*nx*(pz_ceil-1)]
-    c111 = I[px_ceil-1 + nx*(py_ceil-1) + ny*nx*(pz_ceil-1)]
+    tx = px - np.floor(px)
+    ty = py - np.floor(py)
+    tz = pz - np.floor(pz)
     
+    # Perform trilinear interpolation using proper 3D indexing
+    c000 = I[px_floor, py_floor, pz_floor]
+    c100 = I[px_ceil, py_floor, pz_floor]
+    c010 = I[px_floor, py_ceil, pz_floor]
+    c001 = I[px_floor, py_floor, pz_ceil]
+    c110 = I[px_ceil, py_ceil, pz_floor]
+    c101 = I[px_ceil, py_floor, pz_ceil]
+    c011 = I[px_floor, py_ceil, pz_ceil]
+    c111 = I[px_ceil, py_ceil, pz_ceil]
+    
+    # Calculate interpolated values
     pol = (1-tx)*(1-ty)*(1-tz)*c000 + \
           tx*(1-ty)*(1-tz)*c100 + \
           (1-tx)*ty*(1-tz)*c010 + \
@@ -172,4 +183,4 @@ def tom_cart2sph(I):
           (1-tx)*ty*tz*c011 + \
           tx*ty*tz*c111
     
-    return pol    
+    return pol
