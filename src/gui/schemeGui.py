@@ -142,6 +142,7 @@ class MainUI(QMainWindow):
         self.textEdit_pathDenoiseModel.textChanged.connect(self.setPathDenoiseModelToJobTap)
         self.textEdit_modelForFilterTilts.textChanged.connect(self.setmodelForFilterTiltsToJobTap)
         self.textEdit_probThr.textChanged.connect(self.setProbThrToJobTap)
+        self.textEdit_recVoxelSize.textChanged.connect(self.setRecVoxelSizeToJobTap)
         self.btn_browse_gain.clicked.connect(self.browsePathGain)
         self.btn_browse_autoPrefix.clicked.connect(self.generatePrefix)
         self.btn_use_movie_path.clicked.connect(self.mdocs_use_movie_path)
@@ -190,6 +191,8 @@ class MainUI(QMainWindow):
         self.tabWidget.setTabVisible(1,True)
         
         if ((self.check_edit_scheme.isChecked()) and (self.cbdat.args.autoGen == False) and (self.cbdat.args.skipSchemeEdit == False)):
+            inputNodes,inputNodes_df=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
+            self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes_df)
             dialog=EditScheme(self.cbdat.scheme)
             res=dialog.exec()
             self.cbdat.scheme = dialog.getResult()
@@ -237,7 +240,7 @@ class MainUI(QMainWindow):
     def genParticleSetups(self):
         
         self.jobTapNrSetUpTaps=1
-        self.tabWidget.removeTab(self.jobTapNrSetUpTaps)
+        #self.tabWidget.removeTab(self.jobTapNrSetUpTaps)
         self.widgets = [] 
         self.layouts = []
         for job in self.cbdat.scheme.jobs_in_scheme:
@@ -986,15 +989,11 @@ class MainUI(QMainWindow):
                 checkDosePerTilt(self.line_path_mdocs.text(),float(self.textEdit_dosePerTilt.toPlainText()),float(thoneRingFade))
         
         self.setParamsDictToJobTap(params_dict)
-        
-
         try:
             mdoc=mdocMeta(self.line_path_mdocs.text())
-            print(str(mdoc.param4Processing["PixelSize"]))
             self.textEdit_pixelSize.setText(str(mdoc.param4Processing["PixelSize"]))
             self.textEdit_dosePerTilt.setText(str(mdoc.param4Processing["DosePerTilt"]))
             self.textEdit_nomTiltAxis.setText(str(mdoc.param4Processing["TiltAxisAngle"]))
-            
         except: 
             pass
         
@@ -1061,9 +1060,14 @@ class MainUI(QMainWindow):
         self.textEdit_tomoForDenoiseTrain.setText(tomoStr)
        
     def setPixelSizeToJobTap(self):
-        params_dict = {"angpix": self.textEdit_pixelSize.toPlainText()} 
+        textline=self.textEdit_pixelSize.toPlainText()
+        params_dict = {"angpix": textline}
         self.setParamsDictToJobTap(params_dict,["importmovies"])      
-     
+        if textline.replace('.', '', 1).isdigit():  # Allows one decimal point
+            bin4Pixs=str(float(textline)*4)
+            self.textEdit_algRescaleTilts.setText(bin4Pixs)
+            self.textEdit_recVoxelSize.setText(bin4Pixs)
+        
     def setdosePerTiltToJobTap(self):
         params_dict = {"dose_rate": self.textEdit_dosePerTilt.toPlainText()} 
         if "ctffind" in self.cbdat.scheme.jobs_in_scheme.values:
@@ -1141,7 +1145,14 @@ class MainUI(QMainWindow):
     def setInvertHandToJobTap(self):
         params_dict = {"flip_tiltseries_hand": self.textEdit_invertHand.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 
-    
+    def setRecVoxelSizeToJobTap(self):
+        if "reconstruction" in self.cbdat.scheme.jobs_in_scheme.values: 
+            params_dict = {"param1_value": self.textEdit_recVoxelSize.toPlainText()} 
+            self.setParamsDictToJobTap(params_dict,["reconstruction"])
+        if "tsReconstruct" in self.cbdat.scheme.jobs_in_scheme.values: 
+            params_dict = {"param1_value": self.textEdit_recVoxelSize.toPlainText()} 
+            self.setParamsDictToJobTap(params_dict,["tsReconstruct"])
+        
     def setEerFractionsToJobTap(self):
         if "motioncorr" in self.cbdat.scheme.jobs_in_scheme.values: 
             params_dict = {"eer_grouping": self.textEdit_eerFractions.toPlainText()}
@@ -1244,6 +1255,16 @@ class MainUI(QMainWindow):
             comDict=self.cbdat.conf.getJobComputingParams([jobNoTag,nrNodes,partion],shareNodes)
             if (comDict is not None):
                 self.setParamsDictToJobTap(comDict,applyToJobs=job)
+        vRam=int(self.cbdat.conf.confdata['computing'][partion]['VRAM'].replace("G",""))
+        if vRam>40:
+            line_edits = self.tabWidget.findChildren(QLineEdit, "line_path_tm_SearchVolSplit")
+            for line_edit in line_edits:
+                line_edit.setText("2:2:1")
+        else:
+            line_edits = self.tabWidget.findChildren(QLineEdit, "line_path_tm_SearchVolSplit")
+            for line_edit in line_edits:
+                line_edit.setText("4:4:2")
+
          
     def setParamsDictToJobTap(self,params_dict,applyToJobs="all"):
         """
@@ -1453,16 +1474,21 @@ class MainUI(QMainWindow):
             with open(logOut, 'r') as log_file:
                 for line in log_file:
                    cleaned_line = self.process_backspaces(line).strip()
-                   if (cleaned_line):
+                   if cleaned_line:
                         log_contentOut.append(cleaned_line)
                 if len(log_contentOut) > 200:
                     log_contentOut=log_contentOut[-200:]
 
                 log_contentOutStr= "\n".join(log_contentOut)
                 self.textBrowserJobsOut.setText(log_contentOutStr)
-                           
+            
+            log_contentError=[]               
             with open(logError, 'r') as log_fileError:
-                log_contentError = log_fileError.readlines()
+                # log_contentError = log_fileError.readlines()
+                for lineError in log_fileError:
+                   cleaned_lineError = self.process_backspaces(lineError).strip()
+                   if cleaned_lineError:
+                        log_contentError.append(cleaned_lineError)
                 if len(log_contentError) > 200:
                      log_contentError=log_contentError[-200:]
                 

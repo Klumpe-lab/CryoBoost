@@ -80,7 +80,6 @@ def get_user_selection():
                 self.selected_item = self.list_widget.currentItem().text()
             self.accept()
 
-    
     dialog = ListDialog()
     dialog.exec()
     
