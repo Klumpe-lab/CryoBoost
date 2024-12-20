@@ -191,16 +191,15 @@ class MainUI(QMainWindow):
         self.tabWidget.setTabVisible(1,True)
         
         if ((self.check_edit_scheme.isChecked()) and (self.cbdat.args.autoGen == False) and (self.cbdat.args.skipSchemeEdit == False)):
-            inputNodes,inputNodes_df=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
-            self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes_df)
             dialog=EditScheme(self.cbdat.scheme)
             res=dialog.exec()
             self.cbdat.scheme = dialog.getResult()
             self.genSchemeTable()      
         else:
-            inputNodes,inputNodes_df=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
-            if self.cbdat.filtScheme:
-                self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes_df)
+            pass
+            # inputNodes,inputNodes_df=get_inputNodesFromSchemeTable(self.table_scheme,jobsOnly=True)
+            # if self.cbdat.filtScheme:
+            #     self.cbdat.scheme=self.cbdat.scheme.filterSchemeByNodes(inputNodes_df)
        
         self.genParticleSetups()        
        
@@ -873,6 +872,7 @@ class MainUI(QMainWindow):
         else:
             resizedVolNameB=os.path.join(projPath,tmBase +str(newBox)+"_apix"+str(pixSRec) + "_mask.mrc")
         
+        os.makedirs(os.path.dirname(resizedVolNameB),exist_ok=True)
         processVolume(inputVolName,resizedVolNameB, voxel_size_angstrom=pixSTemplate,
                 voxel_size_angstrom_out_header=pixSRec,voxel_size_angstrom_output=pixSRec,
                 box_size_output=newBox,invert_contrast=invert)
