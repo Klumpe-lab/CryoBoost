@@ -1,6 +1,7 @@
 
 import os,subprocess,shlex,sys
-from src.rw.librw import tiltSeriesMeta,warpMetaData
+import numpy as np
+from src.rw.librw import tiltSeriesMeta,warpMetaData,starFileMeta
 from src.misc.system import run_wrapperCommand
 from src.warp.libWarp import warpWrapperBase
 
@@ -102,16 +103,56 @@ class tsAlignment(warpWrapperBase):
         
         
     def updateMetaData(self):
-        wm=warpMetaData(self.args.out_dir+"/warp_tiltseries/*.xml")
-        for index, row in self.st.all_tilts_df.iterrows():
-            key=self.st.all_tilts_df.at[index,'cryoBoostKey']
-            #res = wm.data_df.query(f"cryoBoostKey == '{key}'")
-            #self.st.all_tilts_df.at[index, 'xxxxxx'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc"
-        self.st.writeTiltSeries(self.args.out_dir+"/aligned_tilt_series.star")    
         
+        
+        multTiltAngle=-1
+        self.st.writeTiltSeries(self.args.out_dir+"/aligned_tilt_series.star")
+        pixSA=float(self.args.rescale_angpixs)# self.st.tilt_series_df.rlnMicrographOriginalPixelSize[0]
+        for stTiltName in self.st.tilt_series_df.rlnTomoTiltSeriesStarFile:
+            stTilt=starFileMeta(stTiltName)
+            tsID=os.path.basename(stTiltName.replace(".star",""))
+            tomoStar=starFileMeta(self.args.out_dir+"/tomostar/"+tsID+".tomostar")
+            keysRel = [os.path.basename(path) for path in stTilt.df['rlnMicrographMovieName']]
+            if self.args.alignment_program=="Aretomo":
+                AreAlnFile=self.args.out_dir+"warp_tiltseries/tiltstack/" + tsID + os.path.sep + tsID + ".st.aln"
+                aln=np.loadtxt(AreAlnFile)
+                aln = aln[aln[:, 0].argsort()]
+                for index, row in tomoStar.df.iterrows():
+                    keyTomo=os.path.basename(row['wrpMovieName'])
+                    position = keysRel.index(keyTomo)
+                    stTilt.df.at[position,'rlnTomoXTilt']=0
+                    stTilt.df.at[position,'rlnTomoYTilt']=multTiltAngle*aln[index,9]
+                    stTilt.df.at[position,'rlnTomoZRot']=aln[index,1]        
+                    stTilt.df.at[position,'rlnTomoXShiftAngst']=aln[index,3]*pixSA
+                    stTilt.df.at[position,'rlnTomoYShiftAngst']=aln[index,4]*pixSA
+                stTilt.writeStar(self.args.out_dir+"/tilt_series/"+tsID+".star")
+            
+        stTomo=starFileMeta(self.args.out_dir+"/aligned_tilt_series.star")
+        stTomo.df['rlnTomoSizeX']=int(self.args.tomo_dimensions.split("x")[0])
+        stTomo.df['rlnTomoSizeY']=int(self.args.tomo_dimensions.split("x")[1])
+        stTomo.df['rlnTomoSizeZ']=int(self.args.tomo_dimensions.split("x")[2])
+        stTomo.df['rlnTomoTiltSeriesPixelSize']=float(self.st.tilt_series_df.rlnMicrographOriginalPixelSize.iloc[0])
+        stTomo.writeStar(self.args.out_dir+"/aligned_tilt_series.star")
+
+        
+        # self.st.writeTiltSeries(self.args.out_dir+"/aligned_tilt_series.star")
+        # for tsStarName in self.st.tilt_series_df.rlnTomoTiltSeriesStarFile:
+        #     tsStar=starFileMeta(tsStarName)
+        
+        # stTomo=starFileMeta(self.args.out_dir+"/aligned_tilt_series.star")
+        # stTomo.df['rlnTomoSizeX']=int(self.args.tomo_dimensions.split("x")[0])
+        # stTomo.df['rlnTomoSizeY']=int(self.args.tomo_dimensions.split("x")[1])
+        # stTomo.df['rlnTomoSizeZ']=int(self.args.tomo_dimensions.split("x")[2])
+        # stTomo.df['rlnTomoTiltSeriesPixelSize']=float(self.st.tilt_series_df.rlnMicrographOriginalPixelSize)
+        # stTomo.writeStar(self.args.out_dir+"/aligned_tilt_series.star")
          
     def checkResults(self):
         #check if important results exists and values are in range
         #set to 1 of something is missing self.result.returncode
         pass
-        
+    
+    # wm=warpMetaData(self.args.out_dir+"/warp_tiltseries/*.xml")
+    #     for index, row in self.st.all_tilts_df.iterrows():
+    #         key=self.st.all_tilts_df.at[index,'cryoBoostKey']
+            #res = wm.data_df.query(f"cryoBoostKey == '{key}'")
+            #self.st.all_tilts_df.at[index, 'xxxxxx'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc"    

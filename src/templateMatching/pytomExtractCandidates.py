@@ -3,7 +3,7 @@ from distutils.util import strtobool
 from src.misc.system import run_wrapperCommand
 from src.templateMatching.libTemplateMatching import templateMatchingWrapperBase
 from src.rw.particleList import particleListMeta
-
+from src.rw.librw import starFileMeta
 
 class pytomExtractCandidates(templateMatchingWrapperBase):
     def __init__(self,args,runFlag=None):
@@ -65,6 +65,11 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
                     "-i", tmOutFold,
                     "-o",self.args.out_dir + "/candidates.star"] 
         self.result=run_wrapperCommand(command,tag="run_combineFiles",relionProj=self.relProj)
+        stCand=starFileMeta(self.args.out_dir + "/candidates.star")
+        rmStr=float(stCand.df.rlnTomoTiltSeriesPixelSize[0])
+        rmStr= f"_{round(rmStr, 2):.2f}Apx" 
+        stCand.df.rlnTomoName=stCand.df.rlnTomoName.str.replace(rmStr,"")
+        stCand.writeStar(self.args.out_dir + "/candidates.star")
         
         print("-----generating visualisation---------------------------")
         pl=particleListMeta(self.args.out_dir + "/candidates.star")    

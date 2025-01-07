@@ -47,7 +47,7 @@ class tsReconstruct(warpWrapperBase):
             tN = st.df.at[index, 'rlnTomoName']
             recName=self.args.out_dir + os.path.sep + self.tsFolderName + "/reconstruction/" + tN + "_" + recRes +"Apx.mrc"
             st.df.at[index, 'rlnTomoReconstructedTomogram'] = recName
-            st.df.at[index, 'rlnTomoTiltSeriesPixelSize'] = self.args.rescale_angpixs
+            st.df.at[index, 'rlnTomoTiltSeriesPixelSize'] = float(self.st.tsInfo.framePixS)
             st.df.at[index, 'rlnTomoTomogramBinning']=float(self.args.rescale_angpixs)/float(self.st.tsInfo.framePixS)
         print("writing updated star")                            
         st.writeStar(self.args.out_dir+"/tomograms.star")
