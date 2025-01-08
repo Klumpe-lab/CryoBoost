@@ -67,10 +67,10 @@ class pytomTm(templateMatchingWrapperBase):
             
         if self.args.templateSym!="C1":
             if self.args.templateSym[0]!="C":
-                raise("Only C symmetrz allowed")
+                raise("Only C symmetry allowed")
             else:
-                constParams.extend("--z-axis-rotational-symmetry",str(self.args.templateSym[1]))
-        
+                constParams.extend(["--z-axis-rotational-symmetry", str(self.args.templateSym[1])])
+                
         volumes=self.st.tilt_series_df[[self.args.volumeColumn,"rlnTomoName"]]
         print("starting to match " + str(len(volumes)))
         z=0

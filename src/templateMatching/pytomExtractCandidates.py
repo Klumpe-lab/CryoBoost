@@ -24,7 +24,7 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
         print("--------------run candidate extraction-------------------------")
         sys.stdout.flush() 
         if self.args.apixScoreMap=="auto":
-            pixs=self.st.tilt_series_df["rlnTomoTiltSeriesPixelSize"][0] #*self.st.tilt_series_df["rlnTomoTomogramBinning"][0]
+            pixs=float(self.st.tilt_series_df["rlnTomoTiltSeriesPixelSize"][0])*float(self.st.tilt_series_df["rlnTomoTomogramBinning"][0]) 
         else:
             pixs=float(self.args.apixScoreMap)
         
@@ -59,7 +59,7 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
             z+=1
             
     def updateMetaData(self):
-        print("--------------combining outputs---------------------------")
+        print("--------------combining outputs---------------------------", flush=True)
         tmOutFold=self.args.out_dir + "tmResults"
         command=["pytom_merge_stars.py", 
                     "-i", tmOutFold,
@@ -70,12 +70,13 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
         rmStr= f"_{round(rmStr, 2):.2f}Apx" 
         stCand.df.rlnTomoName=stCand.df.rlnTomoName.str.replace(rmStr,"")
         stCand.writeStar(self.args.out_dir + "/candidates.star")
-        
-        print("-----generating visualisation---------------------------")
+    
+        print("-----generating visualisation---------------------------", flush=True)
         pl=particleListMeta(self.args.out_dir + "/candidates.star")    
         pl.writeImodModel(self.args.out_dir + "/vis/imodPartRad/",int(self.args.particleDiameterInAng),self.st.tsInfo.tomoSize)
         pl.writeImodModel(self.args.out_dir + "/vis/imodCenter/",int(8*self.pixs),self.st.tsInfo.tomoSize,color=[255,0,0],thick=4)
-        print("-----generating warp output---------------------------")
+        print("-----generating warp output---------------------------",flush=True)
+        print("  --> writing to " + "candidatesWarp", flush=True)
         pl.writeList(self.args.out_dir + "/candidatesWarp/",'warpCoords',self.st.tsInfo.tomoSize)
         
     def checkResults(self):

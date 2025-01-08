@@ -115,7 +115,8 @@ class tsAlignment(warpWrapperBase):
             keysRel = [os.path.basename(path) for path in stTilt.df['rlnMicrographMovieName']]
             if self.args.alignment_program=="Aretomo":
                 AreAlnFile=self.args.out_dir+"warp_tiltseries/tiltstack/" + tsID + os.path.sep + tsID + ".st.aln"
-                aln=np.loadtxt(AreAlnFile)
+                #aln=np.loadtxt(AreAlnFile)
+                aln=self.readAretomoAlgFile(AreAlnFile)
                 aln = aln[aln[:, 0].argsort()]
                 for index, row in tomoStar.df.iterrows():
                     keyTomo=os.path.basename(row['wrpMovieName'])
@@ -150,7 +151,22 @@ class tsAlignment(warpWrapperBase):
         #check if important results exists and values are in range
         #set to 1 of something is missing self.result.returncode
         pass
-    
+    def readAretomoAlgFile(self,AreAlnFile):
+
+        data = []
+        with open(AreAlnFile, 'r') as file:
+            for line in file:
+                if line.startswith('# Local Alignment'):
+                    break
+                if not line.startswith('#'):  # Skip comment lines
+                    try:
+                        numbers = [float(x) for x in line.split()]
+                        if numbers:  # If line contains numbers
+                            data.append(numbers)
+                    except ValueError:
+                        continue
+        data = np.array(data)
+        return data
     # wm=warpMetaData(self.args.out_dir+"/warp_tiltseries/*.xml")
     #     for index, row in self.st.all_tilts_df.iterrows():
     #         key=self.st.all_tilts_df.at[index,'cryoBoostKey']
