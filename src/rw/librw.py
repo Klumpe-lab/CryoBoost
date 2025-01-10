@@ -20,9 +20,23 @@ class warpMetaData:
   
   def parseXMLdata(self,wk):
     for name in glob.glob(wk):
-       df=self.__parseXMLFileFrameSeries(name) 
-       self.data_df =pd.concat([self.data_df, df], ignore_index=True) 
-
+      if self.checkXMLFileType(name)== 'fs':
+        df=self.__parseXMLFileFrameSeries(name) 
+      else:
+        df=self.__parseXMLFileTiltSeries(name)
+      self.data_df =pd.concat([self.data_df, df], ignore_index=True)
+       
+  def checkXMLFileType(self,pathXML):
+    tree = ET.parse(pathXML)
+    root = tree.getroot()
+    grid_ctf = root.find('MoviePath')
+    if grid_ctf is None:
+      xmlType='fs'
+    else:
+      xmlType='ts'
+    
+    return xmlType  
+          
   def __parseXMLFileFrameSeries(self,pathXML):
     data_df=pd.DataFrame()
     tree = ET.parse(pathXML)
@@ -36,14 +50,58 @@ class warpMetaData:
        "defocus_value": ctf.find(".//Param[@Name='Defocus']").get('Value'),
        "defocus_angle": ctf.find(".//Param[@Name='DefocusAngle']").get('Value'),
        "defocus_delta": ctf.find(".//Param[@Name='DefocusDelta']").get('Value'),
-         
-        }
-
-   # Create a DataFrame from the dictionary
+         }
     data_df = pd.DataFrame([data])
-    
     return data_df
 
+  def __parseXMLFileTiltSeries(self, pathXML):
+    tree = ET.parse(pathXML)
+    root = tree.getroot()
+    
+    # Parse GridCTF (Defocus)
+    grid_ctf = root.find('GridCTF')
+    defocus_values = []
+    z_values = []
+    for node in grid_ctf.findall('Node'):
+        value = float(node.get('Value'))
+        z = int(node.get('Z'))
+        defocus_values.append(value)
+        z_values.append(z)
+        
+    # Parse GridCTFDefocusDelta
+    grid_delta = root.find('GridCTFDefocusDelta')
+    delta_values = []
+    for node in grid_delta.findall('Node'):
+        value = float(node.get('Value'))
+        delta_values.append(value)
+        
+    # Parse GridCTFDefocusAngle
+    grid_angle = root.find('GridCTFDefocusAngle')
+    angle_values = []
+    for node in grid_angle.findall('Node'):
+        value = float(node.get('Value'))
+        angle_values.append(value)
+        
+    # Parse MoviePath
+    movie_paths = []
+    for path in root.find('MoviePath').text.split('\n'):
+        if path.strip():  # Skip empty lines
+            # Get basename and remove .eer extension
+            movie_name = os.path.basename(path).replace('_EER.eer', '')
+            movie_paths.append(movie_name)
+            
+    # Create DataFrame
+    df = pd.DataFrame({
+        'Z': z_values,
+        'defocus_value': defocus_values,
+        'defocus_delta': delta_values,
+        'defocus_angle': angle_values,
+        'cryoBoostKey': movie_paths
+    })
+    
+    return df
+
+      
 #from lib.functions import calculate_dose_rate_per_pixel, extract_eer_from_header
 class cbconfig:
   def __init__(self,configPath=None):

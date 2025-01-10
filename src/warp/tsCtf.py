@@ -42,22 +42,32 @@ class tsCtf(warpWrapperBase):
         self.result=run_wrapperCommand(command,tag="run_tsCtf",relionProj=self.relProj)
     
     def updateMetaData(self):
+        
         wm=warpMetaData(self.args.out_dir+"/warp_tiltseries/*.xml")
         for index, row in self.st.all_tilts_df.iterrows():
             key=self.st.all_tilts_df.at[index,'cryoBoostKey']
-            #res = wm.data_df.query(f"cryoBoostKey == '{key}'")
-            #self.st.all_tilts_df.at[index, 'xxxxxx'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc"
+            key=key.replace('_EER.eer.mrc','')
+            key=key.replace('_EER.mrc','')
+            res = wm.data_df.query(f"cryoBoostKey == '{key}'")
+            reldefU=(float(res.defocus_value.values[0])+float(res.defocus_delta.values[0]))*10000
+            reldefV=(float(res.defocus_value.values[0])-float(res.defocus_delta.values[0]))*10000
+            reldefAngle=float(res.defocus_angle.values[0])
+            reldefAstig=reldefU-reldefV
+            self.st.all_tilts_df.at[index, 'rlnDefocusU'] = float(reldefU)
+            self.st.all_tilts_df.at[index, 'rlnDefocusV'] = float(reldefV)
+            self.st.all_tilts_df.at[index, 'rlnDefocusAngle'] = float(reldefAngle)
+            self.st.all_tilts_df.at[index, 'rlnCtfAstigmatism'] = float(reldefAstig)
         self.st.writeTiltSeries(self.args.out_dir+"/ts_ctf_tilt_series.star")
     
     def checkResults(self):
         #check if important results exists and values are in range
         #set to 1 of something is missing self.result.returncode
         pass    
-    def updateMetaData(self):
-        wm=warpMetaData(self.args.out_dir+"/warp_tiltseries/*.xml")
-        for index, row in self.st.all_tilts_df.iterrows():
-            key=self.st.all_tilts_df.at[index,'cryoBoostKey']
-            #res = wm.data_df.query(f"cryoBoostKey == '{key}'")
-            #self.st.all_tilts_df.at[index, 'xxxxxx'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc"
-        self.st.writeTiltSeries(self.args.out_dir+"/ts_ctf_tilt_series.star")
+    # def updateMetaData(self):
+    #     wm=warpMetaData(self.args.out_dir+"/warp_tiltseries/*.xml")
+    #     for index, row in self.st.all_tilts_df.iterrows():
+    #         key=self.st.all_tilts_df.at[index,'cryoBoostKey']
+    #         #res = wm.data_df.query(f"cryoBoostKey == '{key}'")
+    #         #self.st.all_tilts_df.at[index, 'xxxxxx'] = str(res.iloc[0]['folder']) + "/average/" + key + ".mrc"
+    #     self.st.writeTiltSeries(self.args.out_dir+"/ts_ctf_tilt_series.star")
         

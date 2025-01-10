@@ -83,9 +83,9 @@ class fsMotionAndCtf(warpWrapperBase):
             self.st.all_tilts_df.at[index, 'rlnAccumMotionEarly']=0.000001 #TODO change real values from .xml
             self.st.all_tilts_df.at[index, 'rlnAccumMotionLate']=0.000001  #TODO change real values from .xml
             self.st.all_tilts_df.at[index, 'rlnCtfImage'] = str(res.iloc[0]['folder']) + "/powerspectrum/" + baseN + ".mrc"
-            self.st.all_tilts_df.at[index, 'rlnDefocusU'] = str(res.iloc[0]['defocus_value']) 
-            self.st.all_tilts_df.at[index, 'rlnDefocusV'] = str(res.iloc[0]['defocus_value'])
-            self.st.all_tilts_df.at[index, 'rlnCtfAstigmatism'] = str(res.iloc[0]['defocus_delta'])
+            self.st.all_tilts_df.at[index, 'rlnDefocusU'] = str(float(res.iloc[0]['defocus_value'])*10000) #in Anng!!
+            self.st.all_tilts_df.at[index, 'rlnDefocusV'] = str(float(res.iloc[0]['defocus_value'])*10000) #in Ang 1!
+            self.st.all_tilts_df.at[index, 'rlnCtfAstigmatism'] = str(float(res.iloc[0]['defocus_delta'])*10000)
             self.st.all_tilts_df.at[index, 'rlnDefocusAngle'] = str(res.iloc[0]['defocus_angle'])
             self.st.all_tilts_df.at[index, 'rlnCtfFigureOfMerit']="None"
             self.st.all_tilts_df.at[index, 'rlnCtfMaxResolution']=0.000001  #TODO change real values from .xml
