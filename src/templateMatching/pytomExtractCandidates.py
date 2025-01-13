@@ -4,6 +4,7 @@ from src.misc.system import run_wrapperCommand
 from src.templateMatching.libTemplateMatching import templateMatchingWrapperBase
 from src.rw.particleList import particleListMeta
 from src.rw.librw import starFileMeta
+import pandas as pd
 
 class pytomExtractCandidates(templateMatchingWrapperBase):
     def __init__(self,args,runFlag=None):
@@ -59,6 +60,7 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
             z+=1
             
     def updateMetaData(self):
+        self.st.writeTiltSeries(self.args.out_dir+"/tomograms.star")
         print("--------------combining outputs---------------------------", flush=True)
         tmOutFold=self.args.out_dir + "tmResults"
         command=["pytom_merge_stars.py", 
@@ -70,7 +72,13 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
         rmStr= f"_{round(rmStr, 2):.2f}Apx" 
         stCand.df.rlnTomoName=stCand.df.rlnTomoName.str.replace(rmStr,"")
         stCand.writeStar(self.args.out_dir + "/candidates.star")
-    
+        df = pd.DataFrame({
+            'rlnTomoParticlesFile': [self.args.out_dir + "/candidates.star"],
+            'rlnTomoTomogramsFile': [self.args.out_dir + "/tomograms.star"]
+         })
+        stOpt=starFileMeta(df)
+        stOpt.writeStar(self.args.out_dir + "/optimisation_set.star")
+        
         print("-----generating visualisation---------------------------", flush=True)
         pl=particleListMeta(self.args.out_dir + "/candidates.star")    
         pl.writeImodModel(self.args.out_dir + "/vis/imodPartRad/",int(self.args.particleDiameterInAng),self.st.tsInfo.tomoSize)
