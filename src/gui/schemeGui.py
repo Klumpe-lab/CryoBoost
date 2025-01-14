@@ -272,6 +272,10 @@ class MainUI(QMainWindow):
             if job.startswith("tmextractcand"):    
                 widget=self.iniWidget(job)
                 layout.addWidget(widget,stretch=0)             
+            
+            if job.startswith("subtomoExtraction"):    
+                widget=self.iniWidget(job)
+                layout.addWidget(widget,stretch=0)  
         
         for layout in self.layouts:   
             spacer = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding)
@@ -283,14 +287,13 @@ class MainUI(QMainWindow):
         if len(jobName.split('_'))>1:
             jobName=jobName.split("_")[0]
 
-        print(jobName)
         srcBasePase=self.cbdat.CRYOBOOST_HOME
         widget = QtWidgets.QWidget()
         if jobName=="templatematching":
             widgetPath=srcBasePase+'/src/gui/widgets/templateMatching.ui'
         if jobName=="tmextractcand":
             widgetPath=srcBasePase+'/src/gui/widgets/candidateExtraction.ui'
-        if jobName=="particlereconstruction":
+        if jobName=="subtomoExtraction":
             widgetPath=srcBasePase+'/src/gui/widgets/particleReconstruction.ui'
         
         widget = loadUi(widgetPath,widget)
@@ -336,7 +339,14 @@ class MainUI(QMainWindow):
             widget.dropDown_scoreFiltType.currentTextChanged.connect(self.setCeScoreFiltTypeToJobTap)
             widget.line_path_ce_scoreFiltVal.textChanged.connect(self.setCeScoreFiltValueToJobTap)
             widget.dropDown_ce_implementation.currentTextChanged.connect(self.setCeImplementationToJobTap)
+        
+        if jobName=="subtomoExtraction":
+            widget.line_path_partRecBoxSzCropped.textChanged.connect(self.setPartRecBoxSzCroppedToJobTap)
+            widget.line_path_partRecBoxSzUnCropped.textChanged.connect(self.setPartRecBoxSzUnCroppedToJobTap)
+            widget.line_path_partRecPixS.textChanged.connect(self.setPartRecPixSToJobTap)
 
+            
+           
             
                 
         return widget                    
@@ -941,12 +951,31 @@ class MainUI(QMainWindow):
     
     def setCeImplementationToJobTap(self,text):
         
-        print("setting Imp")
         textToSet="--implementation " + text + "\'"
         params_dict = {"other_args": textToSet }
         jobTag=self.getTagFromCurrentTab()
         self.setParamsDictToJobTap(params_dict,["tmextractcand"+jobTag])
     
+    def setPartRecBoxSzCroppedToJobTap(self,text):
+        
+        params_dict = {"crop_size": text }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["subtomoExtraction"+jobTag])
+    def setPartRecBoxSzUnCroppedToJobTap(self,text):
+        
+        params_dict = {"box_size": text }
+        jobTag=self.getTagFromCurrentTab()
+        self.setParamsDictToJobTap(params_dict,["subtomoExtraction"+jobTag])
+    
+    def setPartRecPixSToJobTap(self,text,jobTag=None):
+        
+        if jobTag is None:
+            jobTag=self.getTagFromCurrentTab()
+        pixS=self.textEdit_pixelSize.toPlainText()
+        if pixS.replace(".", "", 1).isdigit() and text.replace(".", "", 1).isdigit():
+            binF=float(text)/float(pixS)
+            params_dict = {"binning": str(binF) }
+            self.setParamsDictToJobTap(params_dict,["subtomoExtraction"+jobTag])
     
     def browseCeMaskFold(self):
         """
@@ -994,6 +1023,10 @@ class MainUI(QMainWindow):
             self.textEdit_pixelSize.setText(str(mdoc.param4Processing["PixelSize"]))
             self.textEdit_dosePerTilt.setText(str(mdoc.param4Processing["DosePerTilt"]))
             self.textEdit_nomTiltAxis.setText(str(mdoc.param4Processing["TiltAxisAngle"]))
+            line_edits = self.tabWidget.findChildren(QLineEdit, "line_path_partRecPixS")
+            for line_edit in line_edits:
+                current_value = line_edit.text()
+                line_edit.setText(str(mdoc.param4Processing["PixelSize"]))
         except: 
             pass
         

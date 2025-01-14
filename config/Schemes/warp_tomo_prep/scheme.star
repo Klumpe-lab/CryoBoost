@@ -52,6 +52,7 @@ tsCtf tsCtf continue 0
 tsReconstruct tsReconstruct continue 0
 templatematching  templatematching   continue      0 
 tmextractcand  tmextractcand   continue      0 
+subtomoExtraction subtomoExtraction continue    0
 
 # version 50001
 
@@ -72,4 +73,6 @@ aligntiltsWarp    tsCtf               0 undefined  undefine
 tsCtf tsReconstruct                  0 undefined  undefine
 tsReconstruct templatematching        0 undefined  undefine
 templatematching tmextractcand         0 undefined undefined
-tmextractcand     EXIT                0 undefined
+tmextractcand     subtomoExtraction            0 undefined undefined
+subtomoExtraction    EXIT                    0 undefined  undefined
+

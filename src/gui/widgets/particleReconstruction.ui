@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>889</width>
+    <width>900</width>
     <height>110</height>
    </rect>
   </property>
@@ -15,6 +15,12 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>900</width>
+    <height>110</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -50,22 +56,28 @@
      <string>Particles</string>
     </property>
     <widget class="QLabel" name="label_66">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
-       <x>11</x>
+       <x>545</x>
        <y>30</y>
-       <width>60</width>
+       <width>161</width>
        <height>20</height>
       </rect>
      </property>
      <property name="text">
-      <string>Dia in Ang</string>
+      <string>Particle Diameter in Ang</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_path_movies_11">
+    <widget class="QLineEdit" name="line_path_partRecParticleDia">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
-       <x>76</x>
+       <x>690</x>
        <y>28</y>
        <width>30</width>
        <height>25</height>
@@ -78,33 +90,33 @@
     <widget class="QLabel" name="label_67">
      <property name="geometry">
       <rect>
-       <x>124</x>
+       <x>14</x>
        <y>30</y>
-       <width>81</width>
+       <width>141</width>
        <height>20</height>
       </rect>
      </property>
      <property name="text">
-      <string>Box Size PiIxel</string>
+      <string>Box Size Pixels (cropped)</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_path_movies_14">
+    <widget class="QLineEdit" name="line_path_partRecBoxSzCropped">
      <property name="geometry">
       <rect>
-       <x>210</x>
+       <x>160</x>
        <y>28</y>
        <width>30</width>
        <height>25</height>
       </rect>
      </property>
      <property name="text">
-      <string>250</string>
+      <string>256</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_68">
      <property name="geometry">
       <rect>
-       <x>262</x>
+       <x>410</x>
        <y>30</y>
        <width>91</width>
        <height>20</height>
@@ -114,10 +126,10 @@
       <string>PixelSize in Ang.</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="line_path_movies_15">
+    <widget class="QLineEdit" name="line_path_partRecPixS">
      <property name="geometry">
       <rect>
-       <x>360</x>
+       <x>506</x>
        <y>27</y>
        <width>30</width>
        <height>25</height>
@@ -125,6 +137,32 @@
      </property>
      <property name="text">
       <string>2.5</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_69">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>30</y>
+       <width>161</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Box Size Pixels (uncropped)</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_path_partRecBoxSzUnCropped">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>28</y>
+       <width>30</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>512</string>
      </property>
     </widget>
    </widget>

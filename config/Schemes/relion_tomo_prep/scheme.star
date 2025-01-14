@@ -54,6 +54,7 @@ denoisetrain    denoisetrain    continue        0
 denoisepredict    denoisepredict    continue        0 
 templatematching  templatematching   continue      0 
 tmextractcand  tmextractcand   continue      0 
+subtomoExtraction subtomoExtraction continue    0
 
 # version 50001
 
@@ -76,4 +77,5 @@ reconstruction  denoisetrain            0  undefined  undefined
 denoisetrain    denoisepredict                    0 undefined
 reconstruction  templatematching                0 undefined
 templatematching  tmextractcand                 0 undefined
-tmextractcand    EXIT                    0 undefined
+tmextractcand     subtomoExtraction            0 undefined
+subtomoExtraction    EXIT                    0 undefined
