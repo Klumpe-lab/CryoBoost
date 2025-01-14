@@ -74,8 +74,8 @@ motioncorr    ctffind            0  undefined  undefined
 filtertilts aligntilts            0  undefined  undefined 
 aligntilts reconstruction            0  undefined  undefined 
 reconstruction  denoisetrain            0  undefined  undefined 
-denoisetrain    denoisepredict                    0 undefined
-reconstruction  templatematching                0 undefined
-templatematching  tmextractcand                 0 undefined
-tmextractcand     subtomoExtraction            0 undefined
-subtomoExtraction    EXIT                    0 undefined
+denoisetrain    denoisepredict                    0 undefined undefined
+reconstruction  templatematching                0 undefined  undefined
+templatematching  tmextractcand                 0 undefined undefined
+tmextractcand     subtomoExtraction            0 undefined undefined
+subtomoExtraction    EXIT                    0 undefined undefined

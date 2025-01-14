@@ -978,6 +978,8 @@ class schemeMeta:
           if not any(ind):
               ind=df.rlnJobOptionVariable=="in_tomoset"
           if not any(ind):
+              ind=df.rlnJobOptionVariable=="in_optimisation"
+          if not any(ind):
               raise Exception("nether input_star_mics nor in_tiltseries found")
           
           row_index = schemeJobs_dfFilt[jobNameWithTag].dict["joboptions_values"].index[ind]

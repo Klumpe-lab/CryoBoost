@@ -68,6 +68,8 @@ class EditScheme(QDialog):
                 if not any(ind):
                     ind=df.rlnJobOptionVariable=="in_tomoset"
                 if not any(ind):
+                    ind=df.rlnJobOptionVariable=="in_optimisation"
+                if not any(ind):
                     raise Exception("nether input_star_mics nor in_tiltseries found")
                 row_index = df.index[ind]
                 value=os.path.basename(os.path.dirname(df.loc[row_index, "rlnJobOptionValue"].item()))
