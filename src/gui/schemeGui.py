@@ -232,8 +232,9 @@ class MainUI(QMainWindow):
         
         
         if "denoisetrain" in self.cbdat.scheme.jobs_in_scheme.values  or "denoisepredict" in self.cbdat.scheme.jobs_in_scheme.values:
-            params_dict = {"generate_split_tomograms": "Yes" }
-            self.setParamsDictToJobTap(params_dict)
+            pass
+            #params_dict = {"generate_split_tomograms": "Yes" }
+            #self.setParamsDictToJobTap(params_dict)
               
    
     def genParticleSetups(self):
@@ -1181,7 +1182,8 @@ class MainUI(QMainWindow):
     def setRecVoxelSizeToJobTap(self):
         if "reconstruction" in self.cbdat.scheme.jobs_in_scheme.values: 
             params_dict = {"param1_value": self.textEdit_recVoxelSize.toPlainText()} 
-            self.setParamsDictToJobTap(params_dict,["reconstruction"])
+            self.setParamsDictToJobTap(params_dict,["reconstructionsplit"])
+            self.setParamsDictToJobTap(params_dict,["reconstructionfull"])
         if "tsReconstruct" in self.cbdat.scheme.jobs_in_scheme.values: 
             params_dict = {"param1_value": self.textEdit_recVoxelSize.toPlainText()} 
             self.setParamsDictToJobTap(params_dict,["tsReconstruct"])
@@ -1196,7 +1198,7 @@ class MainUI(QMainWindow):
             
     def setAreTomoSampleThickToJobTap(self):
         
-        params_dict = {"aretomo_thickness": self.textEdit_areTomoSampleThick.toPlainText()} 
+        params_dict = {"tomogram_thickness": self.textEdit_areTomoSampleThick.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["aligntilts"]) 
         
         if "aligntiltsWarp" in self.cbdat.scheme.jobs_in_scheme.values:
@@ -1264,11 +1266,11 @@ class MainUI(QMainWindow):
         
         programSelected=self.dropDown_tomoAlignProgram.currentText()
         if (programSelected=="Imod"):
-            params_dictAre = {"do_aretomo": "No"}
+            params_dictAre = {"do_aretomo2": "No"}
             params_dictImod = {"do_imod_patchtrack": "Yes"}
         
         if (programSelected=="Aretomo"):
-            params_dictAre = {"do_aretomo": "Yes"}
+            params_dictAre = {"do_aretomo2": "Yes"}
             params_dictImod = {"do_imod_patchtrack": "No"}
         
         self.setParamsDictToJobTap(params_dictAre,["aligntilts"])

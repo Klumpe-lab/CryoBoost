@@ -114,6 +114,7 @@ def test_crboost_filterTilts(test_input):
     call=relionProj + "/bin/crboost_filterTitlts.py"
     call+=" --in_mics " + relionProj + tilseriesStar
     call+=" --o " + outputFold
+    #call+=" --o " + outputFold
     call+=" " + test_input
     
     result = subprocess.run(call, capture_output=True, text=True,shell=True)

@@ -18,7 +18,7 @@ _rlnJobOptionValue #2
   in_3dref         "../../data/vols/copiaBlack_11.8A.mrc" 
  in_coords         "" 
    in_mask         "../../data/vols/mask_copia_11.8A.mrc" 
-    in_mic         Schemes/relion_tomo_prep/reconstruction/tomograms.star
+    in_mic         Schemes/relion_tomo_prep/reconstructionfull/tomograms.star
     in_mov         "" 
    in_part         "" 
 other_args         "--implementation pytom --volumeMaskFold None --gpu_ids auto \"  

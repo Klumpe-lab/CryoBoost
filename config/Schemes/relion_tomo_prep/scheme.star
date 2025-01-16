@@ -44,14 +44,15 @@ _rlnSchemeJobNameOriginal #1
 _rlnSchemeJobName #2 
 _rlnSchemeJobMode #3 
 _rlnSchemeJobHasStarted #4 
-aligntilts aligntilts   continue            0 
-   ctffind    ctffind   continue            0 
-filtertilts filtertilts   continue            0 
 importmovies importmovies   continue            0 
 motioncorr motioncorr   continue            0 
-reconstruction reconstruction   continue            0 
+ctffind    ctffind   continue            0 
+aligntilts aligntilts   continue            0 
+filtertilts filtertilts   continue            0 
+reconstructionsplit reconstructionsplit   continue            0 
 denoisetrain    denoisetrain    continue        0      
 denoisepredict    denoisepredict    continue        0 
+reconstructionfull reconstructionfull   continue            0 
 templatematching  templatematching   continue      0 
 tmextractcand  tmextractcand   continue      0 
 subtomoExtraction subtomoExtraction continue    0
@@ -66,16 +67,17 @@ _rlnSchemeEdgeOutputNodeName #2
 _rlnSchemeEdgeIsFork #3 
 _rlnSchemeEdgeOutputNodeNameIfTrue #4 
 _rlnSchemeEdgeBooleanVariable #5 
-      WAIT EXIT_maxtime            0  undefined  undefined 
+WAIT EXIT_maxtime            0  undefined  undefined 
 EXIT_maxtime importmovies            0  undefined  undefined 
 importmovies motioncorr            0  undefined  undefined 
-motioncorr    ctffind            0  undefined  undefined 
-   ctffind filtertilts            0  undefined  undefined 
+motioncorr   ctffind            0  undefined  undefined 
+ctffind      filtertilts            0  undefined  undefined 
 filtertilts aligntilts            0  undefined  undefined 
-aligntilts reconstruction            0  undefined  undefined 
-reconstruction  denoisetrain            0  undefined  undefined 
+aligntilts reconstructionsplit            0  undefined  undefined 
+reconstructionsplit  denoisetrain            0  undefined  undefined 
 denoisetrain    denoisepredict                    0 undefined undefined
-reconstruction  templatematching                0 undefined  undefined
+denoisepredict  reconstructionfull              0 undefined  undefined
+reconstructionfull  templatematching                0 undefined  undefined
 templatematching  tmextractcand                 0 undefined undefined
 tmextractcand     subtomoExtraction            0 undefined undefined
 subtomoExtraction    EXIT                    0 undefined undefined

@@ -20,7 +20,8 @@ xdim       4096
 ydim       4096 
 zdim       2048 
 binned_angpix      11.8 
-generate_split_tomograms         No 
+do_fourier        No 
+generate_split_tomograms         Yes 
 tiltangle_offset          0 
 tomo_name         "" 
 do_proj        Yes 

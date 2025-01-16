@@ -21,7 +21,7 @@ _rlnJobOptionValue #2
 do_float16        Yes 
 do_stack2d        Yes 
 use_direct_entries        No 
-in_optimisation   "Schemes/warp_tomo_prep/tmextractcand/optimisation_set.star" 
+in_optimisation   "Schemes/relion_tomo_prep/tmextractcand/optimisation_set.star" 
 in_particles    "" 
 in_tomograms    "" 
 in_trajectories         "" 

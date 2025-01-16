@@ -1121,7 +1121,9 @@ class tiltSeriesMeta:
             tilt_series_tmp = pd.concat([tilt_series_tmp, tmp_df], ignore_index=True)
             i += 1
 
-        all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
+        #all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
+        all_tilts_df = pd.concat([tilt_series_tmp,all_tilts_df], axis=1)
+
         columns_to_check = [col for col in all_tilts_df.columns if col not in ['rlnCtfScalefactor']]
         all_tilts_df.dropna(subset=columns_to_check,inplace=True)  # check !!
         #generte key to merge later on  
@@ -1139,7 +1141,13 @@ class tiltSeriesMeta:
         self.all_tilts_df = all_tilts_df
         self.tilt_series_df = tilt_series.df
         self.__extractInformation()
-
+        # Store the key values
+        key_values = self.all_tilts_df['cryoBoostKey']
+        # Remove the column
+        self.all_tilts_df = self.all_tilts_df.drop('cryoBoostKey', axis=1)
+        # Add it back (it will be added as the last column)
+        self.all_tilts_df['cryoBoostKey'] = key_values
+        
     def writeTiltSeries(self, tiltseriesStarFile, tiltSeriesStarFolder='tilt_series'):
         """
         Writes the tilt series star file and its associated tilt series files.
@@ -1155,7 +1163,11 @@ class tiltSeriesMeta:
         """
         print("Writing: " + tiltseriesStarFile)
         #generate tiltseries star from all dataframe ...more generic if filter removes all tilts of one series
-        ts_df = self.all_tilts_df[self.tilt_series_df.columns].copy()
+        #ts_df = self.all_tilts_df[self.tilt_series_df.columns].copy()
+        #indStart=self.all_tilts_df.shape[1]-self.tilt_series_df.shape[1]
+        ts_df = self.all_tilts_df.iloc[:,0:self.tilt_series_df.shape[1]].copy()
+        ts_df=ts_df.drop("cryoBoostKey",axis=1,errors='ignore')
+        
         ts_df.drop_duplicates(inplace=True)
         tsFold = os.path.dirname(tiltseriesStarFile) + os.path.sep + tiltSeriesStarFolder + os.path.sep
         ts_df['rlnTomoTiltSeriesStarFile'] = ts_df['rlnTomoTiltSeriesStarFile'].apply(lambda x: os.path.join(tsFold, os.path.basename(x)))
@@ -1169,7 +1181,9 @@ class tiltSeriesMeta:
         Path(fold + os.sep + tiltSeriesStarFolder).mkdir(exist_ok=True)
         for tilt_series in self.tilt_series_df["rlnTomoTiltSeriesStarFile"]:
             oneTs_df = self.all_tilts_df[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series].copy()
-            oneTs_df.drop(self.tilt_series_df.columns, axis=1, inplace=True)
+            #oneTs_df.drop(self.tilt_series_df.columns, axis=1, inplace=True)
+            #oneTs_df=test=self.all_tilts_df.iloc[:,0:indStart-1]
+            oneTs_df=self.all_tilts_df.iloc[:,self.tilt_series_df.shape[1]:]
             tomoName = self.all_tilts_df.loc[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series, 'rlnTomoName'].unique()[0]
             oneTS_dict={}
             oneTS_dict[tomoName]=oneTs_df

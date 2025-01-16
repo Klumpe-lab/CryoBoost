@@ -48,6 +48,7 @@ class pytomTm(templateMatchingWrapperBase):
                      "--voltage",str(self.st.tsInfo.volt),
                      "--spherical-aberration",str(self.st.tsInfo.cs),
                      "--amplitude-contrast",str(self.st.tsInfo.cAmp),
+                     "--tomogram-ctf-model",str('phase-flip'),
                      "--per-tilt-weighting",
                      "--log","debug"]
         constParams.extend(["-g"] + gpuId)

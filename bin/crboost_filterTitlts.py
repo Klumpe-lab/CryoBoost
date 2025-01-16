@@ -20,7 +20,7 @@ def parse_arguments():
     parser.add_argument("--probThreshold", "-pThr",dest="probThr" ,required=False, default=0.1, help="threshold for uncert. assignment")
     parser.add_argument("--probThrAction", "-pAct",dest="probAct" ,required=False, default="assingToGood", help="action for uncert. assignment")
     parser.add_argument("--mdocWk", "-m",required=False, default="mdoc/*.mdoc", help="path to .mdoc remove projctions according to tiltseries.star")
-    parser.add_argument("--j", "-nr_threads",dest="threads" ,required=False, default=None, help="Nr of threads used. Ignore!")
+    parser.add_argument("--j", "-nr_threads",dest="threads" ,required=False, default=24, help="Nr of threads used. Ignore!")
     args,unkArgs=parser.parse_known_args()
     return args,unkArgs
 
