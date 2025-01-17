@@ -34,7 +34,7 @@ module load IMOD/4.12.17
 module load jdk
 module load ARETOMO2/1.1.2
 module load RELION/5.0.0NC
-module load PYTOM-TM/0.7.8
+module load PYTOM-TM/0.7.10
 source /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/.cbenv
 
 module list
