@@ -1183,7 +1183,7 @@ class tiltSeriesMeta:
             oneTs_df = self.all_tilts_df[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series].copy()
             #oneTs_df.drop(self.tilt_series_df.columns, axis=1, inplace=True)
             #oneTs_df=test=self.all_tilts_df.iloc[:,0:indStart-1]
-            oneTs_df=self.all_tilts_df.iloc[:,self.tilt_series_df.shape[1]:]
+            oneTs_df=oneTs_df.iloc[:,self.tilt_series_df.shape[1]:]
             tomoName = self.all_tilts_df.loc[self.all_tilts_df['rlnTomoTiltSeriesStarFile'] == tilt_series, 'rlnTomoName'].unique()[0]
             oneTS_dict={}
             oneTS_dict[tomoName]=oneTs_df

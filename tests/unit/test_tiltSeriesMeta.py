@@ -10,8 +10,8 @@ def test_writeTiltSeries():
     outputTiltSeries='tmpOut/tsRw/tilt_series_testRw.star'
     relionProj=os.path.abspath(__file__)
     relionProj=os.path.dirname(os.path.dirname(os.path.dirname(relionProj)))+os.path.sep
-    #tilseriesStar='tmpOut/E10/Tomograms/job009/tomograms.star'
-    #relionProj='tmpOut/E10/'
+    #tilseriesStar='tmpOut/F1/CtfFind/job003/tilt_series_ctf.star'
+    # relionProj='tmpOut/F1/'
     
     #ts2=tiltSeriesMeta('tmpOut/V3/Tomograms/job005/tomograms.star','./tmpOut/V3/')
  
