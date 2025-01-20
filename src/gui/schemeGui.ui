@@ -324,7 +324,7 @@
                 <x>3</x>
                 <y>20</y>
                 <width>871</width>
-                <height>71</height>
+                <height>61</height>
                </rect>
               </property>
               <property name="title">
@@ -415,8 +415,8 @@ p, li { white-space: pre-wrap; }
               <widget class="QLabel" name="label_8">
                <property name="geometry">
                 <rect>
-                 <x>357</x>
-                 <y>33</y>
+                 <x>704</x>
+                 <y>32</y>
                  <width>80</width>
                  <height>20</height>
                 </rect>
@@ -428,7 +428,7 @@ p, li { white-space: pre-wrap; }
               <widget class="QLabel" name="label_9">
                <property name="geometry">
                 <rect>
-                 <x>490</x>
+                 <x>360</x>
                  <y>33</y>
                  <width>81</width>
                  <height>20</height>
@@ -464,7 +464,7 @@ p, li { white-space: pre-wrap; }
               <widget class="QTextEdit" name="textEdit_eerFractions">
                <property name="geometry">
                 <rect>
-                 <x>570</x>
+                 <x>440</x>
                  <y>30</y>
                  <width>51</width>
                  <height>25</height>
@@ -487,8 +487,8 @@ p, li { white-space: pre-wrap; }
               <widget class="QTextEdit" name="textEdit_invertHand">
                <property name="geometry">
                 <rect>
-                 <x>430</x>
-                 <y>31</y>
+                 <x>783</x>
+                 <y>30</y>
                  <width>50</width>
                  <height>25</height>
                 </rect>
@@ -509,13 +509,13 @@ p, li { white-space: pre-wrap; }
               </widget>
               <widget class="QComboBox" name="dropDown_config">
                <property name="enabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <property name="geometry">
                 <rect>
-                 <x>700</x>
-                 <y>30</y>
-                 <width>121</width>
+                 <x>581</x>
+                 <y>29</y>
+                 <width>111</width>
                  <height>25</height>
                 </rect>
                </property>
@@ -523,14 +523,14 @@ p, li { white-space: pre-wrap; }
               <widget class="QLabel" name="label_10">
                <property name="geometry">
                 <rect>
-                 <x>650</x>
+                 <x>505</x>
                  <y>33</y>
                  <width>81</width>
                  <height>17</height>
                 </rect>
                </property>
                <property name="text">
-                <string>PreSet</string>
+                <string>Hand preset</string>
                </property>
               </widget>
              </widget>

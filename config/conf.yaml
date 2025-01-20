@@ -53,14 +53,12 @@ meta_data:
 # parameter-aliases are used for parameter names
 
 microscopes:
-
-  - Microscope: Titan Krios 4
-    Parameters:
-      # microscope = Titan Krios:
-      - Spherical aberration: 2.7
-      - kV: 300
-      - q Submission Script: ../../../01-Data/relion/qsub_gpu_Relion5.sh
-    
+  TitanKrios5:
+    - flip_tiltseries_hand: "No"
+  TitanKrios4:
+    - flip_tiltseries_hand: "No"  
+  TitanKrios3:
+    - flip_tiltseries_hand: "Yes"
 
 star_file:
 

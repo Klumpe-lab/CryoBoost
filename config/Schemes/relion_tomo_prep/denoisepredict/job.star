@@ -17,7 +17,7 @@ _rlnJobOptionVariable #1
 _rlnJobOptionValue #2 
 in_tomoset  Schemes/relion_tomo_prep/reconstructionsplit/tomograms.star 
 care_denoising_model  Schemes/relion_tomo_prep/denoisetrain/denoising_model.tar.gz 
-cryocare_path /fs/pool/pool-bmapps/hpcl8/app/soft/CRYO-CARE/0.2/conda3/envs/cryocare_11/bin/ 
+cryocare_path /fs/pool/pool-bmapps/hpcl8/app/soft/CRYO-CARE/0.3/conda3/envs/cryocare_11/bin/ 
 gpu_ids          0 
 do_cryocare_train         No 
 tomograms_for_training Position_1 

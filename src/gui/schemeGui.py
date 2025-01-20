@@ -160,7 +160,6 @@ class MainUI(QMainWindow):
         self.btn_unlockWorkFlow.clicked.connect(self.unlockWorkflow)
         self.btn_resetWorkFlow.clicked.connect(self.resetWorkflow)
         self.btn_resetWorkFlowHead.clicked.connect(self.resetWorkflowHead)
-        self.dropDown_config.addItem("Choose Microscope Set-Up")
         self.dropDown_nrNodes.activated.connect(self.setNrNodesToJobTap)
         self.dropDown_partitionName.activated.connect(self.setNrNodesToJobTap)
         self.checkBox_shareNodes.stateChanged.connect(self.setNrNodesToJobTap)
@@ -169,7 +168,9 @@ class MainUI(QMainWindow):
         self.dropDown_jobSize.activated.connect(self.setNrNodesFromJobSize)
         for i in self.cbdat.conf.microscope_presets:
             self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
-    
+        self.dropDown_config.setCurrentIndex(0)
+        
+        
     def genSchemeTable(self):
         self.table_scheme.setColumnCount(1) #origianlly 4
         self.labels_scheme = ["Job Name"] #, "Fork", "Output if True", "Boolean Variable"]
@@ -229,14 +230,11 @@ class MainUI(QMainWindow):
                 self.line_path_gain.setText(os.path.abspath(self.cbdat.args.gain)) 
             else:
                 self.line_path_gain.setText(self.cbdat.args.gain)
-             
-        
-        
         if "denoisetrain" in self.cbdat.scheme.jobs_in_scheme.values  or "denoisepredict" in self.cbdat.scheme.jobs_in_scheme.values:
             pass
             #params_dict = {"generate_split_tomograms": "Yes" }
             #self.setParamsDictToJobTap(params_dict)
-              
+        self.loadConfig()
    
     def genParticleSetups(self):
         
@@ -1572,21 +1570,11 @@ class MainUI(QMainWindow):
         is found, its value is set to the value defined in the config_microscopes for this parameter.
         """
         microscope = self.dropDown_config.currentText()
-        # only do something if a microscope is chosen
-        if microscope != "Choose Microscope Set-Up":
+        microscope_parameters=self.cbdat.conf.get_microscopePreSet(microscope)
+       
+        self.textEdit_invertHand.setText(microscope_parameters["flip_tiltseries_hand"])
+     
         
-            microscope_parameters=self.cbdat.conf.get_microscopePreSet(microscope)
-            # exclude the first tab (= set up)
-            for job_tab_index in range(1, len(self.cbdat.scheme.jobs_in_scheme) + 1):
-                # go to the tabs based on their index
-                self.tabWidget.setCurrentIndex(job_tab_index)
-                # access the TableWidget in the currently open TabWidget
-                table_widget = self.tabWidget.currentWidget().findChild(QTableWidget)
-                #change_values(table_widget, microscope_parameters, jobs_in_scheme)
-                change_values(table_widget, microscope_parameters, self.cbdat.scheme.jobs_in_scheme,self.cbdat.conf)
-            # go back to setup tab
-            self.tabWidget.setCurrentIndex(0)
-
 
     def browsePathTarget(self):
         defPath=os.getcwd()   

@@ -243,9 +243,8 @@ class cbconfig:
   def get_microscopePreSet(self,microscope):
       mic_data= self.confdata['microscopes']
       for entry in mic_data:
-          if entry["Microscope"] == microscope:
-              microscope_parameters_list_of_dicts= entry["Parameters"]
-      
+          if entry == microscope:
+              microscope_parameters_list_of_dicts= mic_data[entry]
       microscope_parameters = {}
       for dicts in microscope_parameters_list_of_dicts:
           microscope_parameters.update(dicts)
@@ -256,17 +255,10 @@ class cbconfig:
       mic_data = self.confdata['microscopes']
       microscope_presets = {}  # Initialize an empty dictionary
       for i, entry in enumerate(mic_data):  # Use enumerate to get both index and entry
-        microscope_presets[i] = entry["Microscope"]
+        microscope_presets[i] = entry
       self.microscope_presets=microscope_presets
       
       return microscope_presets
-      
-      
-      # mic_data= self.confdata['microscopes']
-      # for entry in mic_data:
-      #      microscope_presets[i]= entry["Microscope"]
-      
-      # return microscope_presets
       
   
   def get_alias_reverse(self,job, alias,):

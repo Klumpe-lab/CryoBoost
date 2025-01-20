@@ -15,7 +15,7 @@ data_joboptions_values
 loop_ 
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
-in_tomoset  Schemes/relion_tomo_prep/reconstructionsplit/tomograms.star 
+in_tomoset  Schemes/warp_tomo_prep/tsReconstruct/tomograms.star 
 cryocare_path /fs/pool/pool-bmapps/hpcl8/app/soft/CRYO-CARE/0.3/conda3/envs/cryocare_11/bin/ 
 gpu_ids          0 
 do_cryocare_train        Yes 

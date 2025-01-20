@@ -50,6 +50,8 @@ filtertilts  filtertilts continue 0
 aligntiltsWarp aligntiltsWarp continue 0 
 tsCtf tsCtf continue 0 
 tsReconstruct tsReconstruct continue 0
+denoisetrain    denoisetrain    continue        0      
+denoisepredict    denoisepredict    continue        0 
 templatematching  templatematching   continue      0 
 tmextractcand  tmextractcand   continue      0 
 subtomoExtraction subtomoExtraction continue    0
@@ -71,7 +73,9 @@ fsMotionAndCtf filtertilts        0 undefined  undefine
 filtertilts aligntiltsWarp           0 undefined  undefine   
 aligntiltsWarp    tsCtf               0 undefined  undefine
 tsCtf tsReconstruct                  0 undefined  undefine
-tsReconstruct templatematching        0 undefined  undefine
+tsReconstruct  denoisetrain          0 undefined  undefine
+denoisetrain    denoisepredict          0 undefined undefined
+denoisepredict  templatematching              0 undefined  undefined
 templatematching tmextractcand         0 undefined undefined
 tmextractcand     subtomoExtraction            0 undefined undefined
 subtomoExtraction    EXIT                    0 undefined  undefined
