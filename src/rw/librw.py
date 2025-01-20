@@ -403,7 +403,7 @@ class mdocMeta:
       self.param4Processing["TiltAxisAngle"]=round(float(self.all_df.mdocHeader[0].split("Tilt axis angle =")[1].split(",")[0]),2) #+180
     self.param4Processing["DosePerTilt"]=round(float(self.all_df.ExposureDose[0])*1.5,2)
     self.param4Processing["PixelSize"]= round(float(self.all_df.mdocHeader[0].split("PixelSpacing = ")[1].split('\n')[0]),2)
-    
+    self.param4Processing["ImageSize"]=self.all_df.mdocHeader[0].split("ImageSize = ")[1].split('\n')[0].replace(" ","x")
   
   def addPrefixToFileName(self,prefix):
 

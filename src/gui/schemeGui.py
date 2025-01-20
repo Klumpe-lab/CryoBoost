@@ -143,6 +143,7 @@ class MainUI(QMainWindow):
         self.textEdit_modelForFilterTilts.textChanged.connect(self.setmodelForFilterTiltsToJobTap)
         self.textEdit_probThr.textChanged.connect(self.setProbThrToJobTap)
         self.textEdit_recVoxelSize.textChanged.connect(self.setRecVoxelSizeToJobTap)
+        self.textEdit_recTomosize.textChanged.connect(self.setRecTomosizeToJobTap)
         self.btn_browse_gain.clicked.connect(self.browsePathGain)
         self.btn_browse_autoPrefix.clicked.connect(self.generatePrefix)
         self.btn_use_movie_path.clicked.connect(self.mdocs_use_movie_path)
@@ -1024,6 +1025,7 @@ class MainUI(QMainWindow):
             self.textEdit_pixelSize.setText(str(mdoc.param4Processing["PixelSize"]))
             self.textEdit_dosePerTilt.setText(str(mdoc.param4Processing["DosePerTilt"]))
             self.textEdit_nomTiltAxis.setText(str(mdoc.param4Processing["TiltAxisAngle"]))
+            self.textEdit_recTomosize.setText(str(mdoc.param4Processing["ImageSize"])+str("x2048"))
             line_edits = self.tabWidget.findChildren(QLineEdit, "line_path_partRecPixS")
             for line_edit in line_edits:
                 current_value = line_edit.text()
@@ -1180,13 +1182,26 @@ class MainUI(QMainWindow):
         params_dict = {"flip_tiltseries_hand": self.textEdit_invertHand.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 
     def setRecVoxelSizeToJobTap(self):
-        if "reconstruction" in self.cbdat.scheme.jobs_in_scheme.values: 
-            params_dict = {"param1_value": self.textEdit_recVoxelSize.toPlainText()} 
+        if "reconstructionsplit" in self.cbdat.scheme.jobs_in_scheme.values or "reconstructionfull" in self.cbdat.scheme.jobs_in_scheme.values: 
+            params_dict = {"binned_angpix": self.textEdit_recVoxelSize.toPlainText()} 
             self.setParamsDictToJobTap(params_dict,["reconstructionsplit"])
             self.setParamsDictToJobTap(params_dict,["reconstructionfull"])
         if "tsReconstruct" in self.cbdat.scheme.jobs_in_scheme.values: 
             params_dict = {"param1_value": self.textEdit_recVoxelSize.toPlainText()} 
             self.setParamsDictToJobTap(params_dict,["tsReconstruct"])
+    def setRecTomosizeToJobTap(self):
+        if "reconstructionsplit" in self.cbdat.scheme.jobs_in_scheme.values or "reconstructionfull" in self.cbdat.scheme.jobs_in_scheme.values: 
+            params_dict = {}
+            dims = self.textEdit_recTomosize.toPlainText().split("x")
+            params_dict["xdim"] = dims[0]
+            params_dict["ydim"] = dims[1]
+            params_dict["zdim"] = dims[2]
+            self.setParamsDictToJobTap(params_dict,["reconstructionsplit"])
+            self.setParamsDictToJobTap(params_dict,["reconstructionfull"])
+        if "tsReconstruct" in self.cbdat.scheme.jobs_in_scheme.values: 
+            params_dict = {"param1_value": self.textEdit_recTomosize.toPlainText()} 
+            self.setParamsDictToJobTap(params_dict,["aligntiltsWarp"])
+
         
     def setEerFractionsToJobTap(self):
         if "motioncorr" in self.cbdat.scheme.jobs_in_scheme.values: 
