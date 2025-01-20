@@ -48,6 +48,7 @@ class tsCtf(warpWrapperBase):
             key=self.st.all_tilts_df.at[index,'cryoBoostKey']
             key=key.replace('_EER.eer.mrc','')
             key=key.replace('_EER.mrc','')
+            key=key.replace('.mrc','')
             res = wm.data_df.query(f"cryoBoostKey == '{key}'")
             reldefU=(float(res.defocus_value.values[0])+float(res.defocus_delta.values[0]))*10000
             reldefV=(float(res.defocus_value.values[0])-float(res.defocus_delta.values[0]))*10000

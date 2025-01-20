@@ -88,6 +88,7 @@ class warpMetaData:
         if path.strip():  # Skip empty lines
             # Get basename and remove .eer extension
             movie_name = os.path.basename(path).replace('_EER.eer', '')
+            movie_name = movie_name.replace(".tif","")
             movie_paths.append(movie_name)
             
     # Create DataFrame
