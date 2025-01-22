@@ -34,7 +34,7 @@ class warpMetaData:
       xmlType='fs'
     else:
       xmlType='ts'
-    
+    #print(xmlType)
     return xmlType  
           
   def __parseXMLFileFrameSeries(self,pathXML):
@@ -89,9 +89,10 @@ class warpMetaData:
             # Get basename and remove .eer extension
             movie_name = os.path.basename(path).replace('_EER.eer', '')
             movie_name = movie_name.replace(".tif","")
+            movie_name = movie_name.replace(".eer","")
             movie_paths.append(movie_name)
             
-    # Create DataFrame
+    # Create DataFramemdoc.all_df.mdocFileName[0] in mdoc.all_df.SubFramePath 
     df = pd.DataFrame({
         'Z': z_values,
         'defocus_value': defocus_values,
@@ -273,7 +274,7 @@ class cbconfig:
     Returns:
       parameter (str): parameter name as displayed in the job.star file.
 
-    Example:
+    Example:mdoc.all_df.mdocFileName[0] in mdoc.all_df.SubFramePath 
       job
     """
     
@@ -535,35 +536,55 @@ class mdocMeta:
      
       #df=df.drop(columns=["mdocHeader","mdocFilePath","cryoBoostKey"])   
       # Define the format for each line in the ZValue sections
+      # def format_row(row):
+      #     return (
+      #         f'[ZValue = {row.get("ZValue", "")}]\n'
+      #         f'TiltAngle = {row.get("TiltAngle", "")}\n'
+      #         f'StagePosition = {row.get("StagePosition", "")}\n'
+      #         f'StageZ = {row.get("StageZ", "")}\n'
+      #         f'Magnification = {row.get("Magnification", "")}\n'
+      #         f'Intensity = {row.get("Intensity", "")}\n'
+      #         f'ExposureDose = {row.get("ExposureDose", "")}\n'
+      #         f'PixelSpacing = {row.get("PixelSpacing", "")}\n'
+      #         f'SpotSize = {row.get("SpotSize", "")}\n'
+      #         f'Defocus = {row.get("Defocus", "")}\n'
+      #         f'ImageShift = {row.get("ImageShift", "")}\n'
+      #         f'RotationAngle = {row.get("RotationAngle", "")}\n'
+      #         f'ExposureTime = {row.get("ExposureTime", "")}\n'
+      #         f'Binning = {row.get("Binning", "")}\n'
+      #         f'MagIndex = {row.get("MagIndex", "")}\n'
+      #         f'CountsPerElectron = {row.get("CountsPerElectron", "")}\n'
+      #         f'MinMaxMean = {row.get("MinMaxMean", "")}\n'
+      #         f'TargetDefocus = {row.get("TargetDefocus", "")}\n'
+      #         f'PriorRecordDose = {row.get("PriorRecordDose", "")}\n'
+      #         f'SubFramePath = {row.get("SubFramePath", "")}\n'
+      #         f'NumSubFrames = {row.get("NumSubFrames", "")}\n'
+      #         f'FrameDosesAndNumber = {row.get("FrameDosesAndNumber", "")}\n'
+      #         f'DateTime = {row.get("DateTime", "")}\n'
+      #         f'FilterSlitAndLoss = {row.get("FilterSlitAndLoss", "")}\n'
+      #         f'ChannelName = {row.get("ChannelName", "")}\n'
+      #         f'CameraLength = {row.get("CameraLength", "")}\n'
+      #     )
       def format_row(row):
-          return (
-              f'[ZValue = {row.get("ZValue", "")}]\n'
-              f'TiltAngle = {row.get("TiltAngle", "")}\n'
-              f'StagePosition = {row.get("StagePosition", "")}\n'
-              f'StageZ = {row.get("StageZ", "")}\n'
-              f'Magnification = {row.get("Magnification", "")}\n'
-              f'Intensity = {row.get("Intensity", "")}\n'
-              f'ExposureDose = {row.get("ExposureDose", "")}\n'
-              f'PixelSpacing = {row.get("PixelSpacing", "")}\n'
-              f'SpotSize = {row.get("SpotSize", "")}\n'
-              f'Defocus = {row.get("Defocus", "")}\n'
-              f'ImageShift = {row.get("ImageShift", "")}\n'
-              f'RotationAngle = {row.get("RotationAngle", "")}\n'
-              f'ExposureTime = {row.get("ExposureTime", "")}\n'
-              f'Binning = {row.get("Binning", "")}\n'
-              f'MagIndex = {row.get("MagIndex", "")}\n'
-              f'CountsPerElectron = {row.get("CountsPerElectron", "")}\n'
-              f'MinMaxMean = {row.get("MinMaxMean", "")}\n'
-              f'TargetDefocus = {row.get("TargetDefocus", "")}\n'
-              f'PriorRecordDose = {row.get("PriorRecordDose", "")}\n'
-              f'SubFramePath = {row.get("SubFramePath", "")}\n'
-              f'NumSubFrames = {row.get("NumSubFrames", "")}\n'
-              f'FrameDosesAndNumber = {row.get("FrameDosesAndNumber", "")}\n'
-              f'DateTime = {row.get("DateTime", "")}\n'
-              f'FilterSlitAndLoss = {row.get("FilterSlitAndLoss", "")}\n'
-              f'ChannelName = {row.get("ChannelName", "")}\n'
-              f'CameraLength = {row.get("CameraLength", "")}\n'
-          )
+          output = [f'[ZValue = {row.get("ZValue", "")}]']  # ZValue is required
+          
+          # List of possible fields
+          fields = [
+              "TiltAngle", "StagePosition", "StageZ", "Magnification", 
+              "Intensity", "ExposureDose", "PixelSpacing", "SpotSize",
+              "Defocus", "ImageShift", "RotationAngle", "ExposureTime",
+              "Binning", "MagIndex", "CountsPerElectron", "MinMaxMean",
+              "TargetDefocus", "PriorRecordDose", "SubFramePath", 
+              "NumSubFrames", "FrameDosesAndNumber", "DateTime",
+              "FilterSlitAndLoss", "ChannelName", "CameraLength"
+          ]
+          
+          # Only add fields that exist in the row and have non-null values
+          for field in fields:
+              if field in row and pd.notna(row[field]):
+                  output.append(f'{field} = {row[field]}')
+          
+          return '\n'.join(output) + '\n'
       
 
       # Open the file for writing
@@ -733,7 +754,7 @@ class dataImport():
     self.targetPath=targetPath
     self.wkFrames=wkFrames
     self.wkMdoc=wkMdoc
-    if (prefix == "auto"):
+    if prefix == "auto":
       current_datetime = datetime.now()
       self.prefix=current_datetime.strftime("%Y-%m-%d-%H-%M-%S_")
     else:
@@ -745,7 +766,7 @@ class dataImport():
     self.existingMdocSource=self.__getexistingMdoc()
     self.logDir=logDir
     self.logToConsole=False
-    if (logDir is not None):  
+    if logDir is not None:  
       os.makedirs(logDir, exist_ok=True)
       self.logErrorFile=open(os.path.join(logDir,"run.err"),'a')
       self.logInfoFile=open(os.path.join(logDir,"run.out"),'a')
@@ -793,6 +814,16 @@ class dataImport():
     return existingMdoc  
   
   def runImport(self):   
+    from src.rw.librw import mdocMeta
+    self.mdoc=mdocMeta(self.wkMdoc)
+    base_filename = os.path.splitext(self.mdoc.all_df.mdocFileName[0])[0]
+    path_to_search = os.path.splitext(self.mdoc.all_df.SubFramePath[0])[0]
+    base_filename in path_to_search
+    if base_filename in path_to_search:
+      self.relcompPrefix=False
+    else:   
+      self.relcompPrefix=True
+    
     os.makedirs(self.targetPath, exist_ok=True)
     framesFold=os.path.join(self.targetPath,self.framesLocalFold)
     os.makedirs(framesFold, exist_ok=True)
@@ -814,6 +845,9 @@ class dataImport():
         print("targetFileName:"+tragetFileName)
         print("inputPatter:"+inputPattern)
         if self.__chkFileExists(file_path,existingFiles)==False:
+            if self.relcompPrefix:
+                file_nameBase=os.path.splitext(os.path.splitext(file_name)[0])[0]+".mdoc"
+                tragetFileName=os.path.join(targetFold,self.prefix+file_nameBase)
             self.__adaptMdoc(self.prefix,file_path,tragetFileName)
     
     nrFilesTotalImported=len(glob.glob(targetFold + "/*" + os.path.splitext(inputPattern)[1]));
@@ -830,7 +864,11 @@ class dataImport():
             lineTmp=line.replace("SubFramePath = \\","")
             lineTmp=line.replace("SubFramePath =","")
             lineTmp=os.path.basename(lineTmp.replace('\\',"/"))
-            lines[i] = "SubFramePath = " + prefix + lineTmp
+            if self.relcompPrefix:
+              baseName=os.path.splitext(os.path.splitext(inputMdoc)[0])[0]
+              lines[i] = "SubFramePath = " + baseName + prefix + lineTmp
+            else:
+              lines[i] = "SubFramePath = " + prefix + lineTmp
       
       lines.append("CryoBoost_RootMdocPath = " + os.path.abspath(inputMdoc) + "\n")       
       with open(outputMdoc, 'w') as file:
@@ -840,9 +878,17 @@ class dataImport():
     
     #print("targetWk:" + targetFold + "/*." + os.path.splitext(inputPattern)[1])
     nrFilesAlreadyImported=len(glob.glob(targetFold + "/*" + os.path.splitext(inputPattern)[1]));
-    for file_path in glob.glob(inputPattern):
+    dftmp = self.mdoc.all_df['SubFramePath'].apply(lambda x: x.replace('\\', '/'))
+    framesFromMdoc = [os.path.join(os.path.dirname(inputPattern), os.path.basename(x)) for x in dftmp]
+   
+    #for file_path in glob.glob(inputPattern):
+    for file_path in framesFromMdoc:
         file_name = os.path.basename(file_path)
         tragetFileName = os.path.join(targetFold,self.prefix+file_name)
+        if self.relcompPrefix:
+            mdoc_file = self.mdoc.all_df[self.mdoc.all_df['SubFramePath'].str.contains(file_name, case=False)]['mdocFileName'].iloc[0]
+            mdoc_file = os.path.splitext(os.path.splitext(str(mdoc_file))[0])[0]
+            tragetFileName = os.path.join(targetFold,self.prefix+mdoc_file+file_name)
         if self.__chkFileExists(os.path.abspath(file_path),existingFiles)==False:
           try:
              os.symlink(os.path.abspath(file_path),tragetFileName)
@@ -1285,7 +1331,12 @@ class tiltSeriesMeta:
       self.tsInfo.allUnique=self.tsInfo.allUnique and len(unique_directories)==1 and len(unique_extensions)==1
       self.tsInfo.frameFold=unique_directories[0]
       self.tsInfo.frameExt=unique_extensions[0]
-      self.tsInfo.expPerTilt=self.all_tilts_df["rlnMicrographPreExposure"].drop_duplicates().sort_values().iloc[1]
+      
+      if len(self.all_tilts_df["rlnMicrographPreExposure"].drop_duplicates())>1:
+        self.tsInfo.expPerTilt=self.all_tilts_df["rlnMicrographPreExposure"].drop_duplicates().sort_values().iloc[1]
+      else:
+        self.tsInfo.expPerTilt=self.all_tilts_df["rlnMicrographPreExposure"].drop_duplicates().sort_values().iloc[0]
+      
       self.tsInfo.numTiltSeries=self.tilt_series_df.shape[0]
       
       df_attr="rlnMicrographName"
