@@ -137,83 +137,91 @@ class cbconfig:
   
   def getJobComputingParams(self,comReq,doNodeSharing):    
        
-       self.confdata["computing"]["JOBTypes"]
-       confComp=self.confdata["computing"]
-       jobType=None
-       for entry in confComp["JOBTypes"]:
-         for job in confComp["JOBTypes"][entry]:
-            if job == comReq[0]:
-              jobType=entry
-              break
-       
-       if (jobType == None):
-         compParams=None
-         return compParams 
-       
-       partionSetup= self.confdata["computing"][comReq[2]]
-       kMPIperNode=self.get_alias_reverse(comReq[0],"MPIperNode")
-       kNrGPU=self.get_alias_reverse(comReq[0],"NrGPU")
-       kNrNodes=self.get_alias_reverse(comReq[0],"NrNodes")
-       kPartName=self.get_alias_reverse(comReq[0],"PartionName")
-       kMemory=self.get_alias_reverse(comReq[0],"MemoryRAM")
-       compParams={}
-       compParams[kPartName]=comReq[2]
-       compParams[kMemory]=partionSetup["RAM"]
-       NodeSharing= self.confdata["computing"]["NODE-Sharing"]
-       if (doNodeSharing and (comReq[2] in NodeSharing["ApplyTo"])):
-         compParams[kMemory]=str(round(int(partionSetup["RAM"][:-1])/2))+"G"
-       gpuIDString=":".join(str(i) for i in range(0,partionSetup["NrGPU"]))
-       maxNodes= self.confdata["computing"]["JOBMaxNodes"]
-       
-      
-       if (comReq[0] in maxNodes.keys()):  
-          if (comReq[1]>maxNodes[comReq[0]][0]):
-              comReq[1]=maxNodes[comReq[0]][0]
-       
-       if (jobType == "CPU-MPI"):
-         compParams[kMPIperNode]=partionSetup["NrCPU"]
-         compParams["nr_mpi"]=partionSetup["NrCPU"]*comReq[1]  
-         compParams[kNrGPU]=0
-         compParams[kNrNodes]=comReq[1] 
-         compParams["nr_threads"]=1
-         if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
-            compParams[kMPIperNode]=partionSetup["NrCPU"]-(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"]) 
-            compParams["nr_mpi"]=compParams[kMPIperNode]*comReq[1]
-            
-       if (jobType == "CPU-2MPIThreads"):
-         compParams[kMPIperNode]=2
-         compParams["nr_mpi"]=compParams[kMPIperNode]*comReq[1]  
-         compParams[kNrGPU]=0
-         compParams[kNrNodes]=comReq[1] 
-         compParams["nr_threads"]=round(partionSetup["NrCPU"]/2)
-         if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
-            compParams["nr_threads"]=compParams["nr_threads"]-round(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"]/2)
-       
-       if (jobType == "GPU-OneProcess") or (jobType == "GPU-OneProcessOneGPU"):
-         compParams[kMPIperNode]=1
-         compParams["nr_mpi"]=1  
-         compParams[kNrGPU]=partionSetup["NrGPU"]
-         compParams[kNrNodes]=1
-         compParams["nr_threads"]=partionSetup["NrGPU"]
-         compParams["gpu_ids"]=gpuIDString
-       
-       if (jobType == "GPU-OneProcessOneGPU"):
-         compParams["gpu_ids"]=0
-         compParams[kNrGPU]=1
-       
-       if (jobType == "GPU-ThreadsOneNode"):
-         compParams[kMPIperNode]=1
-         compParams["nr_mpi"]=1  
-         compParams[kNrGPU]=partionSetup["NrGPU"]
-         compParams[kNrNodes]=1 
-         compParams["nr_threads"]=round(partionSetup["NrCPU"]/1)
-         if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
-            compParams["nr_threads"]=compParams["nr_threads"]-round(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"])
-       
-       if comReq[0] in confComp['JOBsPerDevice'].keys():
-          compParams["param10_value"]=confComp['JOBsPerDevice'][comReq[0]][comReq[2]]
+        self.confdata["computing"]["JOBTypes"]
+        confComp=self.confdata["computing"]
+        jobType=None
+        for entry in confComp["JOBTypes"]:
+          for job in confComp["JOBTypes"][entry]:
+              if job == comReq[0]:
+                jobType=entry
+                break
         
-       return compParams 
+        if (jobType == None):
+          compParams=None
+          return compParams 
+        
+        partionSetup= self.confdata["computing"][comReq[2]]
+        kMPIperNode=self.get_alias_reverse(comReq[0],"MPIperNode")
+        kNrGPU=self.get_alias_reverse(comReq[0],"NrGPU")
+        kNrNodes=self.get_alias_reverse(comReq[0],"NrNodes")
+        kPartName=self.get_alias_reverse(comReq[0],"PartionName")
+        kMemory=self.get_alias_reverse(comReq[0],"MemoryRAM")
+        compParams={}
+        compParams[kPartName]=comReq[2]
+        compParams[kMemory]=partionSetup["RAM"]
+        NodeSharing= self.confdata["computing"]["NODE-Sharing"]
+        if (doNodeSharing and (comReq[2] in NodeSharing["ApplyTo"])):
+          compParams[kMemory]=str(round(int(partionSetup["RAM"][:-1])/2))+"G"
+        gpuIDString=":".join(str(i) for i in range(0,partionSetup["NrGPU"]))
+        maxNodes= self.confdata["computing"]["JOBMaxNodes"]
+        
+        
+        if (comReq[0] in maxNodes.keys()):  
+            if (comReq[1]>maxNodes[comReq[0]][0]):
+                comReq[1]=maxNodes[comReq[0]][0]
+        
+        if (jobType == "CPU-MPI"):
+          compParams[kMPIperNode]=partionSetup["NrCPU"]
+          compParams["nr_mpi"]=partionSetup["NrCPU"]*comReq[1]  
+          compParams[kNrGPU]=0
+          compParams[kNrNodes]=comReq[1] 
+          compParams["nr_threads"]=1
+          if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
+              compParams[kMPIperNode]=partionSetup["NrCPU"]-(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"]) 
+              compParams["nr_mpi"]=compParams[kMPIperNode]*comReq[1]
+              
+        if (jobType == "CPU-2MPIThreads"):
+          compParams[kMPIperNode]=2
+          compParams["nr_mpi"]=compParams[kMPIperNode]*comReq[1]  
+          compParams[kNrGPU]=0
+          compParams[kNrNodes]=comReq[1] 
+          compParams["nr_threads"]=round(partionSetup["NrCPU"]/2)
+          if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
+              compParams["nr_threads"]=compParams["nr_threads"]-round(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"]/2)
+        
+        if (jobType == "GPU-OneProcess") or (jobType == "GPU-OneProcessOneGPU"):
+          compParams[kMPIperNode]=1
+          compParams["nr_mpi"]=1  
+          compParams[kNrGPU]=partionSetup["NrGPU"]
+          compParams[kNrNodes]=1
+          compParams["nr_threads"]=partionSetup["NrGPU"]
+          compParams["gpu_ids"]=gpuIDString
+        
+        if (jobType == "GPU-OneProcessOneGPU"):
+          compParams["gpu_ids"]=0
+          compParams[kNrGPU]=1
+        
+        if (jobType == "GPU-ThreadsOneNode"):
+          compParams[kMPIperNode]=1
+          compParams["nr_mpi"]=1  
+          compParams[kNrGPU]=partionSetup["NrGPU"]
+          compParams[kNrNodes]=1 
+          compParams["nr_threads"]=round(partionSetup["NrCPU"]/1)
+          if (doNodeSharing and comReq[2] in NodeSharing["ApplyTo"]):
+              compParams["nr_threads"]=compParams["nr_threads"]-round(partionSetup["NrGPU"]*NodeSharing["CPU-PerGPU"])
+        
+        if (jobType == "GPU-MultProcess"):
+          compParams[kMPIperNode]=partionSetup["NrGPU"]
+          compParams[kNrGPU]=partionSetup["NrGPU"]
+          compParams["nr_mpi"]=partionSetup["NrGPU"]*comReq[1]  
+          compParams["nr_threads"]=1
+          compParams["gpu_ids"]= ":".join([gpuIDString] * comReq[1]) 
+          compParams[kNrNodes]=comReq[1]
+              
+        if comReq[0] in confComp['JOBsPerDevice'].keys():
+            compParams["param10_value"]=confComp['JOBsPerDevice'][comReq[0]][comReq[2]]
+          
+        return compParams 
         
   def get_alias(self,job, parameter):
     """

@@ -1021,7 +1021,11 @@ class MainUI(QMainWindow):
         try:
             mdoc=mdocMeta(self.line_path_mdocs.text())
             self.textEdit_pixelSize.setText(str(mdoc.param4Processing["PixelSize"]))
-            self.textEdit_dosePerTilt.setText(str(mdoc.param4Processing["DosePerTilt"]))
+            dosePerTilt=mdoc.param4Processing["DosePerTilt"]
+            if dosePerTilt<0.1 or dosePerTilt > 9:
+                print("dose per tilt from mdoc out of range setting to 3")
+                dosePerTilt=3.0
+            self.textEdit_dosePerTilt.setText(str(dosePerTilt))
             self.textEdit_nomTiltAxis.setText(str(mdoc.param4Processing["TiltAxisAngle"]))
             self.textEdit_recTomosize.setText(str(mdoc.param4Processing["ImageSize"])+str("x2048"))
             line_edits = self.tabWidget.findChildren(QLineEdit, "line_path_partRecPixS")
@@ -1083,7 +1087,8 @@ class MainUI(QMainWindow):
         mdocList=glob.glob(wk_mdocs)
         pref=self.line_path_crImportPrefix.text()
         mdocList=[mdoc for mdoc in mdocList]# if pref in mdoc]
-        tomoNames=[pref+os.path.splitext(os.path.basename(path))[0].replace(".st","") for path in mdocList]
+        #tomoNames=[pref+os.path.splitext(os.path.basename(path))[0].replace(".st","") for path in mdocList]
+        tomoNames=[pref+os.path.splitext(os.path.splitext(os.path.basename(path))[0])[0] for path in mdocList]
         if len(tomoNames)<3:
             nTomo=len(tomoNames)
         else:
@@ -1119,10 +1124,11 @@ class MainUI(QMainWindow):
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 
     
     def setPathGainToJobTap(self):
+        
         params_dict = {"fn_gain_ref": self.line_path_gain.text()} 
         self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
         params_dict = {"param2_value": self.line_path_gain.text()} 
-        self.setParamsDictToJobTap(params_dict,["fs_motion_and_ctf"]) 
+        self.setParamsDictToJobTap(params_dict,["fsMotionAndCtf"]) 
         
     
     def setGainRotToJobTap(self):
@@ -1197,7 +1203,9 @@ class MainUI(QMainWindow):
             self.setParamsDictToJobTap(params_dict,["reconstructionsplit"])
             self.setParamsDictToJobTap(params_dict,["reconstructionfull"])
         if "tsReconstruct" in self.cbdat.scheme.jobs_in_scheme.values: 
-            params_dict = {"param1_value": self.textEdit_recTomosize.toPlainText()} 
+            tomoSz=self.textEdit_recTomosize.toPlainText().split("x")
+            tomoSz=str(tomoSz[1])+"x"+str(tomoSz[0])+"x"+str(tomoSz[2])
+            params_dict = {"param1_value": tomoSz} 
             self.setParamsDictToJobTap(params_dict,["aligntiltsWarp"])
 
         
@@ -1330,9 +1338,8 @@ class MainUI(QMainWindow):
            applyToJobs = list(self.cbdat.scheme.jobs_in_scheme)
         idxOrg=self.tabWidget.currentIndex()
         
-        
         for current_tab in self.cbdat.scheme.jobs_in_scheme:
-            print(current_tab in applyToJobs)
+            #print(current_tab in applyToJobs)
             if current_tab in applyToJobs:
                 index_import = self.cbdat.scheme.jobs_in_scheme[self.cbdat.scheme.jobs_in_scheme == current_tab].index
                 self.tabWidget.setCurrentIndex(index_import.item()+self.jobTapNrSetUpTaps-1)
