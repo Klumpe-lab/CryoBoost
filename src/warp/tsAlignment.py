@@ -1,9 +1,11 @@
 
 import os,subprocess,shlex,sys
 import numpy as np
+import pandas as pd
 from src.rw.librw import tiltSeriesMeta,warpMetaData,starFileMeta
 from src.misc.system import run_wrapperCommand
 from src.warp.libWarp import warpWrapperBase
+
 
 class tsAlignment(warpWrapperBase):
     def __init__(self,args,runFlag=None):
@@ -94,9 +96,9 @@ class tsAlignment(warpWrapperBase):
            
         else:
             command=["WarpTools", "ts_etomo_patches",
-                    "--settings", tsFold + "/" + self.tsSettingsName,
+                    "--settings",self.args.out_dir + "/" + self.tsSettingsName,
                     "--angpix",str(self.args.rescale_angpixs),
-                    "--patch_size",str(self.args.imod_patch_size_and_overlap.split(":")[0]),
+                    "--patch_size",str(float(self.args.imod_patch_size_and_overlap.split(":")[0])*10),
                     ]
         
         self.result=run_wrapperCommand(command,tag="run_tsAlignment",relionProj=self.relProj)
@@ -115,18 +117,22 @@ class tsAlignment(warpWrapperBase):
             keysRel = [os.path.basename(path) for path in stTilt.df['rlnMicrographMovieName']]
             if self.args.alignment_program=="Aretomo":
                 AreAlnFile=self.args.out_dir+"warp_tiltseries/tiltstack/" + tsID + os.path.sep + tsID + ".st.aln"
-                #aln=np.loadtxt(AreAlnFile)
                 aln=self.readAretomoAlgFile(AreAlnFile)
-                aln = aln[aln[:, 0].argsort()]
-                for index, row in tomoStar.df.iterrows():
-                    keyTomo=os.path.basename(row['wrpMovieName'])
-                    position = keysRel.index(keyTomo)
-                    stTilt.df.at[position,'rlnTomoXTilt']=0
-                    stTilt.df.at[position,'rlnTomoYTilt']=multTiltAngle*aln[index,9]
-                    stTilt.df.at[position,'rlnTomoZRot']=aln[index,1]        
-                    stTilt.df.at[position,'rlnTomoXShiftAngst']=aln[index,3]*pixSA
-                    stTilt.df.at[position,'rlnTomoYShiftAngst']=aln[index,4]*pixSA
-                stTilt.writeStar(self.args.out_dir+"/tilt_series/"+tsID+".star")
+            else:
+                ImodXfFile=self.args.out_dir+"warp_tiltseries/tiltstack/" + tsID + os.path.sep + tsID + ".xf"
+                ImodTltFile=self.args.out_dir+"warp_tiltseries/tiltstack/" + tsID + os.path.sep + tsID + ".tlt"
+                aln=self.readImodXfAndTiltsFile(ImodXfFile,ImodTltFile)
+                                    
+            aln = aln[aln[:, 0].argsort()]
+            for index, row in tomoStar.df.iterrows():
+                keyTomo=os.path.basename(row['wrpMovieName'])
+                position = keysRel.index(keyTomo)
+                stTilt.df.at[position,'rlnTomoXTilt']=0
+                stTilt.df.at[position,'rlnTomoYTilt']=multTiltAngle*aln[index,9]
+                stTilt.df.at[position,'rlnTomoZRot']=aln[index,1]        
+                stTilt.df.at[position,'rlnTomoXShiftAngst']=aln[index,3]*pixSA
+                stTilt.df.at[position,'rlnTomoYShiftAngst']=aln[index,4]*pixSA
+            stTilt.writeStar(self.args.out_dir+"/tilt_series/"+tsID+".star")
             
         stTomo=starFileMeta(self.args.out_dir+"/aligned_tilt_series.star")
         stTomo.df['rlnTomoSizeX']=int(self.args.tomo_dimensions.split("x")[0])
@@ -135,17 +141,6 @@ class tsAlignment(warpWrapperBase):
         stTomo.df['rlnTomoTiltSeriesPixelSize']=float(self.st.tilt_series_df.rlnMicrographOriginalPixelSize.iloc[0])
         stTomo.writeStar(self.args.out_dir+"/aligned_tilt_series.star")
 
-        
-        # self.st.writeTiltSeries(self.args.out_dir+"/aligned_tilt_series.star")
-        # for tsStarName in self.st.tilt_series_df.rlnTomoTiltSeriesStarFile:
-        #     tsStar=starFileMeta(tsStarName)
-        
-        # stTomo=starFileMeta(self.args.out_dir+"/aligned_tilt_series.star")
-        # stTomo.df['rlnTomoSizeX']=int(self.args.tomo_dimensions.split("x")[0])
-        # stTomo.df['rlnTomoSizeY']=int(self.args.tomo_dimensions.split("x")[1])
-        # stTomo.df['rlnTomoSizeZ']=int(self.args.tomo_dimensions.split("x")[2])
-        # stTomo.df['rlnTomoTiltSeriesPixelSize']=float(self.st.tilt_series_df.rlnMicrographOriginalPixelSize)
-        # stTomo.writeStar(self.args.out_dir+"/aligned_tilt_series.star")
          
     def checkResults(self):
         #check if important results exists and values are in range
@@ -167,6 +162,40 @@ class tsAlignment(warpWrapperBase):
                         continue
         data = np.array(data)
         return data
+    
+    def readImodXfAndTiltsFile(self,pathXF,pathTlt):
+        df1 = pd.read_csv(pathXF, delim_whitespace=True, header=None, 
+                        names=['m1', 'm2', 'm3', 'm4', 'tx', 'ty'])
+
+        df2 = pd.read_csv(pathTlt, delim_whitespace=True, header=None, 
+                        names=['tilt_angle'])
+
+        combined = pd.concat([df1, df2], axis=1)
+
+        results_x = []
+        results_y = []
+        titlAng = []
+        for index, row in combined.iterrows():
+            M = np.array([[row['m1'], row['m2']],
+                        [row['m3'], row['m4']]])
+            M = np.linalg.inv(M)
+            v = np.array([row['tx'], row['ty']])
+            v*=-1
+            result = np.dot(M, v)
+            angle = np.degrees(np.arctan2(M[1,0], M[0,0]))
+            results_x.append(result[0])
+            results_y.append(result[1])
+            titlAng.append(angle)
+        combined['Vrot_x'] = results_x
+        combined['Vrot_Y'] = results_y
+        dataNpArray = np.zeros((index+1,10))
+        dataNpArray[:,0] = np.arange(0,index+1)
+        dataNpArray[:,1] = titlAng
+        dataNpArray[:,3] = results_x
+        dataNpArray[:,4]= results_y
+        dataNpArray[:,9]= combined['tilt_angle']
+        return dataNpArray
+    
     # wm=warpMetaData(self.args.out_dir+"/warp_tiltseries/*.xml")
     #     for index, row in self.st.all_tilts_df.iterrows():
     #         key=self.st.all_tilts_df.at[index,'cryoBoostKey']
