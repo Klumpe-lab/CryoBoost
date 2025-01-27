@@ -16,8 +16,8 @@ loop_
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
    binning          1 
-  box_size        256 
- crop_size        128  
+  box_size        512 
+ crop_size        256  
 do_float16        Yes 
 do_stack2d        Yes 
 use_direct_entries        No 

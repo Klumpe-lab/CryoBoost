@@ -99,7 +99,7 @@ def resize_by_fourier_cropping(image_array, new_shape):
     return resized_image_array
 
 
-def mrc_to_pil_image_parallel(mrc_path_sz):
+def mrc_to_pil_image_parallel(mrc_path_sz_pngOutputFold):
     """
     Convert an MRC file to a PIL Image object. This function is designed to be called in parallel.
     
@@ -109,10 +109,17 @@ def mrc_to_pil_image_parallel(mrc_path_sz):
     Returns:
     - A PIL Image object.
     """
-    mrc_path, sz,ignoreNonSquare = mrc_path_sz
+    mrc_path, sz,ignoreNonSquare,pngOutputFold = mrc_path_sz_pngOutputFold
     with mrcfile.open(mrc_path, permissive=True) as mrc:
         image_array = mrc.data
-        
+        # print("in mrc paralell:" + pngOutputFold)
+        if pngOutputFold is not None:
+            image_array_tmp = (image_array - image_array.min()) / (image_array.max() - image_array.min())
+            image_array_tmp = (image_array_tmp * 255).astype(np.uint8)
+            namepng = os.path.splitext(os.path.basename(mrc_path))[0]
+            Image.fromarray(image_array_tmp).save(pngOutputFold+os.path.sep+namepng+".png")
+
+            
         ratio=max(image_array.shape)/min(image_array.shape)
         imgIsNonSquare=min(image_array.shape)!=max(image_array.shape)
         
@@ -131,6 +138,17 @@ def mrc_to_pil_image_parallel(mrc_path_sz):
             #image_array = resize(image_array, (sz, round(sz*ratio)), anti_aliasing=True)
         else:
             image_array=resize_by_fourier_cropping(image_array,[sz,sz])
+    
+        if pngOutputFold is not None:
+            if imgIsNonSquare:
+                image_array_tmp = resize_by_fourier_cropping(image_array,[sz,round(sz*ratio)])
+            else:
+                image_array_tmp = image_array
+            image_array_tmp = (image_array_tmp - image_array_tmp.min()) / (image_array_tmp.max() - image_array_tmp.min())
+            image_array_tmp = (image_array_tmp * 255).astype(np.uint8)
+            namepng = os.path.splitext(os.path.basename(mrc_path))[0]
+            Image.fromarray(image_array_tmp).save(pngOutputFold+os.path.sep+namepng+".png")
+        
             
         image_array = (image_array - image_array.mean())
         if image_array.std() != 0:
@@ -162,7 +180,7 @@ def mrc_to_pil_image_parallel(mrc_path_sz):
            
             return pil1,pil2
 
-def mrcFilesToPilImageStackParallel(mrcFiles, sz, max_workers=20,ignoreNonSquare=0):
+def mrcFilesToPilImageStackParallel(mrcFiles, sz, max_workers=20,ignoreNonSquare=0,pngOutputPath=None):
     """
     Convert MRC files to PIL Image objects in parallel.
     
@@ -175,7 +193,7 @@ def mrcFilesToPilImageStackParallel(mrcFiles, sz, max_workers=20,ignoreNonSquare
     """
     
     with ProcessPoolExecutor(max_workers) as executor:
-        pil_images = list(executor.map(mrc_to_pil_image_parallel, [(mrc_path, sz,ignoreNonSquare) for mrc_path in mrcFiles]))
+        pil_images = list(executor.map(mrc_to_pil_image_parallel, [(mrc_path, sz,ignoreNonSquare,pngOutputPath) for mrc_path in mrcFiles]))
     return pil_images
 
 
@@ -198,7 +216,7 @@ def predictPilImageStack(pilImageStack,learn):
     return pred_labels,pred_probs
     
 
-def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,probThr=0.1,probAction="assingToGood",max_workers=20):
+def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,probThr=0.1,probAction="assingToGood",max_workers=20,pngOutPutPath=None):
     """
     Predict the class of a PIL image stack using a fastai learner.
 
@@ -231,8 +249,9 @@ def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,probThr=0.1,probAction="ass
     all_pLabels = []
     all_pProb = []
     
+   
     for i, batch in enumerate(tqdm(batches, desc="Predicting Tilts"), 1):
-        pilImageBatch=mrcFilesToPilImageStackParallel(batch,sz,max_workers)
+        pilImageBatch=mrcFilesToPilImageStackParallel(batch,sz,max_workers,ignoreNonSquare=0,pngOutputPath=pngOutPutPath)
         
         if isinstance(pilImageBatch[0], tuple):
             ib0=[]
@@ -261,6 +280,7 @@ def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,probThr=0.1,probAction="ass
         all_pLabels.extend(pLables)
         all_pProb.extend(pProb)
     
+    png_list = [pngOutPutPath + os.path.sep + os.path.splitext(os.path.basename(x))[0] + '.png' for x in ts.all_tilts_df['rlnMicrographName']]
     for i, p in enumerate(all_pProb):
         if (p < float(probThr)):
             if (probAction=="assignToGood"):
@@ -271,7 +291,8 @@ def predict_tilts(ts,model,sz=384,batchSize=50,gpu=0,probThr=0.1,probAction="ass
     df = pd.DataFrame({
     'cryoBoostDlLabel': all_pLabels,
     'cryoBoostDlProbability': all_pProb,
-    'cryoBoostKey': tiltspath
+    'cryoBoostKey': tiltspath,
+    'cryoBoostPNG': png_list
     })
     
     ts.addColumns(df)

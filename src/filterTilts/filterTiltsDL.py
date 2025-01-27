@@ -7,10 +7,14 @@ def filterTiltsDL(ts,model,clmethod,outputFolder,plot=None,probThr=0.1,probActio
         from src.deepLearning.predictTilts_Binary import predict_tilts
         if (model=="default"):
             model=os.getenv("CRYOBOOST_HOME")+"/data/models/model.pkl"
-        ts=predict_tilts(ts,model,batchSize=60,gpu=0,probThr=probThr,probAction=probAction,max_workers=threads)
+        pngOut=outputFolder+os.path.sep +"png/"
+        print("generating pngs from manual sorting " + pngOut)
+        os.makedirs(pngOut, exist_ok=True)
+        ts=predict_tilts(ts,model,batchSize=60,gpu=0,probThr=probThr,probAction=probAction,max_workers=threads,pngOutPutPath=pngOut)
         
     if (clmethod=="oneclass"):    
         assert("not implemented yet")
+   
     
     try:
         plotFilterTiltsResults(ts,outputFolder,classLabelName="cryoBoostDlLabel",predScoreLabelName="cryoBoostDlProbability",titlNameLabel="cryoBoostKey",plot=1,threads=threads)
