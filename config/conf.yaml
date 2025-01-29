@@ -4,7 +4,7 @@
 # Parameter = original name (as in job.star file)
 # Alias = new parameter name that should be displayed
 submission:
-  - HeadNode: hpcl8001
+  - HeadNode: hpcl8001 
     SshCommand: "ssh -X"
     Environment: "module purge;module load intel/18.0.5;module load impi/2018.4;module load RELION/5.0.0NC;module load WARP/2.0.0dev29; source /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/.cbenv"
     CalusterStatus: sinfo
@@ -67,6 +67,7 @@ star_file:
   ctffind: ctffind/tilt_series_ctf.star
   analysetilts: feature_analysis/feature_analysis.star
   filtertilts: filtertilts/tiltseries_filtered.star
+  filtertiltsInter: filtertilts/tiltseries_filtered.star
   aligntilts: aligntilts/aligned_tilt_series.star
   reconstructionsplit: reconstructionsplit/tomograms.star
   reconstructionfull: reconstructionfull/tomograms.star

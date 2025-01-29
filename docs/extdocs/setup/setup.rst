@@ -32,7 +32,7 @@ Install dependencies
    pip install scikit-learn scikit-image
    #for local documentation use (optional)
    conda install sphinx sphinx_rtd_theme
-
+   pip install napari     
 
 Test torch and fastai installation
 ==================================

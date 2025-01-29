@@ -38,9 +38,12 @@ class pipe:
     schemeName=self.scheme.scheme_star.dict['scheme_general']['rlnSchemeName']
     schemeName=os.path.basename(schemeName.strip(os.path.sep)) #remove path from schemeName
     schemeLockFile=".relion_lock_scheme_" + schemeName + os.path.sep  + "lock_scheme"
-    relSchemeStart="export TERM=xterm;(relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid)'
+    relSchemeStart="export TERM=xterm;(relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid)' # working
+    #relSchemeStart="export TERM=xterm;{relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid}' 
+    #relSchemeStart="export TERM=xterm;relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid'
+    #relSchemeStart = "export TERM=xterm; { relion_schemer --scheme " + schemeName + " --run --verb 2 & pid=$!; echo $pid > Schemes/" + schemeName + "/scheme.pid; }"
     #waitFor=';sleep 2; while ps -p \`cat Schemes/' + schemeName + '/scheme.pid\` > /dev/null 2>&1;do sleep 4;done;sleep 2'
-    waitFor=";sleep 1"
+    waitFor=";sleep 200"
    
     self.schemeLockFile=schemeLockFile
     self.schemeName=schemeName
@@ -104,7 +107,8 @@ class pipe:
     self.generatCrJobLog("manageWorkflow","  " + self.commandSchemeStart + "\n")
     p=run_command_async(self.commandSchemeStart)
     #p=run_command(self.commandSchemeStart)
- 
+   
+    
   def runSchemeSync(self):
     p=run_command(self.commandSchemeStart)
    

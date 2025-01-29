@@ -49,6 +49,7 @@ motioncorr motioncorr   continue            0
 ctffind    ctffind   continue            0 
 aligntilts aligntilts   continue            0 
 filtertilts filtertilts   continue            0 
+filtertiltsInter filtertiltsInter   continue            0
 reconstructionsplit reconstructionsplit   continue            0 
 denoisetrain    denoisetrain    continue        0      
 denoisepredict    denoisepredict    continue        0 
@@ -72,7 +73,8 @@ EXIT_maxtime importmovies            0  undefined  undefined
 importmovies motioncorr            0  undefined  undefined 
 motioncorr   ctffind            0  undefined  undefined 
 ctffind      filtertilts            0  undefined  undefined 
-filtertilts aligntilts            0  undefined  undefined 
+filtertilts  filtertiltsInter       0 undefined undefined 
+filtertiltsInter  aligntilts            0  undefined  undefined 
 aligntilts reconstructionsplit            0  undefined  undefined 
 reconstructionsplit  denoisetrain            0  undefined  undefined 
 denoisetrain    denoisepredict                    0 undefined undefined

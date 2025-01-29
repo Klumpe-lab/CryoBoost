@@ -14,7 +14,7 @@ data_joboptions_values
 loop_ 
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
-in_tiltseries Schemes/relion_tomo_prep/filtertilts/tiltseries_filtered.star 
+in_tiltseries Schemes/relion_tomo_prep/filtertiltsInter/tiltseries_filtered.star 
 do_imod_fiducials         No 
 fiducial_diameter         10 
 do_imod_patchtrack         No 

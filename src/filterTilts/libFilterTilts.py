@@ -1,15 +1,15 @@
 from src.rw.librw import tiltSeriesMeta
 from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageStackParallel
 from src.rw.librw import mdocMeta
-import os,shutil
+import os,shutil,copy
 
 #TODO This has to an object !
 
 
 def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None,probThr=0.1,probAction="assingToGood",threads=24,mdocWk=None):
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
-    if os.path.exists(outputFolder+"tiltseries_filtered.star"):
-         tsExist=tiltSeriesMeta(outputFolder+"tiltseries_filtered.star")
+    if os.path.exists(outputFolder+"tiltseries_labeled.star"):
+         tsExist=tiltSeriesMeta(outputFolder+"tiltseries_labeled.star")
          ts.reduceToNonOverlab(tsExist)
          if len(ts.tilt_series_df)==0:
              return
@@ -17,18 +17,28 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
     
     #plotTiltStat(ts,outputFolder)
     threads=int(threads)
-    if (pramRuleFilter!=None):
+    if pramRuleFilter!=None:
         from src.filterTilts.filterTiltsRule import filterTiltsRule
         ts=filterTiltsRule(ts,pramRuleFilter,plot)
 
-    if (model!=None):
+    if model!=None:
         from src.filterTilts.filterTiltsDL import filterTiltsDL
         ts=filterTiltsDL(ts,model,'binary',outputFolder,plot,probThr,probAction,threads)
+        print("replace by criteria")
+        dlFailure=False
     
-    if os.path.exists(outputFolder+"tiltseries_filtered.star"):
+    # if (interActiveMode=="onFailure" and dlFailure) or interActiveMode=="always":
+    #     tsLabel=copy.deepcopy(ts)
+    #     ts=filterTiltsInterActive(tsLabel,outputFolder)
+     
+    if os.path.exists(outputFolder+"tiltseries_labeled.star"):
         tsExist.mergeTiltSeries(ts)
         ts=tsExist
     
+    ts.writeTiltSeries(outputFolder+"tiltseries_labeled.star","tilt_seriesLabel")
+    
+    filterParams = {"cryoBoostDlLabel": ("good")}
+    ts.filterTilts(filterParams)
     ts.writeTiltSeries(outputFolder+"tiltseries_filtered.star")
 
     preExpFolder=os.path.dirname(tilseriesStar)
