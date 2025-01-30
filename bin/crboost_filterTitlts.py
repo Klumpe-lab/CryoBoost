@@ -37,7 +37,6 @@ def main():
     
     filterTitls(args.in_mics,relionProj='',pramRuleFilter=filterParams,model=args.model,plot=None,outputFolder=args.out_dir,probThr=args.probThr,probAction=args.probAct,threads=args.threads,mdocWk=args.mdocWk
                 )
-    print("filtering done")
     successName=args.out_dir + "/RELION_JOB_EXIT_SUCCESS"
     with open(successName, 'a'):
         os.utime(successName, None)

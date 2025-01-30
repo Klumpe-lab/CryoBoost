@@ -1,6 +1,7 @@
 from src.rw.librw import tiltSeriesMeta
 from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageStackParallel
 from src.rw.librw import mdocMeta
+import numpy as np
 import os,shutil,copy
 
 #TODO This has to an object !
@@ -24,17 +25,17 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
     if model!=None:
         from src.filterTilts.filterTiltsDL import filterTiltsDL
         ts=filterTiltsDL(ts,model,'binary',outputFolder,plot,probThr,probAction,threads)
-        print("replace by criteria")
-        dlFailure=False
     
-    # if (interActiveMode=="onFailure" and dlFailure) or interActiveMode=="always":
-    #     tsLabel=copy.deepcopy(ts)
-    #     ts=filterTiltsInterActive(tsLabel,outputFolder)
-     
     if os.path.exists(outputFolder+"tiltseries_labeled.star"):
         tsExist.mergeTiltSeries(ts)
         ts=tsExist
-    
+    meanProb=ts.all_tilts_df.cryoBoostDlProbability.mean()
+    meanAngBad=ts.all_tilts_df[ts.all_tilts_df.cryoBoostDlLabel == "bad"].rlnTomoNominalStageTiltAngle.abs().mean()
+    bad_count = (ts.all_tilts_df.cryoBoostDlLabel == "bad").sum()
+    meanAngGood=ts.all_tilts_df[ts.all_tilts_df.cryoBoostDlLabel == "good"].rlnTomoNominalStageTiltAngle.abs().mean()
+    if np.isnan(meanAngBad):
+        meanAngBad=180
+        
     ts.writeTiltSeries(outputFolder+"tiltseries_labeled.star","tilt_seriesLabel")
     
     filterParams = {"cryoBoostDlLabel": ("good")}
@@ -52,7 +53,22 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
         mdoc.filterByTiltSeriesStarFile(outputFolder+"tiltseries_filtered.star")
         print("  filtered mdoc has " + str(len(mdoc.all_df)) + " tilts")
         mdoc.writeAllMdoc(outputFolder+"/mdoc")    
-
+    
+    
+    if meanProb<0.9 or meanAngGood<meanAngBad-2:
+        print("Removal of bad tilts successful")
+        with open(outputFolder+'DATA_IN_DISTRIBUTION', 'w') as f:
+            pass
+    else:
+        print("WARNINIG data out of distribution you should sort manual")
+        with open(outputFolder+'DATA_OUT_OF_DISTRIBUTION', 'w') as f:
+            pass
+    print("  Average Prediction Probability: " + str(round(meanProb,2)) + "% (should be > 0.9)")
+    print("  Percentage of bad tilts: " + str(bad_count/len(ts.all_tilts_df)) )
+    meanAngBad="n.d" if int(meanAngBad) == 180 else str(meanAngBad)
+    print("  Mean Angle of good tilts: " + str(meanAngGood) + " Mean Angle of bad tilts: " + meanAngBad)
+        
+    
 def getDataFromPreExperiment(sourceFolder,targetFolder):
     fsFolderSource=os.path.abspath(sourceFolder+os.path.sep+"warp_frameseries")
     fsFolderTarget=os.path.abspath(targetFolder+os.path.sep+"warp_frameseries")

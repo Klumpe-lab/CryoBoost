@@ -43,7 +43,7 @@ class pipe:
     #relSchemeStart="export TERM=xterm;relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid'
     #relSchemeStart = "export TERM=xterm; { relion_schemer --scheme " + schemeName + " --run --verb 2 & pid=$!; echo $pid > Schemes/" + schemeName + "/scheme.pid; }"
     #waitFor=';sleep 2; while ps -p \`cat Schemes/' + schemeName + '/scheme.pid\` > /dev/null 2>&1;do sleep 4;done;sleep 2'
-    waitFor=";sleep 200"
+    waitFor=";sleep 259200" #keep the ssh for 3 days in case of manual sorting
    
     self.schemeLockFile=schemeLockFile
     self.schemeName=schemeName

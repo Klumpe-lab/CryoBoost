@@ -47,7 +47,7 @@ class BatchViewer:
             self.ts=tiltSeriesMeta(inputTiltseries)
         else:
             self.ts=inputTiltseries
-        
+        self.ts.all_tilts_df = self.ts.all_tilts_df.sort_values(by='cryoBoostDlProbability', ascending=True)    
         self.df_full = self.ts.all_tilts_df
         self.df = self.df_full.copy()  # Working copy to enable batching without losing rest
         self.batch_size = batch_size
@@ -83,6 +83,7 @@ class BatchViewer:
         # Create checkbox to filter only removed images
         self.only_removed_check = QCheckBox('Only show titls that would be removed')
         self.only_removed_check.stateChanged.connect(self.checkbox_ticked)
+        self.only_removed_check.setEnabled(False)
         #self.only_removed_check.setChecked(True) #Have it be checked at start
         layout.addWidget(self.only_removed_check)
         
@@ -92,6 +93,7 @@ class BatchViewer:
         unique_values = self.df_full['rlnTomoName'].unique()
         self.tilt_series_dropdown.addItems([str(x) for x in unique_values])
         self.tilt_series_dropdown.currentTextChanged.connect(self.filter_by_tiltseries)
+        self.tilt_series_dropdown.setEnabled(False)
         layout.addWidget(self.tilt_series_dropdown)
 
         # Create labels with probability range of batch
@@ -152,7 +154,9 @@ class BatchViewer:
         batch_df = self.df.iloc[start_idx:end_idx]
 
         image_layers = []
-
+        import time
+        startT = time.time()
+        print("starting to load batch",flush=True)
         for i, row in batch_df.iterrows():
             img = load_image(row['cryoBoostPNG'])
             # Show each image in the viewer as a separate layer
@@ -164,6 +168,9 @@ class BatchViewer:
                 visible=True 
             )
             image_layers.append(layer)
+        print("batch loaded",flush=True)
+        endT = time.time()
+        print(f"Time taken: {endT - startT} seconds")
 
         n_images = len(image_layers)
         grid_size = int(np.ceil(np.sqrt(n_images))) 
@@ -293,28 +300,17 @@ def filterTiltsInterActive(inputList, output_folder=None,mode="onFailure"):
 
     inputBase=os.path.basename(inputList)
     if inputBase=="tiltseries_filtered.star":
+        inputListOrg=inputList
         inputList=inputList.replace("tiltseries_filtered.star","tiltseries_labeled.star")
-    # print("testing")
-    # import subprocess
-    # process = subprocess.Popen(['glxspheres'])
-    #os.environ['QT_XCB_GL_INTEGRATION'] = 'xcb_glx'
-    #os.environ['QT_QPA_PLATFORM'] = 'xcb'
-    
-    # print("starting napari viewer",flush=True)
-    # import time
-    # time.sleep(1)
-    # #viewer = napari.Viewer()
-    # import subprocess
-    # subprocess.run("/fs/pool/pool-fbeck/projects/4TomoPipe/trainClassifyer/softFastAI/conda3/bin/napari")
-    # print("napari started now sleeping",flush=True)
-    # time.sleep(10)
-    
-    #napari.run()
+        if mode=="Never" or (mode=="onFailure" and os.path.exists(inputList.replace("tiltseries_filtered.star","DATA_IN_DISTRIBUTION"))):
+            print("Skipping manual sort")
+            ts=tiltSeriesMeta(inputListOrg)
+            ts.writeTiltSeries(output_folder+"tiltseries_filtered.star")
+            return   
     print("preparing napari",flush=True)
     viewer = BatchViewer(inputList, output_folder)
-    app = QApplication.instance() # Have to define as a QApplication to connect a function to closing
+    app = QApplication.instance() 
     app.lastWindowClosed.connect(viewer.on_close) 
-    print("starting napari",flush=True)
     napari.run()
 
 if __name__ == '__main__':

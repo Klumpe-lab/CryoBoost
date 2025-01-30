@@ -142,6 +142,7 @@ class MainUI(QMainWindow):
         self.textEdit_pathDenoiseModel.textChanged.connect(self.setPathDenoiseModelToJobTap)
         self.textEdit_modelForFilterTilts.textChanged.connect(self.setmodelForFilterTiltsToJobTap)
         self.textEdit_probThr.textChanged.connect(self.setProbThrToJobTap)
+        self.dropDown_FilterTiltsMode.activated.connect(self.setFilterTiltsModeToJobTap)
         self.textEdit_recVoxelSize.textChanged.connect(self.setRecVoxelSizeToJobTap)
         self.textEdit_recTomosize.textChanged.connect(self.setRecTomosizeToJobTap)
         self.btn_browse_gain.clicked.connect(self.browsePathGain)
@@ -1076,6 +1077,11 @@ class MainUI(QMainWindow):
         params_dict = {"param5_value": self.textEdit_probThr.toPlainText() }
         self.setParamsDictToJobTap(params_dict,applyToJobs="filtertilts")
     
+    def setFilterTiltsModeToJobTap(self,index):
+        params_dict = {"param1_value":  self.dropDown_FilterTiltsMode.currentText()}
+        self.setParamsDictToJobTap(params_dict,applyToJobs="filtertiltsInter")
+
+    
     def setProbBehaveToJobTab(self):
         
         params_dict = {"param6_value": self.dropDown_probThrBehave.currentText() }
@@ -1334,8 +1340,11 @@ class MainUI(QMainWindow):
         Returns:
             None
         """
-        if (applyToJobs == "all"):
+        if applyToJobs == "all":
            applyToJobs = list(self.cbdat.scheme.jobs_in_scheme)
+        if isinstance(applyToJobs, str):
+            applyToJobs = [applyToJobs]
+         
         idxOrg=self.tabWidget.currentIndex()
         
         for current_tab in self.cbdat.scheme.jobs_in_scheme:
