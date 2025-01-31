@@ -58,7 +58,7 @@ microscopes:
   TitanKrios4:
     - flip_tiltseries_hand: "No"  
   TitanKrios3:
-    - flip_tiltseries_hand: "Yes"
+    - flip_tiltseries_hand: "No"
 
 star_file:
 

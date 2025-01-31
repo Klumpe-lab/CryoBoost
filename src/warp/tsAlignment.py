@@ -108,8 +108,10 @@ class tsAlignment(warpWrapperBase):
         
         
         multTiltAngle=-1
-        self.st.writeTiltSeries(self.args.out_dir+"/aligned_tilt_series.star")
+        #self.st.writeTiltSeries(self.args.out_dir+"/aligned_tilt_series.star")
+        os.makedirs(self.args.out_dir+"/tilt_series/", exist_ok=True)
         pixSA=float(self.args.rescale_angpixs)# self.st.tilt_series_df.rlnMicrographOriginalPixelSize[0]
+        tsIDAlgFaild=[]
         for stTiltName in self.st.tilt_series_df.rlnTomoTiltSeriesStarFile:
             stTilt=starFileMeta(stTiltName)
             tsID=os.path.basename(stTiltName.replace(".star",""))
@@ -122,23 +124,30 @@ class tsAlignment(warpWrapperBase):
                 ImodXfFile=self.args.out_dir+"warp_tiltseries/tiltstack/" + tsID + os.path.sep + tsID + ".xf"
                 ImodTltFile=self.args.out_dir+"warp_tiltseries/tiltstack/" + tsID + os.path.sep + tsID + ".tlt"
                 aln=self.readImodXfAndTiltsFile(ImodXfFile,ImodTltFile)
-                                    
-            aln = aln[aln[:, 0].argsort()]
-            for index, row in tomoStar.df.iterrows():
-                keyTomo=os.path.basename(row['wrpMovieName'])
-                position = keysRel.index(keyTomo)
-                stTilt.df.at[position,'rlnTomoXTilt']=0
-                stTilt.df.at[position,'rlnTomoYTilt']=multTiltAngle*aln[index,9]
-                stTilt.df.at[position,'rlnTomoZRot']=aln[index,1]        
-                stTilt.df.at[position,'rlnTomoXShiftAngst']=aln[index,3]*pixSA
-                stTilt.df.at[position,'rlnTomoYShiftAngst']=aln[index,4]*pixSA
-            stTilt.writeStar(self.args.out_dir+"/tilt_series/"+tsID+".star")
+            if aln is None:
+                 tsIDAlgFaild.append(tsID)
+            else:                        
+                aln = aln[aln[:, 0].argsort()]
+                for index, row in tomoStar.df.iterrows():
+                    keyTomo=os.path.basename(row['wrpMovieName'])
+                    position = keysRel.index(keyTomo)
+                    stTilt.df.at[position,'rlnTomoXTilt']=0
+                    stTilt.df.at[position,'rlnTomoYTilt']=multTiltAngle*aln[index,9]
+                    stTilt.df.at[position,'rlnTomoZRot']=aln[index,1]        
+                    stTilt.df.at[position,'rlnTomoXShiftAngst']=aln[index,3]*pixSA
+                    stTilt.df.at[position,'rlnTomoYShiftAngst']=aln[index,4]*pixSA
+                stTilt.writeStar(self.args.out_dir+"/tilt_series/"+tsID+".star")
             
-        stTomo=starFileMeta(self.args.out_dir+"/aligned_tilt_series.star")
+        stTomo=starFileMeta(self.args.in_mics)
         stTomo.df['rlnTomoSizeX']=int(self.args.tomo_dimensions.split("x")[0])
         stTomo.df['rlnTomoSizeY']=int(self.args.tomo_dimensions.split("x")[1])
         stTomo.df['rlnTomoSizeZ']=int(self.args.tomo_dimensions.split("x")[2])
         stTomo.df['rlnTomoTiltSeriesPixelSize']=float(self.st.tilt_series_df.rlnMicrographOriginalPixelSize.iloc[0])
+        stTomo.df = stTomo.df[~stTomo.df['rlnTomoName'].isin(tsIDAlgFaild)]
+        tsFold = self.args.out_dir + os.path.sep + "tilt_series" + os.path.sep
+        stTomo.df = stTomo.df.copy()
+        stTomo.df['rlnTomoTiltSeriesStarFile'] = stTomo.df['rlnTomoTiltSeriesStarFile'].apply(lambda x: os.path.join(tsFold, os.path.basename(x)))
+        stTomo.dict=None
         stTomo.writeStar(self.args.out_dir+"/aligned_tilt_series.star")
 
          
@@ -147,7 +156,9 @@ class tsAlignment(warpWrapperBase):
         #set to 1 of something is missing self.result.returncode
         pass
     def readAretomoAlgFile(self,AreAlnFile):
-
+        if os.path.exists(AreAlnFile)==False:
+            print("Warning: " + AreAlnFile + " not found removing tiltseries from star")
+            return None
         data = []
         with open(AreAlnFile, 'r') as file:
             for line in file:
@@ -164,6 +175,10 @@ class tsAlignment(warpWrapperBase):
         return data
     
     def readImodXfAndTiltsFile(self,pathXF,pathTlt):
+        if os.path.exists(pathXF)==False:
+            print("Warning: " + pathXF + " not found removing tiltseries from star")
+            return None
+        
         df1 = pd.read_csv(pathXF, delim_whitespace=True, header=None, 
                         names=['m1', 'm2', 'm3', 'm4', 'tx', 'ty'])
 

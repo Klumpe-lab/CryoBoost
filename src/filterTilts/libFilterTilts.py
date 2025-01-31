@@ -68,6 +68,8 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
     meanAngBad="n.d" if int(meanAngBad) == 180 else str(meanAngBad)
     print("  Mean Angle of good tilts: " + str(meanAngGood) + " Mean Angle of bad tilts: " + meanAngBad)
         
+
+
     
 def getDataFromPreExperiment(sourceFolder,targetFolder):
     fsFolderSource=os.path.abspath(sourceFolder+os.path.sep+"warp_frameseries")

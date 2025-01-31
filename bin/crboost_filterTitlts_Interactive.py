@@ -23,9 +23,15 @@ def main():
     args,addArg = parse_arguments()
     filterTiltsInterActive(args.in_mics,args.out_dir,args.interActiveMode)
     successName=args.out_dir + "/RELION_JOB_EXIT_SUCCESS"
-    with open(successName, 'a'):
-        os.utime(successName, None)
-    print("done")
+    resultFile=args.out_dir + os.path.sep + "tiltseries_filtered.star"
+    if os.path.exists(resultFile):
+        with open(successName, 'a'):
+            os.utime(successName, None)
+        print("done")
+    else:
+        print('Error ' + resultFile + " not found")
+        print("Restart filter tilts interactive")
+            
 
 if __name__ == '__main__':
     main()

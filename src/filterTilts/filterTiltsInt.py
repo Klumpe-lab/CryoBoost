@@ -1,15 +1,15 @@
 #!/fs/pool/pool-plitzko3/Michael/02-Software/crBoost_tutorial_test/conda3/bin/python
 
 #%%
-import os
+import os,shutil
 import napari
 import pandas as pd
 import numpy as np
 from PIL import Image
 from qtpy.QtWidgets import QPushButton, QVBoxLayout, QWidget, QCheckBox, QApplication, QLabel, QComboBox
 from scipy.ndimage import gaussian_filter
-from src.rw.librw import tiltSeriesMeta
-import os
+from src.rw.librw import tiltSeriesMeta,mdocMeta
+from src.filterTilts.libFilterTilts import getDataFromPreExperiment
 
 
 #%%
@@ -18,35 +18,60 @@ def loadImagesCBinteractive(tilseriesStar,relionProj='',outputFolder=None,thread
     # Sort them by their Probability in ascending order
     ts.all_tilts_df = ts.all_tilts_df.sort_values(by='cryoBoostDlProbability', ascending=True)    
     return ts
+def replace_borders_advanced(image, border_width=1, use_inner_mean=True):
+    # Create a copy of the image
+    img_with_mean_borders = image.copy()
+    
+    if use_inner_mean:
+        # Calculate mean of inner image (excluding borders)
+        mean_value = np.mean(image[border_width:-border_width, border_width:-border_width])
+    else:
+        # Calculate mean of entire image
+        mean_value = np.mean(image)
+    
+    h, w = image.shape
+    
+    # Create border mask
+    mask = np.ones_like(image, dtype=bool)
+    mask[border_width:h-border_width, border_width:w-border_width] = False
+    
+    # Replace borders
+    img_with_mean_borders[mask] = mean_value
+    
+    return img_with_mean_borders
 
 #batchSize=64
 #%% Load images with a Gaussian filter applied
-def load_image(file_name, sigma=1.0):  # sigma controls blur amount
-    # Load and convert to numpy array
-    #img = np.array(Image.open(os.path.join(image_dir, file_name)))
-    #img = ts.all_tilts_df.cryoBoostPNG.loc[file_name]
-    from PIL import Image
-    img = Image.open(file_name)
-    img_filtered = gaussian_filter(img, sigma=sigma)
+def load_image(file_name, sigma=1.1):  # sigma controls blur amount
     
-    # Calculate mean and std
-    mean = np.mean(img_filtered)
-    std = np.std(img_filtered)
-    # Normalize (handle division by zero)
-    if std == 0:
-        img_normalized = img_filtered - mean
-    else:
-        img_normalized = (img_filtered - mean) / std
+    img = Image.open(file_name)
+    img=np.array(img)
+    img = replace_borders_advanced(img, border_width=5, use_inner_mean=True)
+    img=img.astype(np.float32)
+    mean = np.mean(img)
+    std = np.std(img)
+    if std==0:
+        std=1
+    img = (img - mean) / std
+    outlier_mask = img > 4.5
+    img[outlier_mask]=0
+    img = gaussian_filter(img, sigma=sigma)
+    std = np.std(img)
+    if std==0:
+        std=1
+    mean = np.mean(img)
+    img_normalized = (img - mean) / std
         
     return img_normalized
 
 class BatchViewer:
-    def __init__(self,inputTiltseries, output_folder=None, batch_size=64):
+    def __init__(self,inputTiltseries,output_folder=None, batch_size=64,mdocWk="mdoc/*.mdoc"):
         
         if  isinstance(inputTiltseries,str):
             self.ts=tiltSeriesMeta(inputTiltseries)
         else:
             self.ts=inputTiltseries
+        self.inputTiltseries=inputTiltseries
         self.ts.all_tilts_df = self.ts.all_tilts_df.sort_values(by='cryoBoostDlProbability', ascending=True)    
         self.df_full = self.ts.all_tilts_df
         self.df = self.df_full.copy()  # Working copy to enable batching without losing rest
@@ -56,6 +81,7 @@ class BatchViewer:
         self.output_folder = output_folder
         self.viewer = napari.Viewer()
         self.viewer.mouse_drag_callbacks.append(self.on_click)
+        self.mdocWk=mdocWk
         self.setup_navigation()
         self.load_batch(0)
         self.prob_counter()
@@ -67,6 +93,19 @@ class BatchViewer:
         filterParams = {"cryoBoostDlLabel": ("good")}
         self.ts.filterTilts(filterParams)
         self.ts.writeTiltSeries(self.output_folder+"tiltseries_filtered.star")
+        preExpFolder=os.path.dirname(self.inputTiltseries)
+        outputFolder=self.output_folder
+        if os.path.exists(preExpFolder+"/warp_frameseries.settings"):
+            print("Warp frame alignment detected ...getting data from: " + preExpFolder)
+            getDataFromPreExperiment(preExpFolder,outputFolder)
+            os.makedirs(outputFolder+"/mdoc", exist_ok=True)    
+            print("  filtering mdocs: " + self.mdocWk)
+            mdocWk=os.path.dirname(self.mdocWk) + os.path.sep + "*.mdoc"
+            mdoc=mdocMeta(mdocWk)
+            mdoc.filterByTiltSeriesStarFile(outputFolder+"tiltseries_filtered.star")
+            print("  filtered mdoc has " + str(len(mdoc.all_df)) + " tilts")
+            mdoc.writeAllMdoc(outputFolder+"/mdoc")    
+        
     def setup_navigation(self):
         widget = QWidget()
         layout = QVBoxLayout()
@@ -303,9 +342,17 @@ def filterTiltsInterActive(inputList, output_folder=None,mode="onFailure"):
         inputListOrg=inputList
         inputList=inputList.replace("tiltseries_filtered.star","tiltseries_labeled.star")
         if mode=="Never" or (mode=="onFailure" and os.path.exists(inputList.replace("tiltseries_filtered.star","DATA_IN_DISTRIBUTION"))):
-            print("Skipping manual sort")
+            print("Skipping manual sort",flush=True)
             ts=tiltSeriesMeta(inputListOrg)
             ts.writeTiltSeries(output_folder+"tiltseries_filtered.star")
+            if os.path.exists(os.path.dirname(inputListOrg)+"/warp_frameseries.settings"):
+                print("Warp frame alignment detected ...getting data from: " + os.path.dirname(inputListOrg),flush=True)
+                getDataFromPreExperiment(os.path.dirname(inputListOrg),output_folder)
+                mdocFold=os.path.dirname(inputListOrg) + "/mdoc"
+                if os.path.exists(mdocFold):
+                    print("mdoc folder detected " + mdocFold,flush=True)
+                    print("copy " + mdocFold  + " to " + output_folder,flush=True)
+                    shutil.copytree(mdocFold, output_folder+"/mdoc")
             return   
     print("preparing napari",flush=True)
     viewer = BatchViewer(inputList, output_folder)

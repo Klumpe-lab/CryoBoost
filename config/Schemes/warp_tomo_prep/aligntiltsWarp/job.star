@@ -18,7 +18,7 @@ _rlnJobOptionValue #2
   in_3dref         "" 
  in_coords         "" 
    in_mask         "" 
-    in_mic         Schemes/warp_tomo_prep/filtertilts/tiltseries_filtered.star
+    in_mic         Schemes/warp_tomo_prep/filtertiltsInter/tiltseries_filtered.star
     in_mov         "" 
    in_part         "" 
 other_args         "--aretomo_patches 0x0 \" 

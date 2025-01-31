@@ -114,6 +114,11 @@ def mrc_to_pil_image_parallel(mrc_path_sz_pngOutputFold):
         image_array = mrc.data
         # print("in mrc paralell:" + pngOutputFold)
         if pngOutputFold is not None:
+            image_array_tmp=image_array.astype(np.float32)
+            meanT = np.mean(image_array_tmp)
+            stdT = np.std(image_array_tmp)
+            maskT=image_array_tmp>(meanT+(4*stdT))
+            image_array_tmp[maskT]=meanT
             image_array_tmp = (image_array - image_array.min()) / (image_array.max() - image_array.min())
             image_array_tmp = (image_array_tmp * 255).astype(np.uint8)
             namepng = os.path.splitext(os.path.basename(mrc_path))[0]

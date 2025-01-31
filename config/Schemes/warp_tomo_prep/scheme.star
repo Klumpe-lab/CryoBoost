@@ -47,6 +47,7 @@ _rlnSchemeJobHasStarted #4
 importmovies importmovies   continue            0 
 fsMotionAndCtf fsMotionAndCtf continue 0 
 filtertilts  filtertilts continue 0
+filtertiltsInter filtertiltsInter   continue            0
 aligntiltsWarp aligntiltsWarp continue 0 
 tsCtf tsCtf continue 0 
 tsReconstruct tsReconstruct continue 0
@@ -70,7 +71,8 @@ WAIT EXIT_maxtime            0  undefined  undefined
 EXIT_maxtime importmovies            0  undefined  undefined 
 importmovies fsMotionAndCtf       0 undefined  undefined 
 fsMotionAndCtf filtertilts        0 undefined  undefine
-filtertilts aligntiltsWarp           0 undefined  undefine   
+filtertilts  filtertiltsInter     0 undefined  undefine
+filtertiltsInter aligntiltsWarp           0 undefined  undefine   
 aligntiltsWarp    tsCtf               0 undefined  undefine
 tsCtf tsReconstruct                  0 undefined  undefine
 tsReconstruct  denoisetrain          0 undefined  undefine
