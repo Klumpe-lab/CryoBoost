@@ -10,12 +10,13 @@ Open CryoBoost
    module load CRYOBOOST
    # or
    source /path/to/my/Folder/CryoBoost/.cbenv
-   crboost_pipe.py -mov '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/frames/*.eer' -m '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/mdoc/*.mdoc' --proj testProj/copia --pixS 2.95
+   crboost_pipe.py -mov '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/frames//Position_1*.eer' -m '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/mdoc//Position_1*.mdoc' --proj testProj/copia26S --scheme "warp_tomo_prep" --species "copia,26S"
+   
    #or without arguments
    crboost_pipe.py 
 
-Adapt Parameters
-=================
+Adapt Tomogram Parameters
+======================
 
 .. image:: img/setup.png
 
@@ -23,13 +24,68 @@ Adapt Parameters
 
 #. Click on Auto to create a prefix.
 
-#. Click on show cluster status to check which queue is free.
+#. Set sample thickness to 180nm
 
-#. Choose queue and number of nodes.
+#. Switch off tiltaxis refinement (only 1 tomo)
 
-#. Check the parameters of the jobs.
+#. Move to ParticleSetup_copia tap.
 
-#. Move to the Start Relion tab.
+Adapt Copia Particle Parameters
+======================
+
+.. image:: img/particleSetupCopia.png
+
+#. Click on Generate(Volume) to create a template
+
+#. Click on Use Basic shape to create a sphere as template
+
+#. Enter 3x the diamter (of copia) 550:550:550 and OK
+
+#. Click exit
+
+#. Click Generate(Mask) to create a Mask
+
+#. Enter 5 for Extend and SoftEdge (Relion Mask parameters) and OK
+
+#. Enter 550 as diamter for peak extraction (avoid mult. extraction)
+
+#. Enter 224 cropped (used) box size in pixels
+
+#. Enter 384 uncropped box size in pixels
+
+#. Move to ParticleSetup_26S tap.
+
+Adapt 26S Particle Parameters
+======================
+
+.. image:: img/particleSetup26S.png
+
+#. Click on Generate(Volume) to create a template
+
+#. Click on Fetch Pdb to download pdb from pdb www.rcsb.org
+
+#. Enter 5GJR and click OK
+
+#. Click Sim from Pdb to simulate em density from pdb with cistem's simulate
+
+#. Click Gen And Exit to start the simulation
+
+#. Click Exit
+
+#. Click Generate(Mask) to create a Mask
+
+#. Enter 5 for Extend  (Relion Mask parameters) 
+
+#. Enter 6 for SoftEdge (Relion Mask parameters) and OK
+
+#. Enter 250 as diamter for peak extraction (half 26S diameter rod shape)
+
+#. Enter 176 cropped (used) box size in pixels
+
+#. Enter 224 uncropped box size in pixels
+
+#. Move to Start Relion tap.
+
 
 
 Start WorkFlow
