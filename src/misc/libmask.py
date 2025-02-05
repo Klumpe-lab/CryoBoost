@@ -46,7 +46,8 @@ def ellipsoid_mask(box_size, radii, outer_radii=None, decay_width=5.0, voxel_siz
         with mrcfile.new(output_path, overwrite=True) as mrc:
             mrc.set_data(mask)
             mrc.voxel_size = voxel_size
-
+       
+        
     return mask
 
 def genMaskRelion(inputVolume,outputMask=None,threshold=0.001,extend=3,softEdgeSize=6,lowpass=20,threads=20):

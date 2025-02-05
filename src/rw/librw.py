@@ -10,6 +10,7 @@ import tempfile
 import pandas as pd
 import xml.etree.ElementTree as ET
 import mrcfile
+from collections import namedtuple
 
 class warpMetaData:
   
@@ -975,6 +976,68 @@ class schemeMeta:
   def getJobOptions(self, jobName):
     return self.job_star[jobName].dict["joboptions_values"]   
   
+  def jobListToNodeList(self,jobList,tag=None):
+    
+    Node = namedtuple('Node', ['type', 'tag', 'inputType', 'inputTag'])
+    nodes = []
+    intag=None
+    for job in jobList:
+      inputType=self.getInputJobType(job)
+      oneNode = Node(type=job, tag=tag, inputType=inputType, inputTag=intag)
+      nodes.append(oneNode)
+      intag=tag
+    nodes_dict = {i: node for i, node in enumerate(nodes)}   
+    #nodes_dict = {i: row.to_dict() for i, row in nodes.iterrows()}
+    nodes_df = pd.DataFrame.from_dict(nodes_dict, orient='index')
+    
+    return nodes,nodes_df
+  
+  def addNoiseToNoiseFilter(self):
+    pass
+  def removeNoiseToNoiseFilter(self):
+    nFilterJobs=self.conf.confdata['computing']['JOBTypes']['Noise2NoiseFilterJobs']
+    nonFilterJobs=[job for job in self.jobs_in_scheme if job not in set(nFilterJobs)]
+    nodes,nodes_df=self.jobListToNodeList(nonFilterJobs)
+    schemeAdapted=self.filterSchemeByNodes(nodes_df)
+    return schemeAdapted
+  
+  
+  def addParticleJobs(self,tags):
+    particleJobs=self.conf.confdata['computing']['JOBTypes']['ParticleJobs']
+    nonParticleJobs=[job for job in self.jobs_in_scheme if job not in set(particleJobs)]
+    nodes,nodes_df=self.jobListToNodeList(nonParticleJobs)
+    for tag in tags:
+      ndf,nodesPlTag_df=self.jobListToNodeList(particleJobs,tag)
+      nodes_df = pd.concat([nodes_df, nodesPlTag_df], ignore_index=True)
+      
+    #nodes_dict = {i: node for i, node in enumerate(nodes)}   
+    #nodes_dict = {i: row.to_dict() for i, row in nodes.iterrows()}
+    #nodes_df = pd.DataFrame.from_dict(nodes_dict, orient='index')
+    schemeAdapted=self.filterSchemeByNodes(nodes_df)
+    return schemeAdapted
+    
+  def getInputJobType(self, jobName):
+
+    if jobName=="importmovies": #first job for every pipeline
+      return None
+    
+    df = self.job_star[jobName].dict['joboptions_values']
+    ind=df.rlnJobOptionVariable=="input_star_mics"
+    if not any(ind):
+        ind=df.rlnJobOptionVariable=="in_tiltseries" 
+    if not any(ind):
+        ind=df.rlnJobOptionVariable=="in_mic"
+    if not any(ind):
+        ind=df.rlnJobOptionVariable=="in_tomoset"
+    if not any(ind):
+        ind=df.rlnJobOptionVariable=="in_optimisation"
+    if not any(ind):
+        raise Exception("nether input_star_mics nor in_tiltseries found")
+    row_index = df.index[ind]
+    inputType=os.path.basename(os.path.dirname(df.loc[row_index, "rlnJobOptionValue"].item()))
+    
+    return inputType
+    
   def filterSchemeByNodes(self, nodes_df):
     
    

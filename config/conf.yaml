@@ -140,7 +140,14 @@ computing:
         - subtomoExtraction
       GPU-MultProcess:
         - aligntilts
-
+      ParticleJobs:
+        - templatematching
+        - tmextractcand
+        - subtomoExtraction
+      Noise2NoiseFilterJobs:
+       - denoisetrain
+       - denoisepredict  
+    
   JOBMaxNodes:
         motioncorr:
          - 4          

@@ -438,9 +438,11 @@ class TemplateGen(QDialog):
         msg=statusMessageBox("Generating Mask: " + outputName)
         ellipsoid_mask(box_size,np.round(szPix/2),np.round(szPix/2),decay_width=0.0, voxel_size=pixS, output_path=outputName)
         outputNameBlack=os.path.splitext(outputName)[0] + "_black"  + os.path.splitext(outputName)[1]
+        outputNameWhite=os.path.splitext(outputName)[0] + "_white"  + os.path.splitext(outputName)[1]
+        
         msg=statusMessageBox("Filtering And Inverting Mask: " + outputNameBlack)
         gaussian_lowpass_mrc(outputName,outputNameBlack,45,invert_contrast=1)
-        gaussian_lowpass_mrc(outputName,outputName,45,invert_contrast=0)
+        gaussian_lowpass_mrc(outputName,outputNameWhite,45,invert_contrast=0)
         self.line_edit_mapFile.setText(outputNameBlack)
         msg.close()
         

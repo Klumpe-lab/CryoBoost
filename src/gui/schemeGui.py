@@ -98,6 +98,11 @@ class MainUI(QMainWindow):
             cbdat.filtScheme=0
         else:    
             cbdat.scheme=schemeMeta(cbdat.defaultSchemePath)
+            if args.Noise2Noise == "False":
+                cbdat.scheme=cbdat.scheme.removeNoiseToNoiseFilter()
+            if args.species != "noTag":
+                speciesList = [x.strip() for x in args.species.split(',')]
+                cbdat.scheme=cbdat.scheme.addParticleJobs(speciesList)    
         
         return cbdat
     
@@ -486,6 +491,28 @@ class MainUI(QMainWindow):
         else:
             jobTag=""
         self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
+    def getTagFromParentTab(self, widget):
+        """
+        Find parent QTabWidget and the tab name containing the widget
+        Returns: tuple (QTabWidget, tab_name) or (None, None) if not found
+        """
+        from PyQt6.QtWidgets import QTabWidget
+        jobTag=""
+        current = widget
+        while current:
+            parent = current.parent()
+            if isinstance(parent, QTabWidget):
+                for i in range(parent.count()):
+                    if parent.widget(i).isAncestorOf(widget):
+                        tab_name = parent.tabText(i)
+                        if len(tab_name.split("_"))>1:
+                            jobTag="_"+tab_name.split("_")[1]
+                        else:
+                            jobTag=""
+                        return jobTag
+            current = parent
+        
+        return jobTag
     
     def setTmSearchVolSplitToJobTap(self,textLine):
         """
@@ -498,9 +525,12 @@ class MainUI(QMainWindow):
         Returns:
             None
         """
-    
+       
+        # print("callback==="+ tag)
         params_dict = {"param10_value":textLine }
-        jobTag=self.getTagFromCurrentTab()
+        # jobTag=self.getTagFromCurrentTab()
+        widget = self.sender() 
+        jobTag = self.getTagFromParentTab(widget)
         self.setParamsDictToJobTap(params_dict,["templatematching"+jobTag])
     
     def setTmCtfWeightToJobTap(self,state):
@@ -1319,13 +1349,13 @@ class MainUI(QMainWindow):
                 self.setParamsDictToJobTap(comDict,applyToJobs=job)
         vRam=int(self.cbdat.conf.confdata['computing'][partion]['VRAM'].replace("G",""))
         if vRam>40:
-            line_edits = self.tabWidget.findChildren(QLineEdit, "line_path_tm_SearchVolSplit")
-            for line_edit in line_edits:
-                line_edit.setText("2:2:1")
+            spString="2:2:1"
         else:
-            line_edits = self.tabWidget.findChildren(QLineEdit, "line_path_tm_SearchVolSplit")
-            for line_edit in line_edits:
-                line_edit.setText("4:4:2")
+            spString="4:4:2"
+        line_edits = self.tabWidget.findChildren(QLineEdit, "line_path_tm_SearchVolSplit")
+        for line_edit in line_edits:
+            line_edit.setText(spString)
+                
 
          
     def setParamsDictToJobTap(self,params_dict,applyToJobs="all"):

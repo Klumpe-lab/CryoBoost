@@ -8,7 +8,7 @@ def test_readScheme():
     inputScheme='config/Schemes/relion_tomo_prep/'
     sc=schemeMeta(inputScheme)
     assert (sc.jobs_in_scheme == ['importmovies', 'motioncorr', 
-                                 'ctffind','filtertilts', 
+                                 'ctffind','filtertilts','filtertiltsInter', 
                                  'aligntilts', 'reconstructionsplit','denoisetrain','denoisepredict','reconstructionfull','templatematching','tmextractcand','subtomoExtraction']).all()
 
 def test_writeScheme():
