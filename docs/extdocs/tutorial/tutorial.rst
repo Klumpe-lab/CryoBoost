@@ -24,14 +24,15 @@ Adapt Tomogram Parameters
 
 #. Click on Auto to create a prefix.
 
-#. Set sample thickness to 180nm
+#. Alignment: Set sample thickness to 180nm
 
-#. Switch off tiltaxis refinement (only 1 tomo)
+#. Alignment: Switch off tiltaxis refinement (only 1 tomo)
 
 #. Move to ParticleSetup_copia tap.
 
+
 Adapt Copia Particle Parameters
-======================
+================================
 
 .. image:: img/particleSetupCopia.png
 
@@ -56,7 +57,7 @@ Adapt Copia Particle Parameters
 #. Move to ParticleSetup_26S tap.
 
 Adapt 26S Particle Parameters
-======================
+==============================
 
 .. image:: img/particleSetup26S.png
 
@@ -78,7 +79,7 @@ Adapt 26S Particle Parameters
 
 #. Enter 6 for SoftEdge (Relion Mask parameters) and OK
 
-#. Enter 250 as diamter for peak extraction (half 26S diameter rod shape)
+#. Enter 250 as diameter for peak extraction (half 26S diameter rod shape)
 
 #. Enter 176 cropped (used) box size in pixels
 
@@ -98,6 +99,9 @@ Start WorkFlow
 #. Click on Import Data.
 
 #. Click on Start.
+
+
+
 
 
 Add new data (from a new folder) to an existing project 
