@@ -341,7 +341,11 @@ def filterTiltsInterActive(inputList, output_folder=None,mode="onFailure"):
     if inputBase=="tiltseries_filtered.star":
         inputListOrg=inputList
         inputList=inputList.replace("tiltseries_filtered.star","tiltseries_labeled.star")
-        if mode=="Never" or (mode=="onFailure" and os.path.exists(inputList.replace("tiltseries_filtered.star","DATA_IN_DISTRIBUTION"))):
+        # print("mode======: "+mode)
+        # print("file exists"+ str(os.path.exists(inputList.replace("tiltseries_filtered.star","DATA_IN_DISTRIBUTION"))))
+        # print("comp State"+str(mode=="onFailure" and os.path.exists(inputList.replace("tiltseries_filtered.star","DATA_IN_DISTRIBUTION"))) )
+        didFile=os.path.dirname(inputList)+os.path.sep+"DATA_IN_DISTRIBUTION"
+        if mode=="Never" or (mode=="onFailure" and os.path.exists(didFile)):
             print("Skipping manual sort",flush=True)
             ts=tiltSeriesMeta(inputListOrg)
             ts.writeTiltSeries(output_folder+"tiltseries_filtered.star")

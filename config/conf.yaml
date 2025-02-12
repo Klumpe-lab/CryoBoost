@@ -121,7 +121,7 @@ computing:
      - p.hpcl9
      - p.hpcl93
 
-  JOBTypes:
+  JOBTypesCompute:
       CPU-MPI:
        - motioncorr
        - ctffind
@@ -143,6 +143,8 @@ computing:
         - subtomoExtraction
       GPU-MultProcess:
         - aligntilts
+  
+  JOBTypesApplication:    
       ParticleJobs:
         - templatematching
         - tmextractcand

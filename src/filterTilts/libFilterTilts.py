@@ -9,6 +9,8 @@ import os,shutil,copy
 
 def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=None,outputFolder=None,probThr=0.1,probAction="assingToGood",threads=24,mdocWk=None):
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
+    lenUnfilterd=len(ts.all_tilts_df)
+    
     if os.path.exists(outputFolder+"tiltseries_labeled.star"):
          tsExist=tiltSeriesMeta(outputFolder+"tiltseries_labeled.star")
          ts.reduceToNonOverlab(tsExist)
@@ -55,18 +57,19 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
         mdoc.writeAllMdoc(outputFolder+"/mdoc")    
     
     
-    if meanProb<0.9 or meanAngGood<meanAngBad-2:
-        print("Removal of bad tilts successful")
-        with open(outputFolder+'DATA_IN_DISTRIBUTION', 'w') as f:
-            pass
-    else:
+    if (meanProb<0.95) or (meanAngGood<(meanAngBad-2)):
         print("WARNINIG data out of distribution you should sort manual")
         with open(outputFolder+'DATA_OUT_OF_DISTRIBUTION', 'w') as f:
             pass
-    print("  Average Prediction Probability: " + str(round(meanProb,2)) + "% (should be > 0.9)")
-    print("  Percentage of bad tilts: " + str(bad_count/len(ts.all_tilts_df)) )
-    meanAngBad="n.d" if int(meanAngBad) == 180 else str(meanAngBad)
-    print("  Mean Angle of good tilts: " + str(meanAngGood) + " Mean Angle of bad tilts: " + meanAngBad)
+    else:
+        print("Removal of bad tilts successful")
+        with open(outputFolder+'DATA_IN_DISTRIBUTION', 'w') as f:
+            pass
+    badFract=round((bad_count/lenUnfilterd)*100,1)        
+    print("  Average Prediction Probability: " + str(round(meanProb,2)) + " (should be > 0.95)")
+    print("  Percentage of bad tilts: " + str(badFract) + "%")
+    meanAngBad="n.d" if int(meanAngBad) == 180 else str(round(meanAngBad,1))
+    print("  Mean Angle of good tilts: " + str(round(meanAngGood,1)) + " Mean Angle of bad tilts: " + meanAngBad)
         
 
 

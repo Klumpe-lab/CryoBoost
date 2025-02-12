@@ -384,7 +384,7 @@ p, li { white-space: pre-wrap; }
                 <rect>
                  <x>265</x>
                  <y>31</y>
-                 <width>31</width>
+                 <width>41</width>
                  <height>25</height>
                 </rect>
                </property>
@@ -404,18 +404,18 @@ p, li { white-space: pre-wrap; }
                 <rect>
                  <x>99</x>
                  <y>33</y>
-                 <width>101</width>
+                 <width>81</width>
                  <height>21</height>
                 </rect>
                </property>
                <property name="text">
-                <string>DoseRate per Tilt</string>
+                <string>Dose per Tilt</string>
                </property>
               </widget>
               <widget class="QLabel" name="label_8">
                <property name="geometry">
                 <rect>
-                 <x>597</x>
+                 <x>600</x>
                  <y>32</y>
                  <width>81</width>
                  <height>20</height>
@@ -428,22 +428,22 @@ p, li { white-space: pre-wrap; }
               <widget class="QLabel" name="label_9">
                <property name="geometry">
                 <rect>
-                 <x>301</x>
+                 <x>320</x>
                  <y>33</y>
                  <width>81</width>
                  <height>20</height>
                 </rect>
                </property>
                <property name="text">
-                <string>EER fractions</string>
+                <string>EER frac.</string>
                </property>
               </widget>
               <widget class="QTextEdit" name="textEdit_dosePerTilt">
                <property name="geometry">
                 <rect>
-                 <x>199</x>
+                 <x>179</x>
                  <y>31</y>
-                 <width>21</width>
+                 <width>41</width>
                  <height>25</height>
                 </rect>
                </property>
@@ -536,14 +536,14 @@ p, li { white-space: pre-wrap; }
               <widget class="QLabel" name="label_33">
                <property name="geometry">
                 <rect>
-                 <x>711</x>
+                 <x>714</x>
                  <y>32</y>
                  <width>121</width>
                  <height>20</height>
                 </rect>
                </property>
                <property name="text">
-                <string>Inv. Relion  Def. Hand</string>
+                <string>Inv. Relion Def. Hand</string>
                </property>
               </widget>
               <widget class="QTextEdit" name="textEdit_invertDefocusHand">

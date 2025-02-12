@@ -138,11 +138,11 @@ class cbconfig:
   
   def getJobComputingParams(self,comReq,doNodeSharing):    
        
-        self.confdata["computing"]["JOBTypes"]
+        self.confdata["computing"]["JOBTypesCompute"]
         confComp=self.confdata["computing"]
         jobType=None
-        for entry in confComp["JOBTypes"]:
-          for job in confComp["JOBTypes"][entry]:
+        for entry in confComp["JOBTypesCompute"]:
+          for job in confComp["JOBTypesCompute"][entry]:
               if job == comReq[0]:
                 jobType=entry
                 break
@@ -995,7 +995,7 @@ class schemeMeta:
   def addNoiseToNoiseFilter(self):
     pass
   def removeNoiseToNoiseFilter(self):
-    nFilterJobs=self.conf.confdata['computing']['JOBTypes']['Noise2NoiseFilterJobs']
+    nFilterJobs=self.conf.confdata['computing']['JOBTypesApplication']['Noise2NoiseFilterJobs']
     nonFilterJobs=[job for job in self.jobs_in_scheme if job not in set(nFilterJobs)]
     nodes,nodes_df=self.jobListToNodeList(nonFilterJobs)
     schemeAdapted=self.filterSchemeByNodes(nodes_df)
@@ -1003,7 +1003,7 @@ class schemeMeta:
   
   
   def addParticleJobs(self,tags):
-    particleJobs=self.conf.confdata['computing']['JOBTypes']['ParticleJobs']
+    particleJobs=self.conf.confdata['computing']['JOBTypesApplication']['ParticleJobs']
     nonParticleJobs=[job for job in self.jobs_in_scheme if job not in set(particleJobs)]
     nodes,nodes_df=self.jobListToNodeList(nonParticleJobs)
     for tag in tags:
