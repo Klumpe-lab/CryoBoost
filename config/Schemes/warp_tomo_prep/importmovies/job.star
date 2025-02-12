@@ -28,7 +28,7 @@ dose_rate          3
 dose_is_per_movie_frame         No 
 tilt_axis_angle        -95 
 mtf_file         "" 
-flip_tiltseries_hand         Yes 
+flip_tiltseries_hand         No 
 do_queue         No 
 queuename    openmpi 
 qsub     sbatch 

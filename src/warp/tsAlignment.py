@@ -59,8 +59,9 @@ class tsAlignment(warpWrapperBase):
                     "--tilt_exposure",str(self.st.tsInfo.expPerTilt), 
                     "--override_axis",str(self.st.tsInfo.tiltAxis),
                 ]
-        if self.st.tsInfo.keepHand==1:
-            command.append("--dont_invert")
+        #if self.st.tsInfo.keepHand==1:
+        command.append("--dont_invert")
+        
         self.result=run_wrapperCommand(command,tag="tsAlignment-ImportTs",relionProj=self.relProj)
             
     def runMainApp(self):    

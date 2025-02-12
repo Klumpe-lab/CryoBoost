@@ -17,14 +17,30 @@ class tsCtf(warpWrapperBase):
     
     def runMainApp(self):    
         
+        print("--------------check defocus handness---------------------------",flush=True)
+        command=["WarpTools", "ts_defocus_hand",
+                 "--settings", self.args.out_dir + "/" + self.tsSettingsName,
+                 "--check",
+                ]
+        self.result=run_wrapperCommand(command,tag="run_tsCtf",relionProj=self.relProj)
+        
+        print("--------------set defocus handness---------------------------",flush=True)
+        command=["WarpTools", "ts_defocus_hand",
+                 "--settings", self.args.out_dir + "/" + self.tsSettingsName,
+                 "--"+self.args.defocusHand,
+                ]
+        self.result=run_wrapperCommand(command,tag="run_tsCtf",relionProj=self.relProj)
+        
+        #WarpTools ts_defocus_hand --settings warp_tiltseries.settings --set_flip
+        
         print("--------------tilt seriees ctf determination---------------------------")
         sys.stdout.flush()  
         
-        if (int(self.args.auto_hand)>int(self.st.tsInfo.numTiltSeries)):
-            nrAutoHand=self.st.tsInfo.numTiltSeries
-        else:
-            nrAutoHand=int(self.args.auto_hand)
-        nrAutoHand=1
+        # if (int(self.args.auto_hand)>int(self.st.tsInfo.numTiltSeries)):
+        #     nrAutoHand=self.st.tsInfo.numTiltSeries
+        # else:
+        #     nrAutoHand=int(self.args.auto_hand)
+        # nrAutoHand=1
         
         command=["WarpTools", "ts_ctf",
             "--settings", self.args.out_dir + "/" + self.tsSettingsName,

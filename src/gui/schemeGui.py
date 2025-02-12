@@ -120,7 +120,10 @@ class MainUI(QMainWindow):
         self.textEdit_pixelSize.textChanged.connect(self.setPixelSizeToJobTap)
         self.textEdit_dosePerTilt.textChanged.connect(self.setdosePerTiltToJobTap)
         self.textEdit_nomTiltAxis.textChanged.connect(self.setTiltAxisToJobTap)
-        self.textEdit_invertHand.textChanged.connect(self.setInvertHandToJobTap)
+        
+        #self.textEdit_invertTiltAngle.textChanged.connect(self.setInvertTiltAngleToJobTap)
+        self.textEdit_invertDefocusHand.textChanged.connect(self.setInvertDefocusHandToJobTap)
+        
         self.textEdit_eerFractions.textChanged.connect(self.setEerFractionsToJobTap)
         self.textEdit_areTomoSampleThick.textChanged.connect(self.setAreTomoSampleThickToJobTap)
         
@@ -751,17 +754,17 @@ class MainUI(QMainWindow):
         if "tsReconstruct"+tag in scheme.jobs_in_scheme.values: 
             pixS=scheme.job_star['tsReconstruct'+tag].dict['joboptions_values']['rlnJobOptionValue'][9]
             return pixS
-        if "reconstruction"+tag in scheme.jobs_in_scheme.values: 
-            pixS = scheme.job_star['reconstruction'+tag].dict['joboptions_values'][
-            scheme.job_star['reconstruction'].dict['joboptions_values']['rlnJobOptionVariable'] == 'binned_angpix'
+        if "reconstructionfull"+tag in scheme.jobs_in_scheme.values: 
+            pixS = scheme.job_star['reconstructionfull'+tag].dict['joboptions_values'][
+            scheme.job_star['reconstructionfull'].dict['joboptions_values']['rlnJobOptionVariable'] == 'binned_angpix'
             ]['rlnJobOptionValue'].values[0]
             return pixS    
         if "tsReconstruct" in scheme.jobs_in_scheme.values: 
             pixS=scheme.job_star['tsReconstruct'].dict['joboptions_values']['rlnJobOptionValue'][9]
             return pixS
-        if "reconstruction" in scheme.jobs_in_scheme.values: 
-            pixS = scheme.job_star['reconstruction'].dict['joboptions_values'][
-            scheme.job_star['reconstruction'].dict['joboptions_values']['rlnJobOptionVariable'] == 'binned_angpix'
+        if "reconstructionfull" in scheme.jobs_in_scheme.values: 
+            pixS = scheme.job_star['reconstructionfull'].dict['joboptions_values'][
+            scheme.job_star['reconstructionfull'].dict['joboptions_values']['rlnJobOptionVariable'] == 'binned_angpix'
             ]['rlnJobOptionValue'].values[0]
             return pixS    
         
@@ -1218,9 +1221,24 @@ class MainUI(QMainWindow):
             print(params_dict)
             self.setParamsDictToJobTap(params_dict,["fs_motion_and_ctf"]) 
             
-    def setInvertHandToJobTap(self):
+    def setInvertTiltAngleToJobTap(self):
         params_dict = {"flip_tiltseries_hand": self.textEdit_invertHand.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 
+    def setInvertDefocusHandToJobTap(self):
+        params_dict = {"flip_tiltseries_hand": self.textEdit_invertDefocusHand.toPlainText()} 
+        self.setParamsDictToJobTap(params_dict,["importmovies"]) 
+        print("setting Warp Handness inverse to Relion")
+        if self.textEdit_invertDefocusHand.toPlainText()=="Yes":
+            print("  Warp Handness set_noflip")
+            params_dict = {"param4_value": "set_noflip"} 
+        else:
+            print("  Warp Handness set_flip")
+            params_dict = {"param4_value": "set_flip"} 
+                
+        self.setParamsDictToJobTap(params_dict,["tsCtf"]) 
+        
+        
+        
     def setRecVoxelSizeToJobTap(self):
         if "reconstructionsplit" in self.cbdat.scheme.jobs_in_scheme.values or "reconstructionfull" in self.cbdat.scheme.jobs_in_scheme.values: 
             params_dict = {"binned_angpix": self.textEdit_recVoxelSize.toPlainText()} 
@@ -1618,8 +1636,8 @@ class MainUI(QMainWindow):
         microscope = self.dropDown_config.currentText()
         microscope_parameters=self.cbdat.conf.get_microscopePreSet(microscope)
        
-        self.textEdit_invertHand.setText(microscope_parameters["flip_tiltseries_hand"])
-     
+        self.textEdit_invertTiltAngle.setText(microscope_parameters["invert_tiltAngles"])
+        self.textEdit_invertDefocusHand.setText(microscope_parameters["invert_defocusHandness"])
         
 
     def browsePathTarget(self):

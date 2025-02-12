@@ -54,11 +54,14 @@ meta_data:
 
 microscopes:
   TitanKrios5:
-    - flip_tiltseries_hand: "No"
+    - invert_tiltAngles: "No"
+    - invert_defocusHandness: "No"
   TitanKrios4:
-    - flip_tiltseries_hand: "No"  
+    - invert_tiltAngles: "No"
+    - invert_defocusHandness: "No"  
   TitanKrios3:
-    - flip_tiltseries_hand: "No"
+    - invert_tiltAngles: "No"
+    - invert_defocusHandness: "No"  
 
 star_file:
 
