@@ -91,9 +91,17 @@ class MainUI(QMainWindow):
         cbdat.args=args
         cbdat.filtScheme=1
         if os.path.exists(str(args.proj) +  "/Schemes/" + args.scheme + "/scheme.star"):
+            print("WARNING missing reload of options")
+            print("======> check mdoc invert")
+            print("WARNING missing reload of options")
             cbdat.scheme=schemeMeta(args.proj +  "/Schemes/" + args.scheme )
             args.scheme=cbdat.scheme
-            cbdat.pipeRunner=pipe(args);
+            invTilt=self.textEdit_invertTiltAngle.toPlainText()
+            if invTilt == "Yes":
+                invTilt=True
+            else:
+                invTilt=False
+            cbdat.pipeRunner=pipe(args,invMdocTiltAngle=invTilt);
             cbdat.args.skipSchemeEdit=True
             cbdat.filtScheme=0
         else:    
@@ -1679,8 +1687,12 @@ class MainUI(QMainWindow):
         args.movies=self.line_path_movies.text()
         args.proj=self.line_path_new_project.text()
         args.scheme=scheme
-        
-        pipeRunner=pipe(args)
+        invTilt=self.textEdit_invertTiltAngle.toPlainText()
+        if invTilt == "Yes":
+            invTilt=True
+        else:
+            invTilt=False
+        pipeRunner=pipe(args,invMdocTiltAngle=invTilt)
         pipeRunner.initProject()
         pipeRunner.writeScheme()
         #pipeRunner.scheme.schemeFilePath=args.proj +  "/Schemes/relion_tomo_prep/scheme.star"

@@ -14,7 +14,7 @@ class pipe:
   Returns:
       _type_: _description_
   """
-  def __init__(self,args):
+  def __init__(self,args,invMdocTiltAngle=False):
     CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
     if (type(args.scheme) == str and os.path.exists(args.scheme)==False):
       self.defaultSchemePath=CRYOBOOST_HOME + "/config/Schemes/" + args.scheme
@@ -32,6 +32,8 @@ class pipe:
     self.pathFrames=args.movies
     self.importPrefix=args.impPrefix
     self.pathProject=args.proj
+    self.invMdocTiltAngle=invMdocTiltAngle
+    print("init class pipe:" + str(self.invMdocTiltAngle))
     headNode=self.conf.confdata['submission'][0]['HeadNode']
     sshStr=self.conf.confdata['submission'][0]['SshCommand']
     envRel=self.conf.confdata['submission'][0]['Environment']
@@ -86,7 +88,7 @@ class pipe:
     self.writeToLog("    " + self.pathMdoc + " --> mdoc" +"\n")
     
     logDir=self.pathProject + os.path.sep + "Logs" + os.path.sep + "importData"
-    dataImport(self.pathProject,self.pathFrames,self.pathMdoc,self.importPrefix,logDir=logDir)
+    dataImport(self.pathProject,self.pathFrames,self.pathMdoc,self.importPrefix,logDir=logDir,invTiltAngle=self.invMdocTiltAngle)
     print("frames/"+os.path.basename(self.pathFrames))
     self.scheme.update_job_star_dict('importmovies','movie_files',"frames/"+os.path.basename(self.pathFrames))
     self.scheme.update_job_star_dict('importmovies','mdoc_files',"mdoc/"+os.path.basename(self.pathMdoc))

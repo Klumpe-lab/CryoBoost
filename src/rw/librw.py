@@ -759,7 +759,7 @@ class starFileMeta:
     
 class dataImport():
   
-  def __init__(self,targetPath,wkFrames,wkMdoc=None,prefix="auto",logDir=None):  
+  def __init__(self,targetPath,wkFrames,wkMdoc=None,prefix="auto",logDir=None,invTiltAngle=False):  
     self.targetPath=targetPath
     self.wkFrames=wkFrames
     self.wkMdoc=wkMdoc
@@ -775,6 +775,8 @@ class dataImport():
     self.existingMdocSource=self.__getexistingMdoc()
     self.logDir=logDir
     self.logToConsole=False
+    self.invTiltAngle=invTiltAngle
+    print("import TiltAngle Inv data Import Ini:" + str(self.invTiltAngle))
     if logDir is not None:  
       os.makedirs(logDir, exist_ok=True)
       self.logErrorFile=open(os.path.join(logDir,"run.err"),'a')
@@ -842,10 +844,10 @@ class dataImport():
     if self.wkMdoc is not None:
       mdocFold=os.path.join(self.targetPath,self.mdocLocalFold)
       os.makedirs(mdocFold, exist_ok=True)  
-      self.__writeAdaptedMdoc(self.wkMdoc,mdocFold,self.existingMdocSource)
+      self.__writeAdaptedMdoc(self.wkMdoc,mdocFold,self.existingMdocSource,self.invTiltAngle)
       #self.__genLinks(self.wkMdoc,mdocFold,self.existingMdoc)
   
-  def __writeAdaptedMdoc(self,inputPattern,targetFold,existingFiles):
+  def __writeAdaptedMdoc(self,inputPattern,targetFold,existingFiles,invTiltAngle=False):
     
     nrFilesAlreadyImported=len(glob.glob(targetFold + "/*" + os.path.splitext(inputPattern)[1])); 
     for file_path in glob.glob(inputPattern):
@@ -857,14 +859,14 @@ class dataImport():
             if self.relcompPrefix:
                 file_nameBase=os.path.splitext(os.path.splitext(file_name)[0])[0]+".mdoc"
                 tragetFileName=os.path.join(targetFold,self.prefix+file_nameBase)
-            self.__adaptMdoc(self.prefix,file_path,tragetFileName)
+            self.__adaptMdoc(self.prefix,file_path,tragetFileName,invTiltAngle)
     
     nrFilesTotalImported=len(glob.glob(targetFold + "/*" + os.path.splitext(inputPattern)[1]));
     nrFilesNewImported=nrFilesTotalImported-nrFilesAlreadyImported
     self.__writeLog("info","Total number of mdocs imported: " + str(nrFilesTotalImported) )
     self.__writeLog("info","Number of new mdoc imported: " + str(nrFilesNewImported) )        
           
-  def __adaptMdoc(self,prefix,inputMdoc,outputMdoc):
+  def __adaptMdoc(self,prefix,inputMdoc,outputMdoc,invTiltAngle=False):
     
     with open(inputMdoc, 'r') as file:
       lines = file.readlines()
@@ -878,7 +880,10 @@ class dataImport():
               lines[i] = "SubFramePath = " + baseName + prefix + lineTmp
             else:
               lines[i] = "SubFramePath = " + prefix + lineTmp
-      
+        if ('TiltAngle =' in line) and invTiltAngle:  
+            key,angle=line.split("=")
+            lines[i] = key.replace(" ","") + " = " + str(-1*float(angle)) + "\n"
+          
       lines.append("CryoBoost_RootMdocPath = " + os.path.abspath(inputMdoc) + "\n")       
       with open(outputMdoc, 'w') as file:
         file.writelines(lines)
