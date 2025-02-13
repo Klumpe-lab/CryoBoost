@@ -24,6 +24,8 @@ Adapt Tomogram Parameters
 
 #. Click on Auto to create a prefix.
 
+#. Set Invert Tiltangel and Invert Defocus Hand to No.
+
 #. Alignment: Set sample thickness to 180nm
 
 #. Alignment: Switch off tiltaxis refinement (only 1 tomo)
@@ -80,6 +82,8 @@ Adapt 26S Particle Parameters
 #. Enter 5 for Extend  (Relion Mask parameters) 
 
 #. Enter 6 for SoftEdge (Relion Mask parameters) and OK
+
+#. Enter 12 to set Angular Increment
 
 #. Enter 250 as diameter for peak extraction (half 26S diameter rod shape)
 
