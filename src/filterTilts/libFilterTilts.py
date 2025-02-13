@@ -36,7 +36,7 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
     bad_count = (ts.all_tilts_df.cryoBoostDlLabel == "bad").sum()
     meanAngGood=ts.all_tilts_df[ts.all_tilts_df.cryoBoostDlLabel == "good"].rlnTomoNominalStageTiltAngle.abs().mean()
     if np.isnan(meanAngBad):
-        meanAngBad=180
+        meanAngBad=float(180)
         
     ts.writeTiltSeries(outputFolder+"tiltseries_labeled.star","tilt_seriesLabel")
     
@@ -57,7 +57,7 @@ def filterTitls(tilseriesStar,relionProj='',pramRuleFilter=None,model=None,plot=
         mdoc.writeAllMdoc(outputFolder+"/mdoc")    
     
     
-    if (meanProb<0.95) or (meanAngGood<(meanAngBad-2)):
+    if (meanProb<0.95) or (meanAngGood>(meanAngBad-2)):
         print("WARNINIG data out of distribution you should sort manual")
         with open(outputFolder+'DATA_OUT_OF_DISTRIBUTION', 'w') as f:
             pass
