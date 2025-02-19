@@ -118,21 +118,36 @@ Processing Copia
 
 click on open Relion 
 
-++++++++++++++
-Initial Model
-++++++++++++++
+++++++++++++++++++++++
+Reconstruct Particle
+++++++++++++++++++++++
 
 .. code-block:: bash
    
-   Input Optimisation Set Extract/jobXXX/optimisation_set.star
-   Number vAdam mini Batches: 70 
-   Regularisation parameter T: 1.1
-   Mask Diameter: 550
+   Input Optimisation Set Extract/job20/optimisation_set.star
+   
    Symmetry: I1
    Pre-read all particles into RAM: yes
-   Use GPU acceleration: yes
-   Number of MPI procs: 1 
-   Number of MPI per Node: 1 
+   Box size: 384
+   Cropped Box size: 224
+   Submit to queue: yes
+   
+++++++++++++++++++++++
+Class3d
+++++++++++++++++++++++
+
+.. code-block:: bash
+   
+   Input: Optimisation Set Extract/job20/optimisation_set.star
+   RefereceMap: Reconstruct/job030/merged.mrc
+   Inital Lowpass Filter (A): 45
+   Symmetry: I1
+   
+   Pre-read all particles into RAM: yes
+   Box size: 384
+   Cropped Box size: 224
+   Submit to queue: yes
+
 
 
 ++++++++++++++
@@ -144,11 +159,11 @@ Mask creation
    #Remove unstructured inner part
    cd myProjct
    module load EMAN
-   e2proc3d.py InitialModel/job0XX/initial_model.mrc  InitialModel/job0XX/initial_model4Mask.mrc --process=mask.sharp:inner_radius=65
-   Input 3d Map: InitialModel/job0XX/initial_model4Mask.mrc 
+   e2proc3d.py InitialModel/job024/initial_model.mrc  InitialModel/job024/initial_model4Mask.mrc --process=mask.sharp:inner_radius=65 (73)
+   Input 3d Map: InitialModel/job024/initial_model4Mask.mrc 
    Lowpass: 18
    Inital binarisation threshold: 0.1
-   Extend binary Map this many pixels: 4
+   Extend binary Map this many pixels: 4 (5)
    Add soft-edge of this many pixels: 7
    
 
@@ -158,15 +173,17 @@ Refine3d
 
 .. code-block:: bash
    
-   Input Optimisation Set Extract/jobXXX/optimisation_set.star
-   Reference Map: InitialModel/job0XX/initial_model.mrc 
-   Reference Mask: MaskCreate/job053/mask.mrc 
-   Initial Lowpass Filter: 30
+   Input Optimisation Set Extract/job020/optimisation_set.star
+   Reference Map: InitialModel/job024/initial_model.mrc 
+   Reference Mask: MaskCreate/job025/mask.mrc 
+   Initial Lowpass Filter: 40
    Symmetry: I1
    Use Flattern Solvent CTF: yes
    Use Blush Regularisation: yes
    Pre-read all particles into RAM: yes
    Use GPU acceleration: yes
+   Submit to queue: yes
+   
 
 ++++++++++++++
 Reconstruct

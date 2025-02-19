@@ -58,7 +58,7 @@ class MainUI(QMainWindow):
     
     def adaptWidgetsToJobsInScheme(self):
         
-        if "fs_motion_and_ctf" in self.cbdat.scheme.jobs_in_scheme.values:
+        if "fsMotionAndCtf" in self.cbdat.scheme.jobs_in_scheme.values:
             self.dropDown_gainRot.clear()  # This will remove all items from the dropdown
             self.dropDown_gainRot.addItem("No transpose")
             self.dropDown_gainRot.addItem("Transpose")
@@ -1183,7 +1183,7 @@ class MainUI(QMainWindow):
             params_dict = {"gain_rot": self.dropDown_gainRot.currentText()} 
             checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
             self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
-        if "fs_motion_and_ctf" in self.cbdat.scheme.jobs_in_scheme.values:   
+        if "fsMotionAndCtf" in self.cbdat.scheme.jobs_in_scheme.values:   
             selFlip=self.dropDown_gainFlip.currentText()
             selRot=self.dropDown_gainRot.currentText()
             gainOpString=""
@@ -1200,7 +1200,8 @@ class MainUI(QMainWindow):
             
             #checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
             params_dict = {"param3_value": gainOpString}
-            self.setParamsDictToJobTap(params_dict,["fs_motion_and_ctf"]) 
+            print(params_dict)
+            self.setParamsDictToJobTap(params_dict,["fsMotionAndCtf"]) 
         
         
     def setGainFlipJobTap(self):
@@ -1208,7 +1209,7 @@ class MainUI(QMainWindow):
             params_dict = {"gain_flip": self.dropDown_gainFlip.currentText()} 
             checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
             self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
-        if "fs_motion_and_ctf" in self.cbdat.scheme.jobs_in_scheme.values:   
+        if "fsMotionAndCtf" in self.cbdat.scheme.jobs_in_scheme.values:   
             
             selFlip=self.dropDown_gainFlip.currentText()
             selRot=self.dropDown_gainRot.currentText()
@@ -1227,7 +1228,7 @@ class MainUI(QMainWindow):
             #checkGainOptions(self.line_path_gain.text(),self.dropDown_gainRot.currentText(),self.dropDown_gainFlip.currentText())
             params_dict = {"param3_value": gainOpString}
             print(params_dict)
-            self.setParamsDictToJobTap(params_dict,["fs_motion_and_ctf"]) 
+            self.setParamsDictToJobTap(params_dict,["fsMotionAndCtf"]) 
             
     def setInvertTiltAngleToJobTap(self):
         params_dict = {"flip_tiltseries_hand": self.textEdit_invertHand.toPlainText()} 
@@ -1235,14 +1236,13 @@ class MainUI(QMainWindow):
     def setInvertDefocusHandToJobTap(self):
         params_dict = {"flip_tiltseries_hand": self.textEdit_invertDefocusHand.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 
-        print("setting Warp Handness inverse to Relion")
+        print("setting Warp Handness same ass Relion")
         if self.textEdit_invertDefocusHand.toPlainText()=="Yes":
-            print("  Warp Handness set_noflip")
-            params_dict = {"param4_value": "set_noflip"} 
-        else:
             print("  Warp Handness set_flip")
             params_dict = {"param4_value": "set_flip"} 
-                
+        else:
+            print("  Warp Handness set_noflip")
+            params_dict = {"param4_value": "set_noflip"} 
         self.setParamsDictToJobTap(params_dict,["tsCtf"]) 
         
         
