@@ -17,12 +17,13 @@ Install dependencies
 ====================
 .. code-block:: bash
    
-   conda create -n cryoboost python=3.11.5
+   conda create -n cryoboost python=3.11.8
    conda activate cryoboost
    conda install nvidia/label/cuda-11.8.0::cuda-toolkit
    pip3 install torch==2.2.1  torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu118
    conda install -c fastai fastai==2.7.14
    pip3 install --ignore-installed torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu118 --no-cache-dir
+   pip install --force-reinstall numpy==1.26.3
    pip3 install pyqt6==6.7.0
    pip install starfile
    pip install biopython
@@ -30,10 +31,11 @@ Install dependencies
    conda install conda-forge::timm
    conda install seaborn mrcfile 
    pip install scikit-learn scikit-image
+   pip install wget
+   conda install -c schrodinger pymol
+   pip install napari     
    #for local documentation use (optional)
    conda install sphinx sphinx_rtd_theme
-   pip install wget
-   pip install napari     
 
 Test torch and fastai installation
 ==================================
