@@ -32,7 +32,6 @@ Install dependencies
    conda install seaborn mrcfile 
    pip install scikit-learn scikit-image
    pip install wget
-   conda install -c schrodinger pymol
    pip install napari     
    #for local documentation use (optional)
    conda install sphinx sphinx_rtd_theme

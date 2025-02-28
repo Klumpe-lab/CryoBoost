@@ -1,5 +1,4 @@
 from src.rw.librw import tiltSeriesMeta
-from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageStackParallel
 from src.rw.librw import mdocMeta
 import numpy as np
 import os,shutil,copy
@@ -102,6 +101,8 @@ def plotTiltStat(ts,outputFolder,plot=None):
     
     
 def plotFilterTiltsResults(ts,outputFolder,classLabelName=None,predScoreLabelName=None,titlNameLabel=None,plot=False,threads=24):
+    from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageStackParallel
+    
     if (plot==False):
         return
     
