@@ -50,9 +50,9 @@ def ellipsoid_mask(box_size, radii, outer_radii=None, decay_width=5.0, voxel_siz
         
     return mask
 
-def genMaskRelion(inputVolume,outputMask=None,threshold=0.001,extend=3,softEdgeSize=6,lowpass=20,threads=20):
+def genMaskRelion(inputVolume,outputMask=None,threshold=0.001,extend=3,softEdgeSize=6,lowpass=20,threads=20,envStr=""):
     
-    program='relion_mask_create'
+    program=' relion_mask_create'
     inp=' --i ' + inputVolume
     outp=' --o ' + outputMask
     thr=' --ini_threshold ' + str(threshold)
@@ -61,9 +61,9 @@ def genMaskRelion(inputVolume,outputMask=None,threshold=0.001,extend=3,softEdgeS
     lowp=' --lowpass ' + str(lowpass)
     threads=' --j ' + str(threads)
     
-    call=program + inp + outp
-    call+=thr + ext + soft + lowp + threads 
-
+    call=envStr + program + inp + outp
+    call=call + thr + ext + soft + lowp + threads 
+    
     print(call)
     subprocess.run(call,shell=True)
     

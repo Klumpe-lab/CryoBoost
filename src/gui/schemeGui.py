@@ -88,6 +88,7 @@ class MainUI(QMainWindow):
         cbdat.confPath=cbdat.CRYOBOOST_HOME + "/config/conf.yaml"
         cbdat.pipeRunner= None
         cbdat.conf=cbconfig(cbdat.confPath)     
+        cbdat.localEnv=cbdat.conf.confdata['local']['Environment']+";"
         cbdat.args=args
         cbdat.filtScheme=1
         if os.path.exists(str(args.proj) +  "/Schemes/" + args.scheme + "/scheme.star"):
@@ -821,6 +822,8 @@ class MainUI(QMainWindow):
                           val["Extend"],
                           val["SoftEdge"],  
                           val["LowPass"],
+                          threads=20,
+                          envStr=self.cbdat.localEnv,
                            )
             with QSignalBlocker(text_field):
                 text_field.setText(val["MaskPath"])
@@ -843,9 +846,8 @@ class MainUI(QMainWindow):
     
         
     def viewVolume(self,volume):
-        
-       os.system("imod " + volume)
-       os.system("chimera " + volume) 
+        os.system(self.cbdat.localEnv + " imod " + volume)
+        os.system(self.cbdat.localEnv + " chimera " + volume) 
        
     def setTmVolumeTemplateToJobTap(self):
         """

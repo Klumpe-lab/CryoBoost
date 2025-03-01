@@ -101,14 +101,13 @@ def plotTiltStat(ts,outputFolder,plot=None):
     
     
 def plotFilterTiltsResults(ts,outputFolder,classLabelName=None,predScoreLabelName=None,titlNameLabel=None,plot=False,threads=24):
-    from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageStackParallel
     
     if (plot==False):
         return
     
+    from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageStackParallel
     print("generting:" + outputFolder + "/logfile.pdf")
        
-    #from src.deepLearning.predictTilts_Binary import mrcFilesToPilImageS  
     
     pred_lables=ts.all_tilts_df[classLabelName]
     if (predScoreLabelName is not None):
