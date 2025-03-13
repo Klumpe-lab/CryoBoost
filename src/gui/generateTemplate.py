@@ -428,23 +428,33 @@ class TemplateGen(QDialog):
         pixS = float(self.line_edit_templatePixelSize.text())
         outFold = self.line_edit_outputFolder.text()
         szStr, ok = QInputDialog.getText(None, 'Enter sz:sy:sz Diameter in Ang', 'Input', text='100:500:100')
+       
+        if ok == False:
+            return
         outputName = outFold + os.path.sep + 'ellipsoid_' + szStr.replace(":", "_") + "_apix" + str(pixS) +".mrc"
-        szPix = np.array(szStr.split(":"), dtype=float)/pixS   
-        offset = 32
-        max_size = int(np.ceil(np.max(szPix*1.2) + offset - 1) // offset) * offset
-        box_size = int(max_size)
-        if box_size<self.minTemplateSize:
-            box_size=self.minTemplateSize
-        msg=statusMessageBox("Generating Mask: " + outputName)
-        ellipsoid_mask(box_size,np.round(szPix/2),np.round(szPix/2),decay_width=0.0, voxel_size=pixS, output_path=outputName)
-        outputNameBlack=os.path.splitext(outputName)[0] + "_black"  + os.path.splitext(outputName)[1]
-        outputNameWhite=os.path.splitext(outputName)[0] + "_white"  + os.path.splitext(outputName)[1]
-        
-        msg=statusMessageBox("Filtering And Inverting Mask: " + outputNameBlack)
-        gaussian_lowpass_mrc(outputName,outputNameBlack,45,invert_contrast=1)
-        gaussian_lowpass_mrc(outputName,outputNameWhite,45,invert_contrast=0)
-        self.line_edit_mapFile.setText(outputNameBlack)
-        msg.close()
+        try:
+            szPix = np.array(szStr.split(":"), dtype=float)/pixS   
+            if len(szPix) != 3:
+                messageBox("Problem","Size must be 3 numbers seperated by : e.g 500:500:300")
+                return
+            offset = 32
+            max_size = int(np.ceil(np.max(szPix*1.2) + offset - 1) // offset) * offset
+            box_size = int(max_size)
+            if box_size<self.minTemplateSize:
+                box_size=self.minTemplateSize
+            msg=statusMessageBox("Generating Mask: " + outputName)
+            ellipsoid_mask(box_size,np.round(szPix/2),np.round(szPix/2),decay_width=0.0, voxel_size=pixS, output_path=outputName)
+            outputNameBlack=os.path.splitext(outputName)[0] + "_black"  + os.path.splitext(outputName)[1]
+            outputNameWhite=os.path.splitext(outputName)[0] + "_white"  + os.path.splitext(outputName)[1]
+            
+            msg=statusMessageBox("Filtering And Inverting Mask: " + outputNameBlack)
+            gaussian_lowpass_mrc(outputName,outputNameBlack,45,invert_contrast=1)
+            gaussian_lowpass_mrc(outputName,outputNameWhite,45,invert_contrast=0)
+            self.line_edit_mapFile.setText(outputNameBlack)
+            msg.close()
+        except Exception as e:
+            print(f"Error generating basic shape: {str(e)}")
+            print(f"Error type: {type(e).__name__}")
         
     def viewMap(self):
         try:

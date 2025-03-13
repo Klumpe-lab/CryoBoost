@@ -131,7 +131,8 @@ Reconstruct Particle
    Box size: 384
    Cropped Box size: 224
    Submit to queue: yes
-   
+   Threads: 24
+
 ++++++++++++++++++++++
 Class3d
 ++++++++++++++++++++++
@@ -142,10 +143,11 @@ Class3d
    RefereceMap: Reconstruct/job030/merged.mrc
    Inital Lowpass Filter (A): 45
    Symmetry: I1
-   
+   Number of Iterations: 15
+  
+   Mask Diameter: 575
    Pre-read all particles into RAM: yes
-   Box size: 384
-   Cropped Box size: 224
+   Use GPU acceleration: yes
    Submit to queue: yes
 
 
@@ -159,11 +161,11 @@ Mask creation
    #Remove unstructured inner part
    cd myProjct
    module load EMAN
-   e2proc3d.py InitialModel/job024/initial_model.mrc  InitialModel/job024/initial_model4Mask.mrc --process=mask.sharp:inner_radius=65 (73)
-   Input 3d Map: InitialModel/job024/initial_model4Mask.mrc 
+   e2proc3d.py Class3D/job025/run_it015_class001.mrc Class3D/job025/vol4Mask.mrc --process=mask.sharp:inner_radius=73
+   Input 3d Map: Class3D/job025/vol4Mask.mrc 
    Lowpass: 18
-   Inital binarisation threshold: 0.1
-   Extend binary Map this many pixels: 4 (5)
+   Inital binarisation threshold: 0.15
+   Extend binary Map this many pixels: 5
    Add soft-edge of this many pixels: 7
    
 
@@ -179,7 +181,7 @@ Refine3d
    Initial Lowpass Filter: 40
    Symmetry: I1
    Use Flattern Solvent CTF: yes
-   Use Blush Regularisation: yes
+   #Use Blush Regularisation: yes
    Pre-read all particles into RAM: yes
    Use GPU acceleration: yes
    Submit to queue: yes
@@ -191,7 +193,14 @@ Reconstruct
 
 .. code-block:: bash
    
-   Tau Fudge == 1   
+   Input Optimisation Set Refine3d/job26/optimisation_set.star
+   
+   Symmetry: I1
+   Pre-read all particles into RAM: yes
+   Box size: 384
+   Cropped Box size: 224
+   Submit to queue: yes
+   Threads: 24   
 
 
 ++++++++++++++++++
@@ -200,8 +209,9 @@ PostProcessing
 
 .. code-block:: bash
    
-   Tau Fudge == 1   
-
+   Reference Mask: MaskCreate/job025/mask.mrc 
+   Unfiltered Map: Reconstruct/job27/half1.mrc
+   
 
 +++++++++++++++++
 Bayesian Polish
@@ -209,7 +219,14 @@ Bayesian Polish
 
 .. code-block:: bash
    
-   Tau Fudge == 1   
+   Reference Half Maps:  Reconstruct/job27/half1.mrc   
+   Referece Mask: Reconstruct/job27/mask.mrc   
+   Input PostProcess star: PostProcess/job28/post_process.star 
+   Box Size: 256
+   Max Position_error: 7
+   Fit Per Particle Motion: yes
+   Number of Threads: 24
+
 
 +++++++++++++++
 Extract 
@@ -217,7 +234,26 @@ Extract
 
 .. code-block:: bash
    
-   Tau Fudge == 1   
+   Input Optimisation Set: Polish/job028/optimisation_set.star
+   Box Size: 384
+   Cropped Box Size: 224   
+   Threads: 24
+
+++++++++++++++
+Reconstruct
+++++++++++++++
+
+.. code-block:: bash
+   
+   Input Optimisation Set Extract/job030/optimisation_set.star
+   
+   Symmetry: I1
+   Pre-read all particles into RAM: yes
+   Box size: 384
+   Cropped Box size: 224
+   Submit to queue: yes
+   Threads: 24   
+
 
 ++++++++++++++++
 PostProcessing
@@ -225,7 +261,9 @@ PostProcessing
 
 .. code-block:: bash
    
-   Tau Fudge == 1   
+   Unfiltered Map: Reconstruct/job29/half1.mrc   
+   Reference Mask: MaskCreate/job025/mask.mrc 
+
 
 +++++++++++++++
 CTF Refinement
@@ -233,16 +271,10 @@ CTF Refinement
 
 .. code-block:: bash
    
-   Tau Fudge == 1   
-
-+++++++++++++++
-Extract 
-+++++++++++++++
-
-.. code-block:: bash
-   
-   Tau Fudge == 1   
-
+   Input Optimisation Set: Extract/job29/optimisation_set.star
+   Reference Mask: MaskCreate/job025/mask.mrc 
+   Input PostProcess star: PostProcess/job28/post_process.star 
+   Defocus Regularisation Lamda: 0.1
 
 ++++++++++++++++++
 Reconstruct
@@ -250,7 +282,14 @@ Reconstruct
 
 .. code-block:: bash
    
-   Tau Fudge == 1   
+   Input Optimisation Set CtfRefine/job030/optimisation_set.star
+   
+   Symmetry: I1
+   Pre-read all particles into RAM: yes
+   Box size: 384
+   Cropped Box size: 224
+   Submit to queue: yes
+   Threads: 24      
 
 ++++++++++++++++
 PostProcessing
@@ -258,7 +297,8 @@ PostProcessing
 
 .. code-block:: bash
    
-   Tau Fudge == 1   
+   Unfiltered Map: Reconstruct/job31/half1.mrc   
+   Reference Mask: MaskCreate/job025/mask.mrc 
 
 
 Add new data (from a new folder) to an existing project 

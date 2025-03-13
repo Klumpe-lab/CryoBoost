@@ -79,7 +79,7 @@ class particleListMeta:
             os.makedirs(outputPath, exist_ok=True)
             for tomo in tomos:
                 tmp=tomo.split('_')
-                tomoStarName = '_'.join(tmp[:-1])+'.tomostar'
+                tomoStarName = tomo + '_'.join(tmp[:-1])+'.tomostar'
                 df = pd.DataFrame()
                 coords=self.getImodCoords(tomo,tomoSize)
                 angles=self.getAngles(tomo)

@@ -1238,7 +1238,7 @@ class MainUI(QMainWindow):
     def setInvertDefocusHandToJobTap(self):
         params_dict = {"flip_tiltseries_hand": self.textEdit_invertDefocusHand.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 
-        print("setting Warp Handness same ass Relion")
+        print("setting Warp Handness same as Relion")
         if self.textEdit_invertDefocusHand.toPlainText()=="Yes":
             print("  Warp Handness set_flip")
             params_dict = {"param4_value": "set_flip"} 
