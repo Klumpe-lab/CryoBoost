@@ -221,6 +221,7 @@ Bayesian Polish
 
 .. code-block:: bash
    
+   Input Optimisation Set: Refine3d/job019/optimisation_set.star
    Reference Half Maps:  Reconstruct/job020/half1.mrc   
    Referece Mask: MaskCreate/job018/mask.mrc   
    Input PostProcess star: PostProcess/job021/post_process.star 
@@ -241,14 +242,14 @@ Extract
    Cropped Box Size: 224   
    Threads: 24
 
+
 ++++++++++++++
 Reconstruct
-+++++++++++++
+++++++++++++++
 
 .. code-block:: bash
    
    Input Optimisation Set Extract/job024/optimisation_set.star
-   
    Symmetry: I1
    Pre-read all particles into RAM: yes
    Box size: 384
