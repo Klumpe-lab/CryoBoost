@@ -24,7 +24,7 @@ Adapt Tomogram Parameters
 
 #. Click on Auto to create a prefix.
 
-#. Set Invert Tiltangel and Invert Defocus Hand to No.
+#. Set Invert Tiltangel to No and Invert Defocus Hand to Yes.
 
 #. Alignment: Set sample thickness to 180nm
 
@@ -50,7 +50,7 @@ Adapt Copia Particle Parameters
 
 #. Enter 5 for Extend and SoftEdge (Relion Mask parameters) and OK
 
-#. Enter 180 as angular increment and
+#. Enter 90 as angular increment and
 
 #. Enter 550 as diamter for peak extraction (avoid mult. extraction)
 
@@ -87,7 +87,9 @@ Adapt 26S Particle Parameters
 
 #. Enter 250 as diameter for peak extraction (half 26S diameter rod shape)
 
-#. Enter 176 cropped (used) box size in pixels
+#. Enter 600 Max Num of particles
+
+#. Enter 5 for Number of faslse positives
 
 #. Enter 224 uncropped box size in pixels
 
@@ -124,7 +126,7 @@ Reconstruct Particle
 
 .. code-block:: bash
    
-   Input Optimisation Set Extract/job20/optimisation_set.star
+   Input Optimisation Set Extract/job12/optimisation_set.star
    
    Symmetry: I1
    Pre-read all particles into RAM: yes
@@ -139,8 +141,8 @@ Class3d
 
 .. code-block:: bash
    
-   Input: Optimisation Set Extract/job20/optimisation_set.star
-   RefereceMap: Reconstruct/job030/merged.mrc
+   Input: Optimisation Set Extract/job12/optimisation_set.star
+   RefereceMap: Reconstruct/job016/merged.mrc
    Inital Lowpass Filter (A): 45
    Symmetry: I1
    Number of Iterations: 15
@@ -161,8 +163,8 @@ Mask creation
    #Remove unstructured inner part
    cd myProjct
    module load EMAN
-   e2proc3d.py Class3D/job025/run_it015_class001.mrc Class3D/job025/vol4Mask.mrc --process=mask.sharp:inner_radius=73
-   Input 3d Map: Class3D/job025/vol4Mask.mrc 
+   e2proc3d.py Class3D/job017/run_it015_class001.mrc Class3D/job017/vol4Mask.mrc --process=mask.sharp:inner_radius=73
+   Input 3d Map: Class3D/job017/vol4Mask.mrc 
    Lowpass: 18
    Inital binarisation threshold: 0.15
    Extend binary Map this many pixels: 5
@@ -175,13 +177,13 @@ Refine3d
 
 .. code-block:: bash
    
-   Input Optimisation Set Extract/job020/optimisation_set.star
-   Reference Map: InitialModel/job024/initial_model.mrc 
-   Reference Mask: MaskCreate/job025/mask.mrc 
+   Input Optimisation Set Extract/job012/optimisation_set.star
+   Reference Map:  Class3D/job017/run_it015_class001.mrc
+   Reference Mask: MaskCreate/job018/mask.mrc 
+   Mask Diameter: 575
    Initial Lowpass Filter: 40
    Symmetry: I1
    Use Flattern Solvent CTF: yes
-   #Use Blush Regularisation: yes
    Pre-read all particles into RAM: yes
    Use GPU acceleration: yes
    Submit to queue: yes
@@ -193,7 +195,7 @@ Reconstruct
 
 .. code-block:: bash
    
-   Input Optimisation Set Refine3d/job26/optimisation_set.star
+   Input Optimisation Set Refine3d/job019/optimisation_set.star
    
    Symmetry: I1
    Pre-read all particles into RAM: yes
@@ -209,8 +211,8 @@ PostProcessing
 
 .. code-block:: bash
    
-   Reference Mask: MaskCreate/job025/mask.mrc 
-   Unfiltered Map: Reconstruct/job27/half1.mrc
+   Reference Mask: MaskCreate/job018/mask.mrc 
+   Unfiltered Map: Reconstruct/job20/half1.mrc
    
 
 +++++++++++++++++
@@ -219,14 +221,14 @@ Bayesian Polish
 
 .. code-block:: bash
    
-   Reference Half Maps:  Reconstruct/job27/half1.mrc   
-   Referece Mask: Reconstruct/job27/mask.mrc   
-   Input PostProcess star: PostProcess/job28/post_process.star 
+   Reference Half Maps:  Reconstruct/job020/half1.mrc   
+   Referece Mask: MaskCreate/job018/mask.mrc   
+   Input PostProcess star: PostProcess/job021/post_process.star 
    Box Size: 256
    Max Position_error: 7
    Fit Per Particle Motion: yes
    Number of Threads: 24
-
+   Submit to queue: yes
 
 +++++++++++++++
 Extract 
@@ -234,18 +236,18 @@ Extract
 
 .. code-block:: bash
    
-   Input Optimisation Set: Polish/job028/optimisation_set.star
+   Input Optimisation Set: Polish/job022/optimisation_set.star
    Box Size: 384
    Cropped Box Size: 224   
    Threads: 24
 
 ++++++++++++++
 Reconstruct
-++++++++++++++
++++++++++++++
 
 .. code-block:: bash
    
-   Input Optimisation Set Extract/job030/optimisation_set.star
+   Input Optimisation Set Extract/job024/optimisation_set.star
    
    Symmetry: I1
    Pre-read all particles into RAM: yes
@@ -261,8 +263,8 @@ PostProcessing
 
 .. code-block:: bash
    
-   Unfiltered Map: Reconstruct/job29/half1.mrc   
-   Reference Mask: MaskCreate/job025/mask.mrc 
+   Unfiltered Map: Reconstruct/job025/half1.mrc   
+   Reference Mask: MaskCreate/job018/mask.mrc 
 
 
 +++++++++++++++
@@ -271,10 +273,12 @@ CTF Refinement
 
 .. code-block:: bash
    
-   Input Optimisation Set: Extract/job29/optimisation_set.star
-   Reference Mask: MaskCreate/job025/mask.mrc 
-   Input PostProcess star: PostProcess/job28/post_process.star 
-   Defocus Regularisation Lamda: 0.1
+   Input Optimisation Set: Extract/job024/optimisation_set.star
+   Reference Mask: MaskCreate/job018/mask.mrc 
+   Input PostProcess star: PostProcess/job26/post_process.star 
+   Defocus Search Range: 6000
+   Defocus Regularisation Lamda: 0.2
+
 
 ++++++++++++++++++
 Reconstruct
@@ -282,7 +286,7 @@ Reconstruct
 
 .. code-block:: bash
    
-   Input Optimisation Set CtfRefine/job030/optimisation_set.star
+   Input Optimisation Set CtfRefine/job028/optimisation_set.star
    
    Symmetry: I1
    Pre-read all particles into RAM: yes
@@ -297,8 +301,117 @@ PostProcessing
 
 .. code-block:: bash
    
-   Unfiltered Map: Reconstruct/job31/half1.mrc   
-   Reference Mask: MaskCreate/job025/mask.mrc 
+   Unfiltered Map: Reconstruct/job029/half1.mrc   
+   Reference Mask: MaskCreate/job018/mask.mrc 
+
+
+Processing 26S
+================
+
+++++++++++++++++++++++
+Reconstruct Particle
+++++++++++++++++++++++
+
+.. code-block:: bash
+   
+   Input Optimisation Set Extract/job015/optimisation_set.star
+   
+   Symmetry: C2
+   Pre-read all particles into RAM: yes
+   Box size: 256
+   Cropped Box size: 208
+   Submit to queue: yes
+   Threads: 24
+
+++++++++++++++
+Mask creation
+++++++++++++++
+
+.. code-block:: bash
+   
+   Input 3d Map: Class3D/job017/vol4Mask.mrc 
+   Lowpass: 20
+   Inital binarisation threshold: 6
+   Extend binary Map this many pixels: 12
+   Add soft-edge of this many pixels: 8
+
+++++++++++++++++++++++
+Class3d
+++++++++++++++++++++++
+
+.. code-block:: bash
+   
+   Input: Optimisation Set Extract/job20/optimisation_set.star
+   RefereceMap: Reconstruct/job030/merged.mrc
+   Input Mask: MaskCreate/job017/mask.mrc
+   Inital Lowpass Filter (A): 60
+   Symmetry: C2
+   Number of Iterations: 30
+   Number of Classes: 9
+   Tau Fudge: 1.05
+   Mask Diameter: 510
+   Pre-read all particles into RAM: yes
+   Use GPU acceleration: yes
+   Submit to queue: yes
+
+++++++++++++++++++++++
+Subset selection
+++++++++++++++++++++++
+
+.. code-block:: bash
+   #Select the cleanest 26S class
+   Input: Optimisation Set Class3D/job20/optimisation_set.star
+
+
++++++++++
+Refine3d
++++++++++
+
+.. code-block:: bash
+   
+   Input Optimisation Set Extract/job0xx/optimisation_set.star
+   Reference Map:  Class3D/job0xx/run_it015_class001.mrc
+   Reference Mask: MaskCreate/job0xx/mask.mrc 
+   Mask Diameter: 510
+   Initial Lowpass Filter: 60
+   Symmetry: I1
+   Use Flattern Solvent CTF: yes
+   
+   Pre-read all particles into RAM: yes
+   Use GPU acceleration: yes
+   Submit to queue: yes
+
+++++++++++++++++++++++
+Reconstruct Particle
+++++++++++++++++++++++
+
+.. code-block:: bash
+   
+   Input Optimisation Set Extract/job015/optimisation_set.star
+   
+   Symmetry: C2
+   Pre-read all particles into RAM: yes
+   Box size: 256
+   Cropped Box size: 208
+   Submit to queue: yes
+   Threads: 24
+
+++++++++++++++++
+PostProcessing
+++++++++++++++++
+
+.. code-block:: bash
+   
+   Unfiltered Map: Reconstruct/job029/half1.mrc   
+   Reference Mask: MaskCreate/job018/mask.mrc 
+
+
+
+Co-Refine both species in M 
+============================
+
+
+
 
 
 Add new data (from a new folder) to an existing project 

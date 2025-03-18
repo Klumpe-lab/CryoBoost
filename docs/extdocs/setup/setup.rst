@@ -70,7 +70,14 @@ Adapt /path/to/my/Folder/CryoBoost/.cbenv
    export CRYOBOOST_PYTHON_PATH=/path/to/my/pythonInstall/conda3/envs/cryoboost/bin/python
    export PYTHONPATH=$CRYOBOOST_HOME
    export PATH=$CRYOBOOST_HOME/bin:$PATH
-  
+
+Adapt /path/to/my/Folder/CryoBoost/config/qsub/*.sh
+==========================================
+.. code-block:: bash   
+   
+   source /path/to/my/Folder/CryoBoost/.cbenv
+   
+
 
 Further requiremets
 =================
