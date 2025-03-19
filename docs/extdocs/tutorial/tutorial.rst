@@ -87,7 +87,7 @@ Adapt 26S Particle Parameters
 
 #. Enter 250 as diameter for peak extraction (half 26S diameter rod shape)
 
-#. Enter 1500 Max Num of particles
+#. Enter 1600 Max Num of particles
 
 #. Enter 5 for Number of faslse positives
 
@@ -404,7 +404,7 @@ Reconstruct Particle
 PostProcessing
 ++++++++++++++++
 
-.. code-block:: bash
+.. code-block:: bashcrboost_pipe.py 'data/raw/rubiscoK3/frames/Krios_K3_47_000*.tif' -m 'data/raw/rubiscoK3/mdoc/G2t1.st.mdoc' --proj tmpOut/K3^Cs "warp_tomo_prep" 
    
    Unfiltered Map: Reconstruct/job034/half1.mrc   
    Reference Mask: MaskCreate/job030/mask.mrc 
@@ -414,7 +414,7 @@ PostProcessing
 Co-Refine both species in M 
 ============================
 
-
+.. code-block:: bash
 
 
 
