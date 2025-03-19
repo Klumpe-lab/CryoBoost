@@ -249,7 +249,7 @@ Reconstruct
 
 .. code-block:: bash
    
-   Input Optimisation Set Extract/job024/optimisation_set.star
+   Input Optimisation Set Extract/job023/optimisation_set.star
    Symmetry: I1
    Pre-read all particles into RAM: yes
    Box size: 384
@@ -274,7 +274,8 @@ CTF Refinement
 
 .. code-block:: bash
    
-   Input Optimisation Set: Extract/job024/optimisation_set.star
+   Input Optimisation Set: Extract/job023/optimisation_set.star
+   Reference Half Maps:  Reconstruct/job024/half1.mrc 
    Reference Mask: MaskCreate/job018/mask.mrc 
    Input PostProcess star: PostProcess/job26/post_process.star 
    Defocus Search Range: 6000
@@ -287,7 +288,7 @@ Reconstruct
 
 .. code-block:: bash
    
-   Input Optimisation Set CtfRefine/job028/optimisation_set.star
+   Input Optimisation Set CtfRefine/job026/optimisation_set.star
    
    Symmetry: I1
    Pre-read all particles into RAM: yes
@@ -302,7 +303,7 @@ PostProcessing
 
 .. code-block:: bash
    
-   Unfiltered Map: Reconstruct/job029/half1.mrc   
+   Unfiltered Map: Reconstruct/job027/half1.mrc   
    Reference Mask: MaskCreate/job018/mask.mrc 
 
 
