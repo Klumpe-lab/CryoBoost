@@ -87,11 +87,11 @@ Adapt 26S Particle Parameters
 
 #. Enter 250 as diameter for peak extraction (half 26S diameter rod shape)
 
-#. Enter 600 Max Num of particles
+#. Enter 1500 Max Num of particles
 
 #. Enter 5 for Number of faslse positives
 
-#. Enter 224 uncropped box size in pixels
+#. Enter 208 uncropped box size in pixels
 
 #. Move to Start Relion tap.
 
@@ -331,7 +331,7 @@ Mask creation
 
 .. code-block:: bash
    
-   Input 3d Map: Class3D/job017/vol4Mask.mrc 
+   Input 3d Map: Reconstruct/job029/vol4Mask.mrc 
    Lowpass: 20
    Inital binarisation threshold: 6
    Extend binary Map this many pixels: 12
@@ -343,9 +343,9 @@ Class3d
 
 .. code-block:: bash
    
-   Input: Optimisation Set Extract/job20/optimisation_set.star
-   RefereceMap: Reconstruct/job030/merged.mrc
-   Input Mask: MaskCreate/job017/mask.mrc
+   Input: Optimisation Set Extract/job015/optimisation_set.star
+   RefereceMap: Reconstruct/job029/merged.mrc
+   Input Mask: MaskCreate/job030/mask.mrc
    Inital Lowpass Filter (A): 60
    Symmetry: C2
    Number of Iterations: 30
@@ -362,7 +362,7 @@ Subset selection
 
 .. code-block:: bash
    #Select the cleanest 26S class
-   Input: Optimisation Set Class3D/job20/optimisation_set.star
+   Input: Optimisation Set Class3D/job31/optimisation_set.star
 
 
 +++++++++
@@ -371,12 +371,14 @@ Refine3d
 
 .. code-block:: bash
    
-   Input Optimisation Set Extract/job0xx/optimisation_set.star
-   Reference Map:  Class3D/job0xx/run_it015_class001.mrc
-   Reference Mask: MaskCreate/job0xx/mask.mrc 
+   Input Optimisation Set; 
+   Input Particle List: Select/job032/particles.star
+   Input Tomogram Set: External/job014/tomograms.star
+   Reference Map:  Reconstruct/job029/merged.mrc
+   Reference Mask: MaskCreate/job030/mask.mrc
    Mask Diameter: 510
    Initial Lowpass Filter: 60
-   Symmetry: I1
+   Symmetry: C2
    Use Flattern Solvent CTF: yes
    
    Pre-read all particles into RAM: yes
@@ -389,7 +391,7 @@ Reconstruct Particle
 
 .. code-block:: bash
    
-   Input Optimisation Set Extract/job015/optimisation_set.star
+   Input Optimisation Set Extract/job033/optimisation_set.star
    
    Symmetry: C2
    Pre-read all particles into RAM: yes
@@ -404,9 +406,9 @@ PostProcessing
 
 .. code-block:: bash
    
-   Unfiltered Map: Reconstruct/job029/half1.mrc   
-   Reference Mask: MaskCreate/job018/mask.mrc 
-
+   Unfiltered Map: Reconstruct/job034/half1.mrc   
+   Reference Mask: MaskCreate/job030/mask.mrc 
+   #should be below 40A
 
 
 Co-Refine both species in M 
