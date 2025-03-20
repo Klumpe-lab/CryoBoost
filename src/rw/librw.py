@@ -875,6 +875,7 @@ class dataImport():
             lineTmp=line.replace("SubFramePath = \\","")
             lineTmp=line.replace("SubFramePath =","")
             lineTmp=os.path.basename(lineTmp.replace('\\',"/"))
+            lineTmp=lineTmp.replace(" ","")
             if self.relcompPrefix:
               baseName=os.path.splitext(os.path.splitext(inputMdoc)[0])[0]
               lines[i] = "SubFramePath = " + baseName + prefix + lineTmp

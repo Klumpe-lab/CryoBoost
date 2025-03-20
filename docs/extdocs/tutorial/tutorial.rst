@@ -85,9 +85,9 @@ Adapt 26S Particle Parameters
 
 #. Enter 12 to set Angular Increment
 
-#. Enter 250 as diameter for peak extraction (half 26S diameter rod shape)
+#. Enter 200 as diameter for peak extraction (half 26S diameter rod shape)
 
-#. Enter 1600 Max Num of particles
+#. Enter 1500 Max Num of particles
 
 #. Enter 5 for Number of faslse positives
 
@@ -350,8 +350,12 @@ Class3d
    Symmetry: C2
    Number of Iterations: 30
    Number of Classes: 9
+   Angular Sampling Interval: 3.7
+   Offset Search Range: 8
+   Perform Local Angular Search: Yes
+   Local Anguglar Search Range: 24
    Tau Fudge: 1.05
-   Mask Diameter: 510
+   Mask Diameter: 550
    Pre-read all particles into RAM: yes
    Use GPU acceleration: yes
    Submit to queue: yes

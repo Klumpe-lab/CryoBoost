@@ -99,7 +99,7 @@ class tsAlignment(warpWrapperBase):
             command=["WarpTools", "ts_etomo_patches",
                     "--settings",self.args.out_dir + "/" + self.tsSettingsName,
                     "--angpix",str(self.args.rescale_angpixs),
-                    "--patch_size",str(float(self.args.imod_patch_size_and_overlap.split(":")[0])*10),
+                    "--patch_size",str(float(self.args.imod_patch_size_and_overlap.split(":")[0])*1),
                     ]
         
         self.result=run_wrapperCommand(command,tag="run_tsAlignment",relionProj=self.relProj)
