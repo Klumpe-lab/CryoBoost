@@ -800,6 +800,9 @@ class MainUI(QMainWindow):
         text_field = widget.findChild(QLineEdit, "line_path_tm_template_volumeMask") 
         text_fieldTempl = widget.findChild(QLineEdit, "line_path_tm_template_volume") 
         inputVol=text_fieldTempl.text().replace("_black.mrc","_white.mrc")
+        if not os.path.isfile(inputVol):
+            messageBox("Problem","No Template Volume. Generate Template Volume first")
+            return
         maskName=os.path.splitext(inputVol.replace("_white.mrc",".mrc"))[0]+"_mask.mrc"
         lowpass=20
         thr=caclThreshold(inputVol,lowpass=None)
@@ -927,16 +930,17 @@ class MainUI(QMainWindow):
             resizedVolNameB=os.path.join(projPath,tmBase +str(newBox)+"_apix"+str(pixSRec) + "_mask.mrc")
         
         os.makedirs(os.path.dirname(resizedVolNameB),exist_ok=True)
+        envStr=self.cbdat.localEnv
         processVolume(inputVolName,resizedVolNameB, voxel_size_angstrom=pixSTemplate,
                 voxel_size_angstrom_out_header=pixSRec,voxel_size_angstrom_output=pixSRec,
-                box_size_output=newBox,invert_contrast=invert)
+                box_size_output=newBox,invert_contrast=invert,envStr=envStr)
     
         if checkInvert:
             resizedVolNameW=os.path.join(projPath,tmBase +str(newBox)+"_apix"+str(pixSRec) + "_white.mrc")
             invI=invert==False
             processVolume(inputVolName,resizedVolNameW, voxel_size_angstrom=pixSTemplate,
                         voxel_size_angstrom_out_header=pixSRec,voxel_size_angstrom_output=pixSRec,
-                        box_size_output=newBox,invert_contrast=invI)
+                        box_size_output=newBox,invert_contrast=invI,envStr=envStr)
         
         
         return resizedVolNameB

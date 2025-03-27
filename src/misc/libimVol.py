@@ -69,7 +69,7 @@ def gaussian_lowpass_mrc(input_mrc, output_mrc: str=None, cutoff_angstrom: float
 
 def processVolume(input_mrc: str, output_mrc: str, cutoff_angstrom: float=None, cutoff_edge_width: float=6,
                   voxel_size_angstrom: float = None,voxel_size_angstrom_out_header: float = None ,invert_contrast: bool = False,voxel_size_angstrom_output: float = None,
-                  box_size_output: float = None):
+                  box_size_output: float = None,envStr: str = None):
     program='relion_image_handler'
     inp=' --i ' + input_mrc
     outp=' --o ' + output_mrc
@@ -87,8 +87,13 @@ def processVolume(input_mrc: str, output_mrc: str, cutoff_angstrom: float=None, 
         voxel_size_outHeader="  --force_header_angpix " + str(voxel_size_angstrom_out_header)
     if voxel_size_angstrom is not None:
         voxelIn=" --angpix " + str(voxel_size_angstrom)
+    if envStr is not None:
+        if not envStr.endswith(';'):
+            envStr+=";"
+        call=envStr + program + inp + outp
+    else:
+        call=program + inp + outp 
     
-    call=program + inp + outp 
     if invert_contrast:
         call+=invert
     if cutoff_angstrom is not None:

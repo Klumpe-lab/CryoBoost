@@ -398,6 +398,7 @@ class TemplateGen(QDialog):
         "Box": str(int(boxTM)),
         }
         dialog = MultiInputDialog(fields)
+        envStr = self.conf.confdata['local']['Environment']
         if dialog.exec() == QDialog.DialogCode.Accepted:
             val = dialog.getInputs()
             resTM=round(float(val['ResolutionInAng']),2)
@@ -411,10 +412,10 @@ class TemplateGen(QDialog):
             bseFoldName=os.path.dirname(map_file)+os.path.sep+tag
             mapWhite= bseFoldName+"_white.mrc"
             processVolume(map_file,mapWhite,resTM,invert_contrast=0,voxel_size_angstrom_output=pixsTm,box_size_output=boxTM,voxel_size_angstrom=pixsEMDB,
-                            voxel_size_angstrom_out_header=pixsTm)
+                            voxel_size_angstrom_out_header=pixsTm,envStr=envStr)
             mapBlack = bseFoldName+"_black.mrc"
             processVolume(map_file,mapBlack,resTM,invert_contrast=1,voxel_size_angstrom_output=pixsTm,box_size_output=boxTM,voxel_size_angstrom=pixsEMDB,
-                            voxel_size_angstrom_out_header=pixsTm)
+                            voxel_size_angstrom_out_header=pixsTm,envStr=envStr)
             self.line_edit_mapFile.setText(mapBlack)
         return True
    
