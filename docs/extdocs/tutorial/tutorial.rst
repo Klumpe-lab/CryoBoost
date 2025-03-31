@@ -16,7 +16,7 @@ Open CryoBoost
    crboost_pipe.py 
 
 Adapt Tomogram Parameters
-======================
+==========================
 
 .. image:: img/setup.png
 
@@ -127,17 +127,18 @@ Reconstruct Particle
 .. code-block:: bash
    
    Input Optimisation Set Extract/job12/optimisation_set.star
-   
    Symmetry: I1
-   Pre-read all particles into RAM: yes
    Box size: 384
    Cropped Box size: 224
    Submit to queue: yes
    Threads: 24
 
 ++++++++++++++++++++++
-Class3d
+Class3d 
 ++++++++++++++++++++++
+
+generate a starting model good enough for mask creation
+"one class classification is just faster for that purpose"
 
 .. code-block:: bash
    
@@ -145,8 +146,8 @@ Class3d
    RefereceMap: Reconstruct/job016/merged.mrc
    Inital Lowpass Filter (A): 45
    Symmetry: I1
+   Number of classes: 1
    Number of Iterations: 15
-  
    Mask Diameter: 575
    Pre-read all particles into RAM: yes
    Use GPU acceleration: yes
@@ -158,22 +159,30 @@ Class3d
 Mask creation
 ++++++++++++++
 
+
 .. code-block:: bash
    
    #Remove unstructured inner part
    cd myProjct
    module load EMAN
    e2proc3d.py Class3D/job017/run_it015_class001.mrc Class3D/job017/vol4Mask.mrc --process=mask.sharp:inner_radius=73
+   #Now we use the masked map to generate a soft mask with relion
    Input 3d Map: Class3D/job017/vol4Mask.mrc 
    Lowpass: 18
    Inital binarisation threshold: 0.15
    Extend binary Map this many pixels: 5
    Add soft-edge of this many pixels: 7
+
+.. figure:: img/maskCopia.png
+   :width: 220px
    
+   inner part removed
+
 
 +++++++++
 Refine3d
 +++++++++
+
 
 .. code-block:: bash
    
@@ -183,11 +192,30 @@ Refine3d
    Mask Diameter: 575
    Initial Lowpass Filter: 40
    Symmetry: I1
-   Use Flattern Solvent CTF: yes
+   Use solvent flattenned FSC: yes
    Pre-read all particles into RAM: yes
    Use GPU acceleration: yes
    Submit to queue: yes
+
+
+
+relion full command
+
+.. container:: toggle  
    
+   .. container:: content
+     
+      relion XXXX command
+
+
+
+.. figure:: img/copiaRefindedIso.png
+   :width: 220px
+   
+   8.5A resolution
+
+
+
 
 ++++++++++++++
 Reconstruct
@@ -251,7 +279,6 @@ Reconstruct
    
    Input Optimisation Set Extract/job023/optimisation_set.star
    Symmetry: I1
-   Pre-read all particles into RAM: yes
    Box size: 384
    Cropped Box size: 224
    Submit to queue: yes
@@ -278,8 +305,22 @@ CTF Refinement
    Reference Half Maps:  Reconstruct/job024/half1.mrc 
    Reference Mask: MaskCreate/job018/mask.mrc 
    Input PostProcess star: PostProcess/job26/post_process.star 
+   Box size: 256
    Defocus Search Range: 6000
    Defocus Regularisation Lamda: 0.2
+   Submit to queue: yes
+   Threads: 24   
+
++++++++++++++++
+Extract 
++++++++++++++++
+
+.. code-block:: bash
+   
+   Input Optimisation Set: CtfRefine/job027/optimisation_set.star
+   Box Size: 384
+   Cropped Box Size: 224   
+   Threads: 24
 
 
 ++++++++++++++++++
@@ -288,10 +329,8 @@ Reconstruct
 
 .. code-block:: bash
    
-   Input Optimisation Set CtfRefine/job026/optimisation_set.star
-   
+   Input Optimisation Set CtfRefine/job028/optimisation_set.star
    Symmetry: I1
-   Pre-read all particles into RAM: yes
    Box size: 384
    Cropped Box size: 224
    Submit to queue: yes
@@ -303,8 +342,16 @@ PostProcessing
 
 .. code-block:: bash
    
-   Unfiltered Map: Reconstruct/job027/half1.mrc   
+   Unfiltered Map: Reconstruct/job029/half1.mrc   
    Reference Mask: MaskCreate/job018/mask.mrc 
+
+.. figure:: img/finalPostProcessing.png
+   :width: 220px
+   
+   7.5A resolution
+
+
+
 
 
 Processing 26S
@@ -331,7 +378,7 @@ Mask creation
 
 .. code-block:: bash
    
-   Input 3d Map: Reconstruct/job029/vol4Mask.mrc 
+   Input 3d Map: Reconstruct/job031/merged.mrc 
    Lowpass: 20
    Inital binarisation threshold: 6
    Extend binary Map this many pixels: 12
@@ -344,8 +391,8 @@ Class3d
 .. code-block:: bash
    
    Input: Optimisation Set Extract/job015/optimisation_set.star
-   RefereceMap: Reconstruct/job029/merged.mrc
-   Input Mask: MaskCreate/job030/mask.mrc
+   RefereceMap: Reconstruct/job031/merged.mrc
+   Input Mask: MaskCreate/job032/mask.mrc
    Inital Lowpass Filter (A): 60
    Symmetry: C2
    Number of Iterations: 30
@@ -365,8 +412,15 @@ Subset selection
 ++++++++++++++++++++++
 
 .. code-block:: bash
-   #Select the cleanest 26S class
-   Input: Optimisation Set Class3D/job31/optimisation_set.star
+   
+   #Select the "cleanest" 26S class
+   Input: Optimisation Set Class3D/job33/optimisation_set.star
+
+
+.. figure:: img/select26S.png
+   :width: 220px
+   
+   
 
 
 +++++++++
@@ -383,7 +437,7 @@ Refine3d
    Mask Diameter: 510
    Initial Lowpass Filter: 60
    Symmetry: C2
-   Use Flattern Solvent CTF: yes
+   Use solvent flattened FSC: yes
    
    Pre-read all particles into RAM: yes
    Use GPU acceleration: yes
@@ -408,11 +462,16 @@ Reconstruct Particle
 PostProcessing
 ++++++++++++++++
 
-.. code-block:: bashcrboost_pipe.py 'data/raw/rubiscoK3/frames/Krios_K3_47_000*.tif' -m 'data/raw/rubiscoK3/mdoc/G2t1.st.mdoc' --proj tmpOut/K3^Cs "warp_tomo_prep" 
+.. code-block:: bash
    
-   Unfiltered Map: Reconstruct/job034/half1.mrc   
+   Unfiltered Map: Reconstruct/job035/half1.mrc   
    Reference Mask: MaskCreate/job030/mask.mrc 
    #should be below 40A
+
+.. figure:: img/postProcessed26S.png
+   :width: 220px
+   
+   37A resolution
 
 
 Co-Refine both species in M 
@@ -437,10 +496,11 @@ Add new data (from a new folder) to an existing project
       crboost_pipe.py --proj testProj/copia -mov '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/frames2/*.eer' -m '/fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/mdoc2/*.mdoc' --pixS 2.95
    
 * If crboost_pipe.py is still running, move to Jobs and Set-Up and browse/adapt the path for the new frames and mdocs.
-      
- frames: /fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/frames2/*.eer
-      
- mdoc: /fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/mdoc2/*.mdoc
+
+.. code-block:: none      
+   
+   frames: /fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/frames2/*.eer
+   mdoc: /fs/pool/pool-bmapps/allSystem/appData/dataSets/copia/mdoc2/*.mdoc
 
 
 #. Move to Start Relion.
