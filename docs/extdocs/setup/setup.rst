@@ -35,6 +35,7 @@ Install dependencies
    pip install napari     
    #for local documentation use (optional)
    conda install sphinx sphinx_rtd_theme
+   pip install sphinx-togglebutton     
 
 Test torch and fastai installation
 ==================================
