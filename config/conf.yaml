@@ -6,7 +6,7 @@
 submission:
   - HeadNode: hpcl8001 
     SshCommand: "ssh -Y"
-    Environment: "module purge;module load intel/18.0.5;module load impi/2018.4;module load RELION/5.0.0NC;module load WARP/2.0.0dev29; source /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/.cbenv"
+    Environment: "module purge;module load intel/18.0.5;module load impi/2018.4;module load IMOD/4.12.17;module load RELION/5.0.0NC;module load WARP/2.0.0dev29; source /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/.cbenv"
     CalusterStatus: sinfo
     Helpssh: c-wing-wiki.biochem.mpg.de/wiki/index.php/Ssh-keygen
     HelpConflict: "rmove relion/python from your .bashrc hpcl8 or global section"
