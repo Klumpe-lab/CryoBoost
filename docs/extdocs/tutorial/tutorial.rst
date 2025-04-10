@@ -212,7 +212,7 @@ relion full command
 .. figure:: img/copiaRefindedIso.png
    :width: 220px
    
-   8.5A resolution
+   8.5A resolution (should be below 10A)
 
 
 
@@ -268,6 +268,7 @@ Extract
    Input Optimisation Set: Polish/job022/optimisation_set.star
    Box Size: 384
    Cropped Box Size: 224   
+   Submit to queue: yes
    Threads: 24
 
 
@@ -348,7 +349,7 @@ PostProcessing
 .. figure:: img/finalPostProcessing.png
    :width: 220px
    
-   7.5A resolution
+   7.5A resolution (should be below 8.5A)
 
 
 
