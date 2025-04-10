@@ -48,7 +48,9 @@ Adapt Copia Particle Parameters
 
 #. Click Generate(Mask) to create a Mask
 
-#. Enter 5 for Extend and SoftEdge (Relion Mask parameters) and OK
+#. Enter 5 for Extend 
+
+#. Enter 5 for SoftEdge (Relion Mask parameters) and OK
 
 #. Enter 90 as angular increment and
 
@@ -87,11 +89,9 @@ Adapt 26S Particle Parameters
 
 #. Enter 200 as diameter for peak extraction (half 26S diameter rod shape)
 
-#. Enter 1500 Max Num of particles
+#. Enter 208 cropped box size in pixels
 
-#. Enter 5 for Number of faslse positives
-
-#. Enter 208 uncropped box size in pixels
+#. Enter 256 uncropped box size in pixels
 
 #. Move to Start Relion tap.
 
@@ -452,7 +452,6 @@ Reconstruct Particle
    Input Optimisation Set Extract/job033/optimisation_set.star
    
    Symmetry: C2
-   Pre-read all particles into RAM: yes
    Box size: 256
    Cropped Box size: 208
    Submit to queue: yes

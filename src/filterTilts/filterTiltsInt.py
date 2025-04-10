@@ -5,9 +5,9 @@ import os,shutil
 import napari
 import numpy as np
 from PIL import Image
-from qtpy.QtWidgets import QPushButton,QMessageBox, QVBoxLayout, QWidget, QCheckBox, QApplication, QLabel, QComboBox
+from qtpy.QtWidgets import QPushButton, QVBoxLayout, QWidget, QCheckBox, QApplication, QLabel, QComboBox, QMessageBox
 from scipy.ndimage import gaussian_filter
-from src.rw.librw import tiltSeriesMeta,mdocMeta,cbconfig
+from src.rw.librw import tiltSeriesMeta,mdocMeta
 from src.filterTilts.libFilterTilts import getDataFromPreExperiment
 #import time
 
@@ -64,7 +64,7 @@ def load_image(file_name, sigma=1.1):  # sigma controls blur amount
     return img_normalized
 
 class BatchViewer:
-    def __init__(self,inputTiltseries,output_folder=None, batch_size=24,mdocWk="mdoc/*.mdoc"):
+    def __init__(self,inputTiltseries,output_folder=None, batch_size=64,mdocWk="mdoc/*.mdoc"):
         
         if  isinstance(inputTiltseries,str):
             self.ts=tiltSeriesMeta(inputTiltseries)
@@ -98,10 +98,8 @@ class BatchViewer:
     def on_close(self):
         # Untick only-removed checkbox and dropdown to All
         self.only_removed_check.setChecked(False)
-        #self.filter_by_tiltseries("All Tilt-Series")
-        # print('-------------------------------')
-        # print(self.df.cryoBoostDlLabel)
-        # print('-------------------------------')
+        self.filter_by_tiltseries("All Tilt-Series")
+
         self.ts.all_tilts_df=self.df
         self.ts.writeTiltSeries(self.output_folder+"tiltseries_labeled.star","tilt_seriesLabel")
         filterParams = {"cryoBoostDlLabel": ("good")}
@@ -134,30 +132,34 @@ class BatchViewer:
         self.next_btn.clicked.connect(self.next_batch)
         layout.addWidget(self.next_btn)
 
+        # Create labels with probability range of batch
+        self.prob_range_label = QLabel()
+        layout.addWidget(self.prob_range_label)
+
+        self.batch_counter_label = QLabel()
+        self.batch_counter_label.setStyleSheet("color: white; margin-bottom: 10px;")
+        layout.addWidget(self.batch_counter_label)
+
         # Create checkbox to filter only removed images
-        self.only_removed_check = QCheckBox('Only show titls that would be removed')
+        self.only_removed_check = QCheckBox('Only show tilts that will be removed')
         self.only_removed_check.stateChanged.connect(self.only_removed_ticked)
         self.only_removed_check.setEnabled(True)
         #self.only_removed_check.setChecked(True) #Have it be checked at start
         layout.addWidget(self.only_removed_check)
         
         # Add dropdown for tilt series selection
-        # self.tilt_series_dropdown = QComboBox()
-        # self.tilt_series_dropdown.addItem("All Tilt-Series")  # Default option
-        # unique_values = self.df_full['rlnTomoName'].unique()
-        # self.tilt_series_dropdown.addItems([str(x) for x in unique_values])
-        # self.tilt_series_dropdown.currentTextChanged.connect(self.filter_by_tiltseries)
-        # self.tilt_series_dropdown.setEnabled(True)
-        # layout.addWidget(self.tilt_series_dropdown)
+        self.tilt_series_dropdown = QComboBox()
+        self.tilt_series_dropdown.addItem("All Tilt-Series")  # Default option
+        unique_values = self.df_full['rlnTomoName'].unique()
+        self.tilt_series_dropdown.addItems([str(x) for x in unique_values])
+        self.tilt_series_dropdown.currentTextChanged.connect(self.filter_by_tiltseries)
+        self.tilt_series_dropdown.setEnabled(True)
+        layout.addWidget(self.tilt_series_dropdown)
 
         # Add button to set all labels to good
         self.set_all_good_btn = QPushButton("Set All Labels to Good")
         self.set_all_good_btn.clicked.connect(self.set_all_labels_good)
         layout.addWidget(self.set_all_good_btn)
-        
-        # Create labels with probability range of batch
-        self.prob_range_label = QLabel()
-        layout.addWidget(self.prob_range_label)
 
         # Add instructions to the legend label
         self.legend = QLabel()
@@ -202,10 +204,14 @@ class BatchViewer:
 
         # Filter df
         if only_removed:
+            # reset to accurately display currenlty shown tilt series 
+            self.tilt_series_dropdown.setCurrentText("All Tilt-Series")            
             self.df = self.df_full[self.df_full['cryoBoostDlLabel'] == "bad"].copy()
         else:
             self.df = self.df_full.copy()
         
+        self.total_batches = (len(self.df) + self.batch_size - 1) // self.batch_size
+        self.current_batch = 0  
         self.load_batch(0)
         self.prob_counter()
 
@@ -215,7 +221,7 @@ class BatchViewer:
         start_idx = self.current_batch * self.batch_size
         end_idx = min(start_idx + self.batch_size, len(self.df))
         
-        # Get current batch probadf_fullbilities
+        # Get current batch probabilities
         current_batch = self.df.iloc[start_idx:end_idx]
         min_prob = current_batch['cryoBoostDlProbability'].iloc[0]
         max_prob = current_batch['cryoBoostDlProbability'].iloc[-1]
@@ -223,15 +229,33 @@ class BatchViewer:
 
 
     def filter_by_tiltseries(self, selected_ts):
+        # Update the full DataFrame with any changes made to the filtered DataFrame and vice versa
+        # Create a temporary DataFrame with only the image names and updated labels
+        updates_df = self.df[['cryoBoostPNG', 'cryoBoostDlLabel']]
+
+        # Use pandas merge to update all matching rows from updates to df_full based on 'cryoBoostPNG'
+        self.df_full = self.df_full.merge(
+            updates_df, 
+            on='cryoBoostPNG', 
+            how='left', # keep all rows of df_full
+            suffixes=('', '_changed') # add the suffix _changed to the added column to avoid name conflicts    
+        )
+
+        # If an entry exists in the _changed column, set the mask to True
+        mask = ~self.df_full['cryoBoostDlLabel_changed'].isna()
+        # Update the label of the df_full where the mask is True
+        self.df_full.loc[mask, 'cryoBoostDlLabel'] = self.df_full.loc[mask, 'cryoBoostDlLabel_changed']
+        # Drop the temporary column of df_full
+        self.df_full = self.df_full.drop(columns=['cryoBoostDlLabel_changed'])
+
+        # Filter based on selected tilt series
         if selected_ts == "All Tilt-Series":
-            print("All Tilt-Series selected")
             self.df = self.df_full.copy()
         else:
             # Untick only-removed checkbox
-            print(f"Selected Tilt-Series: {selected_ts}")
             self.only_removed_check.setChecked(False)
             self.df = self.df_full[self.df_full['rlnTomoName'] == selected_ts].copy()
-
+    
         self.total_batches = (len(self.df) + self.batch_size - 1) // self.batch_size
         self.current_batch = 0  
         self.load_batch(0)
@@ -239,30 +263,34 @@ class BatchViewer:
 
 
     def set_all_labels_good(self):
+        # Show confirmation dialog
+        confirm = QMessageBox()
+        confirm.setWindowTitle("Confirm Action")
+        confirm.setText("Are you sure you want to set ALL labels to good?")
+        confirm.setInformativeText("This will override all previous labelling decisions")
+        confirm.setIcon(QMessageBox.Warning)
+        confirm.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        confirm.setDefaultButton(QMessageBox.Cancel)
         
-        msg = QMessageBox()
-        msg.setWindowTitle("Decision")
-        msg.setText("Are you sure you want to set all labels to 'good'?")
-        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        result = msg.exec()
-        if result == QMessageBox.StandardButton.No:
-            print("Abrot set all labels to good")
-            return()
-      
-    
-        # Set all labels in the DataFrame to "good"
-        self.df['cryoBoostDlLabel'] = "good"
+        # Get user's decision
+        response = confirm.exec_()
         
-        # Also update the main DataFrame
-        self.df_full['cryoBoostDlLabel'] = "good"
-        
-        # Update the current batch display to reflect changes
-        for i, layer_name in enumerate(self.point_layers):
-            if self.point_layers[i].visible:
-                self.point_layers[i].face_color = 'green'
-                self.point_layers[i].border_color = 'green'
-        
-        print("All labels have been set to 'good'")
+        if response == QMessageBox.Yes:
+            # Set all labels in the working df and the main df to "good"
+            self.df['cryoBoostDlLabel'] = "good"
+            self.df_full['cryoBoostDlLabel'] = "good"
+            
+            # Update the current batch display to reflect changes
+            for i, layer_name in enumerate(self.point_layers):
+                if self.point_layers[i].visible:
+                    self.point_layers[i].face_color = 'green'
+                    self.point_layers[i].border_color = 'green'
+            
+            print("All labels have been set to 'good'", flush=True)
+            # Reload the current batch to ensure all indicators are updated
+            self.load_batch(self.current_batch)
+        else:
+            print("Operation cancelled", flush=True)
 
 
     # replacement instead of new layer works fast but images need to be normalised etc 
@@ -365,6 +393,9 @@ class BatchViewer:
         # Update button states
         self.prev_btn.setEnabled(batch_num > 0)
         self.next_btn.setEnabled(batch_num < self.total_batches - 1)
+        # Update batch counter label
+        self.batch_counter_label.setText(f"Showing batch {batch_num + 1} of {self.total_batches}")
+    
         self.prob_counter()
         
         print(f"Showing batch {batch_num + 1} of {self.total_batches}", flush=True)
@@ -417,8 +448,8 @@ class BatchViewer:
                     0 <= layer_y < img_height):
                     clicked_layer = current_layer
                     break
-        
-        if clicked_layer is not None:
+
+        if clicked_layer is not None and not clicked_layer.name.startswith("image_layer_"):
             # Get image name from layer
             img_name = clicked_layer.name            
             # Find corresponding index in DataFrame
@@ -438,10 +469,6 @@ class BatchViewer:
             indicator_layer = self.viewer.layers[f'label_indicator_{img_name}']
             indicator_layer.face_color = color
             indicator_layer.border_color = color 
-            
-        # print('left click status')
-        # print(self.df.cryoBoostDlLabel)
-        # print('left click status End')
             
 
     def on_right_click(self, layer, event):
@@ -470,7 +497,7 @@ class BatchViewer:
                     clicked_layer = current_layer
                     break
         
-        if clicked_layer is not None:
+        if clicked_layer is not None and not clicked_layer.name.startswith("image_layer_"):
             # Get image name from layer
             img_name = clicked_layer.name
             
@@ -483,8 +510,7 @@ class BatchViewer:
             try:
                 print(f"Opening {mrc_name} with IMOD", flush=True)
                 # Load the IMOD module first, then run the command
-                # os.system(f"bash -c 'module load IMOD && imod \"{mrc_name}\"'")
-                os.system("imod " + mrc_name)
+                os.system(f"bash -c 'imod \"{mrc_name}\"'")
             except Exception as e:
                 print(f"Error opening file with IMOD: {e}")
 
@@ -521,4 +547,3 @@ def filterTiltsInterActive(inputList, output_folder=None,mode="onFailure"):
 
 if __name__ == '__main__':
     filterTiltsInterActive()
-
