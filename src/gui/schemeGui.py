@@ -1281,9 +1281,9 @@ class MainUI(QMainWindow):
         if "motioncorr" in self.cbdat.scheme.jobs_in_scheme.values: 
             params_dict = {"eer_grouping": self.textEdit_eerFractions.toPlainText()}
             self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
-        if "fs_motion_and_ctf" in self.cbdat.scheme.jobs_in_scheme.values:
+        if "fsMotionAndCtf" in self.cbdat.scheme.jobs_in_scheme.values:
             params_dict = {"param1_value": self.textEdit_eerFractions.toPlainText()}
-            self.setParamsDictToJobTap(params_dict,["fs_motion_and_ctf"]) 
+            self.setParamsDictToJobTap(params_dict,["fsMotionAndCtf"]) 
             
     def setAreTomoSampleThickToJobTap(self):
         

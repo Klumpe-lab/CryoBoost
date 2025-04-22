@@ -5,7 +5,7 @@ import os,shutil
 import napari
 import numpy as np
 from PIL import Image
-from qtpy.QtWidgets import QPushButton, QVBoxLayout, QWidget, QCheckBox, QApplication, QLabel, QComboBox, QMessageBox
+from qtpy.QtWidgets import QPushButton, QVBoxLayout, QWidget, QCheckBox, QApplication, QLabel, QComboBox, QMessageBox, QTextEdit
 from scipy.ndimage import gaussian_filter
 from src.rw.librw import tiltSeriesMeta,mdocMeta
 from src.filterTilts.libFilterTilts import getDataFromPreExperiment
@@ -14,6 +14,8 @@ from src.filterTilts.libFilterTilts import getDataFromPreExperiment
 #%%
 def loadImagesCBinteractive(tilseriesStar,relionProj='',outputFolder=None,threads=24):   
     ts=tiltSeriesMeta(tilseriesStar,relionProj)
+    
+    
     # Sort them by their Probability in ascending order
     ts.all_tilts_df = ts.all_tilts_df.sort_values(by='cryoBoostDlProbability', ascending=True)    
     return ts
@@ -71,7 +73,9 @@ class BatchViewer:
         else:
             self.ts=inputTiltseries
 
-        print('initializing custom batch viewer')
+        print('initializing custom batch viewer', flush=True)
+        print("  found " + str(len(self.ts.all_tilts_df)) + " tilts", flush=True)
+        self.orgNrTilts=len(self.ts.all_tilts_df)
         self.inputTiltseries=inputTiltseries
         self.ts.all_tilts_df = self.ts.all_tilts_df.sort_values(by='cryoBoostDlProbability', ascending=True)    
         self.df_full = self.ts.all_tilts_df
@@ -85,17 +89,19 @@ class BatchViewer:
         
         self.mdocWk=mdocWk
 
-        # Edited:
-        self.image_layers = {}  # Maps image path to layer
-        self.point_layers = {}  # Maps image path to label indicator layer
+        self.image_layers = {} 
+        self.point_layers = {}
 
+        self.run_out_layer = None # Display run.out file 
+        
         self.setup_navigation()
         self.load_batch(0)
         self.prob_counter()
-
+        self.update_log_display()
 
     # Save the .star file when the viewer is closed
     def on_close(self):
+        print("Loading batches to save final state as .star file...", flush=True)
         # Untick only-removed checkbox and dropdown to All
         self.only_removed_check.setChecked(False)
         self.filter_by_tiltseries("All Tilt-Series")
@@ -107,6 +113,7 @@ class BatchViewer:
         self.ts.writeTiltSeries(self.output_folder+"tiltseries_filtered.star")
         preExpFolder=os.path.dirname(self.inputTiltseries)
         outputFolder=self.output_folder
+        print("org number of Tilts: " + str(self.orgNrTilts))
         if os.path.exists(preExpFolder+"/warp_frameseries.settings"):
             print("Warp frame alignment detected ...getting data from: " + preExpFolder)
             getDataFromPreExperiment(preExpFolder,outputFolder)
@@ -179,6 +186,48 @@ class BatchViewer:
         widget.setLayout(layout)
         self.viewer.window.add_dock_widget(widget, area='right')
 
+        # widget to display the last lines of run.out
+        log_header = QLabel("<b>Log:</b>")
+        log_header.setStyleSheet("color: white;")
+        layout.addWidget(log_header)
+        
+        # Create simple text display for run.out
+        self.log_display = QTextEdit()
+        self.log_display.setReadOnly(True)
+        self.log_display.setStyleSheet("""
+            background-color: #333333;
+            color: #CCCCCC;
+            font-family: monospace;
+            border: none;
+            border-radius: 5px;
+        """)
+        self.log_display.setFixedHeight(400)
+        layout.addWidget(self.log_display)
+
+        
+    def update_log_display(self):
+        try:
+            run_out_path = os.path.join(self.output_folder, "run.out")
+            if not os.path.exists(run_out_path):
+                self.log_display.setText("Log file not found")
+                return
+                
+            # Read last 10 lines of the file
+            with open(run_out_path, 'r') as f:
+                lines = f.readlines()
+                last_lines = lines[-10:] if len(lines) > 10 else lines
+                self.log_display.setText(''.join(last_lines))
+                
+            # Auto-scroll to bottom
+            scrollbar = self.log_display.verticalScrollBar()
+            scrollbar.setValue(scrollbar.maximum())
+
+            scrollbar.repaint()
+        except Exception as e:
+            self.log_display.setText(f"Error reading log: {str(e)}")
+            
+            scrollbar.repaint()
+
 
     def only_removed_ticked(self, state):
         only_removed = state == 2  # Qt.Checked = 2
@@ -202,30 +251,48 @@ class BatchViewer:
         # Drop the temporary column of df_full
         self.df_full = self.df_full.drop(columns=['cryoBoostDlLabel_changed'])
 
-        # Filter df
-        if only_removed:
-            # reset to accurately display currenlty shown tilt series 
+        if only_removed and not len(self.df_full[self.df_full['cryoBoostDlLabel'] == "bad"]) == 0:
+            # Reset to accurately display currently shown tilt series 
             self.tilt_series_dropdown.setCurrentText("All Tilt-Series")            
             self.df = self.df_full[self.df_full['cryoBoostDlLabel'] == "bad"].copy()
+            print("\nOnly showing images that will be removed", flush=True)
+            self.update_log_display()
         else:
             self.df = self.df_full.copy()
-        
+            if only_removed and len(self.df_full[self.df_full['cryoBoostDlLabel'] == "bad"]) == 0:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("No bad labels found")
+                msg.setWindowTitle("Filter Information")
+                msg.exec_()
+
         self.total_batches = (len(self.df) + self.batch_size - 1) // self.batch_size
         self.current_batch = 0  
+
         self.load_batch(0)
         self.prob_counter()
 
 
     def prob_counter(self):
-        # Calculate indices for current batch
-        start_idx = self.current_batch * self.batch_size
-        end_idx = min(start_idx + self.batch_size, len(self.df))
-        
-        # Get current batch probabilities
-        current_batch = self.df.iloc[start_idx:end_idx]
-        min_prob = current_batch['cryoBoostDlProbability'].iloc[0]
-        max_prob = current_batch['cryoBoostDlProbability'].iloc[-1]
-        self.prob_range_label.setText(f"Displayed Probability Range: {min_prob:.3f} - {max_prob:.3f}")
+        try:
+            # Calculate indices for current batch
+            start_idx = self.current_batch * self.batch_size
+            end_idx = min(start_idx + self.batch_size, len(self.df))
+            
+            # Get current batch probabilities
+            current_batch = self.df.iloc[start_idx:end_idx]
+            
+            # Check if current_batch is empty
+            if len(current_batch) == 0:
+                self.prob_range_label.setText("No probability data available")
+                return
+            
+            min_prob = current_batch['cryoBoostDlProbability'].iloc[0]
+            max_prob = current_batch['cryoBoostDlProbability'].iloc[-1]
+            self.prob_range_label.setText(f"Displayed Probability Range: {min_prob:.3f} - {max_prob:.3f}")
+        except Exception as e:
+            print(f"\nError in prob_counter: {e}", flush=True)
+            self.prob_range_label.setText("Error getting probability data")
 
 
     def filter_by_tiltseries(self, selected_ts):
@@ -258,6 +325,7 @@ class BatchViewer:
     
         self.total_batches = (len(self.df) + self.batch_size - 1) // self.batch_size
         self.current_batch = 0  
+            
         self.load_batch(0)
         self.prob_counter()
 
@@ -286,19 +354,17 @@ class BatchViewer:
                     self.point_layers[i].face_color = 'green'
                     self.point_layers[i].border_color = 'green'
             
-            print("All labels have been set to 'good'", flush=True)
+            print("\nAll labels have been set to 'good'", flush=True)
             # Reload the current batch to ensure all indicators are updated
+            self.update_log_display()
             self.load_batch(self.current_batch)
         else:
-            print("Operation cancelled", flush=True)
+            print("\nOperation cancelled", flush=True)
+            self.update_log_display()
 
-
-    # replacement instead of new layer works fast but images need to be normalised etc 
-    def load_batch(self, batch_num):
-
-        print('loading batch',flush=True)
-        #startT = time.time()
-        
+    # replacement instead of new layer
+    def load_batch(self, batch_num):###
+        #startT = time.time()        
         self.current_batch = batch_num
         
         # Get images for this batch
@@ -394,21 +460,20 @@ class BatchViewer:
         self.prev_btn.setEnabled(batch_num > 0)
         self.next_btn.setEnabled(batch_num < self.total_batches - 1)
         # Update batch counter label
-        self.batch_counter_label.setText(f"Showing batch {batch_num + 1} of {self.total_batches}")
-    
+        self.batch_counter_label.setText(f"Showing batch {batch_num + 1} of {self.total_batches}")  
         self.prob_counter()
-        
-        print(f"Showing batch {batch_num + 1} of {self.total_batches}", flush=True)
-    
-
         #endT = time.time()
-        #(f"Total time: {endT - startT} seconds")
+        #print(f"Total time: {endT - startT} seconds", flush=True)
+        
+        #print(f'\nloaded batch {batch_num + 1} of {self.total_batches}',flush=True)
+        #self.update_log_display()
 
 
     def next_batch(self):
         if self.current_batch < self.total_batches - 1:
+            #startT = time.time()
             self.load_batch(self.current_batch + 1)
-    
+
 
     def prev_batch(self):
         if self.current_batch > 0:
@@ -462,8 +527,8 @@ class BatchViewer:
                 invLabel = 'good'
             self.df.loc[index, 'cryoBoostDlLabel'] = invLabel
             #new_label = self.df.loc[index, 'cryoBoostDlLabel']
-            print(f"Updated label for {img_name}: {invLabel}", flush=True)
-            
+            print(f"\nUpdated label for {img_name} to {invLabel}", flush=True)
+            self.update_log_display()
             # Update point color
             color = 'green' if invLabel == 'good' else 'red'
             indicator_layer = self.viewer.layers[f'label_indicator_{img_name}']
@@ -508,11 +573,12 @@ class BatchViewer:
             mrc_name = self.df.loc[index, 'rlnMicrographName']
 
             try:
-                print(f"Opening {mrc_name} with IMOD", flush=True)
-                # Load the IMOD module first, then run the command
-                os.system(f"bash -c 'imod \"{mrc_name}\"'")
+                print(f"\nOpening {mrc_name} with IMOD", flush=True)
+                print("  imod " + mrc_name, flush=True)
+                os.system("imod " + mrc_name)
             except Exception as e:
-                print(f"Error opening file with IMOD: {e}")
+                print(f"\nError opening file with IMOD: {e}")
+            self.update_log_display()
 
 
 #%%
