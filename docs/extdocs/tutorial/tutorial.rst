@@ -330,7 +330,7 @@ Reconstruct
 
 .. code-block:: bash
    
-   Input Optimisation Set CtfRefine/job028/optimisation_set.star
+   Input Optimisation Set Extract/job028/optimisation_set.star
    Symmetry: I1
    Box size: 384
    Cropped Box size: 224
