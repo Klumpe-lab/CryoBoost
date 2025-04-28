@@ -292,7 +292,7 @@ PostProcessing
 
 .. code-block:: bash
    
-   Unfiltered Map: Reconstruct/job025/half1.mrc   
+   Unfiltered Map: Reconstruct/job024/half1.mrc   
    Reference Mask: MaskCreate/job018/mask.mrc 
 
 
@@ -305,7 +305,7 @@ CTF Refinement
    Input Optimisation Set: Extract/job023/optimisation_set.star
    Reference Half Maps:  Reconstruct/job024/half1.mrc 
    Reference Mask: MaskCreate/job018/mask.mrc 
-   Input PostProcess star: PostProcess/job26/post_process.star 
+   Input PostProcess star: PostProcess/job25/post_process.star 
    Box size: 256
    Defocus Search Range: 6000
    Defocus Regularisation Lamda: 0.2
@@ -318,7 +318,7 @@ Extract
 
 .. code-block:: bash
    
-   Input Optimisation Set: CtfRefine/job027/optimisation_set.star
+   Input Optimisation Set: CtfRefine/job026/optimisation_set.star
    Box Size: 384
    Cropped Box Size: 224   
    Threads: 24
@@ -330,7 +330,7 @@ Reconstruct
 
 .. code-block:: bash
    
-   Input Optimisation Set Extract/job028/optimisation_set.star
+   Input Optimisation Set Extract/job027/optimisation_set.star
    Symmetry: I1
    Box size: 384
    Cropped Box size: 224
@@ -343,7 +343,7 @@ PostProcessing
 
 .. code-block:: bash
    
-   Unfiltered Map: Reconstruct/job029/half1.mrc   
+   Unfiltered Map: Reconstruct/job028/half1.mrc   
    Reference Mask: MaskCreate/job018/mask.mrc 
 
 .. figure:: img/finalPostProcessing.png
