@@ -379,7 +379,7 @@ Mask creation
 
 .. code-block:: bash
    
-   Input 3d Map: Reconstruct/job031/merged.mrc 
+   Input 3d Map: Reconstruct/job030/merged.mrc 
    Lowpass: 20
    Inital binarisation threshold: 6
    Extend binary Map this many pixels: 12
@@ -392,8 +392,8 @@ Class3d
 .. code-block:: bash
    
    Input: Optimisation Set Extract/job015/optimisation_set.star
-   RefereceMap: Reconstruct/job031/merged.mrc
-   Input Mask: MaskCreate/job032/mask.mrc
+   RefereceMap: Reconstruct/job030/merged.mrc
+   Input Mask: MaskCreate/job031/mask.mrc
    Inital Lowpass Filter (A): 60
    Symmetry: C2
    Number of Iterations: 30
@@ -415,7 +415,7 @@ Subset selection
 .. code-block:: bash
    
    #Select the "cleanest" 26S class
-   Input: Optimisation Set Class3D/job33/optimisation_set.star
+   Input: Optimisation Set Class3D/job32/optimisation_set.star
 
 
 .. figure:: img/select26S.png
@@ -430,11 +430,11 @@ Refine3d
 
 .. code-block:: bash
    
-   Input Optimisation Set; 
-   Input Particle List: Select/job032/particles.star
+   Input Optimisation Set: 
+   Input Particle List: Select/job033/particles.star
    Input Tomogram Set: External/job014/tomograms.star
-   Reference Map:  Reconstruct/job029/merged.mrc
-   Reference Mask: MaskCreate/job030/mask.mrc
+   Reference Map:  Reconstruct/job030/merged.mrc
+   Reference Mask: MaskCreate/job031/mask.mrc
    Mask Diameter: 510
    Initial Lowpass Filter: 60
    Symmetry: C2
@@ -450,7 +450,7 @@ Reconstruct Particle
 
 .. code-block:: bash
    
-   Input Optimisation Set Extract/job033/optimisation_set.star
+   Input Optimisation Set Refine3d/job034/optimisation_set.star
    
    Symmetry: C2
    Box size: 256
@@ -465,7 +465,7 @@ PostProcessing
 .. code-block:: bash
    
    Unfiltered Map: Reconstruct/job035/half1.mrc   
-   Reference Mask: MaskCreate/job030/mask.mrc 
+   Reference Mask: MaskCreate/job031/mask.mrc 
    #should be below 40A
 
 .. figure:: img/postProcessed26S.png
