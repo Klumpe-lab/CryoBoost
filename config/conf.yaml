@@ -62,7 +62,7 @@ microscopes:
   TitanKrios3:
     - invert_tiltAngles: "No"
     - invert_defocusHandness: "Yes"  
-  TitanKriosK3:
+  TitanKriosCoreFacK3:
     - invert_tiltAngles: "No"
     - invert_defocusHandness: "No"  
 
