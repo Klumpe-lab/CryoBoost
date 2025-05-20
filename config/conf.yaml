@@ -62,6 +62,9 @@ microscopes:
   TitanKrios3:
     - invert_tiltAngles: "No"
     - invert_defocusHandness: "Yes"  
+  TitanKriosK3:
+    - invert_tiltAngles: "No"
+    - invert_defocusHandness: "No"  
 
 star_file:
 

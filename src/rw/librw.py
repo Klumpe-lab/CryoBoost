@@ -878,7 +878,8 @@ class dataImport():
             lineTmp=lineTmp.replace(" ","")
             if self.relcompPrefix:
               baseName=os.path.splitext(os.path.splitext(inputMdoc)[0])[0]
-              lines[i] = "SubFramePath = " + baseName + prefix + lineTmp
+              baseName=os.path.basename(baseName)
+              lines[i] = "SubFramePath = " + prefix + baseName  + lineTmp
             else:
               lines[i] = "SubFramePath = " + prefix + lineTmp
         if ('TiltAngle =' in line) and invTiltAngle:  
@@ -1243,7 +1244,6 @@ class tiltSeriesMeta:
         columns_to_check = [col for col in all_tilts_df.columns if col not in ['rlnCtfScalefactor']]
         all_tilts_df.dropna(subset=columns_to_check,inplace=True)  # check !!
         #generte key to merge later on  
-        #if ()
         if 'rlnMicrographName' in all_tilts_df.columns:
           k=all_tilts_df['rlnMicrographName'].apply(os.path.basename)
         else:

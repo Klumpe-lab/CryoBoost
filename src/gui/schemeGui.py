@@ -1076,6 +1076,9 @@ class MainUI(QMainWindow):
             self.textEdit_dosePerTilt.setText(str(dosePerTilt))
             self.textEdit_nomTiltAxis.setText(str(mdoc.param4Processing["TiltAxisAngle"]))
             self.textEdit_recTomosize.setText(str(mdoc.param4Processing["ImageSize"])+str("x2048"))
+            # if int(mdoc.param4Processing["ImageSize"].split("x")[0])>4096:
+            #     print("detected large camera chip size increasing default patch size by 10 percent")
+            #     self.textEdit_ImodPatchSize.setText=(str(800))
             line_edits = self.tabWidget.findChildren(QLineEdit, "line_path_partRecPixS")
             for line_edit in line_edits:
                 current_value = line_edit.text()
