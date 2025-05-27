@@ -11,7 +11,7 @@ class neighbourMap:
       
     """
 
-    def __init__(self,particleListName=None, outputMapName=None, boxsize=96, scaling=1.0,calc=True,recenterCoords=True):
+    def __init__(self,particleListName=None, outputMapName=None,tomoCoordPixs=None,boxsize=96, pixs=3.0,calc=True,recenterCoords=True):
         """
         Initializes the tiltSeriesMeta class.
         """
@@ -21,9 +21,11 @@ class neighbourMap:
             self.outputMapName = particleListName.replace('.star', '_neighborMap.mrc')
         else:
             self.outputMapName = outputMapName
+        self.tomoCoordPixs = tomoCoordPixs
         self.boxsize = int(boxsize)
-        self.scaling = scaling
+        self.pixs = pixs
         self.recenterCoords = recenterCoords
+        
         if calc:
             self.calc()
           
@@ -50,19 +52,22 @@ class neighbourMap:
     
         partList = particleListMeta(self.particleListName)
         tomos = partList.all_particle_df['rlnTomoName'].unique()
-    
+        if self.recenterCoords:
+            print('Re-centering coordinates...')
+            partList.centerCoords(self.tomoCoordPixs)    
         cen = self.boxsize // 2
         d_cut = (self.boxsize - 1) // 2
         nplot = np.zeros((self.boxsize, self.boxsize, self.boxsize))
+        scaling =float(self.tomoCoordPixs) / float(self.pixs)
+        print(f'Scaling factor for coordinates: {scaling}')
         
         # Process each tomogram
         for tomo in tomos:
-            print(f'Processing tomogram {tomo}...')
-            
+         
             # Get coordinates and angles for this tomogram
-            coords = partList.getImodCoords(tomo, [self.boxsize]*3)
+            coords = partList.getImodCoords(tomo)
             angles = partList.getAngles(tomo)
-            pos = coords.T * self.scaling
+            pos = coords.T * float(scaling)
             
             # Process each position
             for j in range(pos.shape[1]):
