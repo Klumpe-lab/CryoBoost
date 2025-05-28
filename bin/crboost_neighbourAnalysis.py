@@ -13,6 +13,7 @@ def parse_arguments():
     parser.add_argument("--type", "-t", required=False,default="neighborMap", help="Type of analysis neighbourMap (default: neighbourMap)")
     parser.add_argument("--o", dest="output",required=False,default="default", help="Output name")
     parser.add_argument("--i", dest="particleList",required=True, help="Input particle list ")
+    parser.add_argument("--i2", dest="particleList2",required=False,default=None,help="Input second particle list ")
     parser.add_argument("--tomoCoordPixs", "-tcp", required=False,default=None, help="If absolute coordinates are used, provide the tomogram coordinate pixelsize")
     parser.add_argument("--boxsize", "-b", required=False,default=96, help="Box size")
     parser.add_argument("--pixs", "-p", required=False,default=1.0, help="pixelsize of output neighbour map")
@@ -23,7 +24,7 @@ def parse_arguments():
 def main():
     
     args,addArg = parse_arguments()
-    nM=neighbourMap(particleListName=args.particleList, outputMapName=args.output,tomoCoordPixs=args.tomoCoordPixs,boxsize=args.boxsize, pixs=args.pixs,calc=True,recenterCoords=True)
+    nM=neighbourMap(particleListName=args.particleList, outputMapName=args.output,tomoCoordPixs=args.tomoCoordPixs,boxsize=args.boxsize, pixs=args.pixs,calc=True,recenterCoords=True,particleListName2=args.particleList2)
     
     
 if __name__ == '__main__':
