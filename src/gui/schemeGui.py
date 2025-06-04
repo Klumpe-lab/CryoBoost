@@ -17,6 +17,7 @@ from src.rw.librw import schemeMeta,cbconfig,read_mdoc,importFolderBySymlink
 from src.gui.edit_scheme import EditScheme
 from src.gui.generateTemplate import TemplateGen
 from src.misc.libimVol import processVolume
+from src.misc.eerSampling import get_EERsections_per_frame
 import subprocess, shutil
 from PyQt6.QtCore import QTimer 
 import mrcfile
@@ -454,9 +455,49 @@ class MainUI(QMainWindow):
             None
         """
         
+        import re
         params_dict = {"movie_files": "frames/*" + os.path.splitext(self.line_path_movies.text())[1] }
         self.setParamsDictToJobTap(params_dict)
+        folderName = self.line_path_movies.text()
+        if (bool(re.search(r'[\*\?\[\]]', folderName))):
+            folderName = os.path.dirname(folderName)
+        folderName = folderName.rstrip(os.sep) + os.sep
+        files = {ext: glob.glob(f"{folderName}*.{ext}") for ext in ['tif', 'tiff', 'eer']}
+        max_type = max(files.items(), key=lambda x: len(x[1]))
+        selected_files = max_type[1]
+        if selected_files:
+            self.groupBox_Frames.setTitle("Frames   (" + str(len(selected_files)) + "  " + max_type[0] + " files found in folder)")
+            self.groupBox_Frames.setStyleSheet("QGroupBox { color: green; }")
+        else:
+            self.groupBox_Frames.setTitle("Frames   (0 files found)")
+            self.groupBox_Frames.setStyleSheet("QGroupBox { color: red; }")
+        ext="*.eer"
+        self.updateEERFractions()
     
+    def updateEERFractions(self):
+        folder=os.path.join(os.path.dirname(self.line_path_movies.text()),'')  # Ensure folder path ends with a slash
+        ext="*.eer"
+        eerFiles=glob.glob(folder + "/" + ext)
+        if not eerFiles:  # checks if list is empty
+           self.textEdit_eerFractions.setEnabled(False)
+           return  
+        try:
+            self.textEdit_eerFractions.setEnabled(True)
+            print("Nr eer files found: " + str(len(eerFiles)))
+            totDosePerTilt=float(self.textEdit_dosePerTilt.toPlainText())
+            tragetDosePerFrame=float(self.textEdit_eerFractions.toPlainText())
+            nrFramesToGroup=get_EERsections_per_frame(eerFiles[0],dosePerTilt=totDosePerTilt,dosePerRenderedFrame=tragetDosePerFrame)
+            if "motioncorr" in self.cbdat.scheme.jobs_in_scheme.values: 
+                params_dict = {"eer_grouping": str(nrFramesToGroup) }
+                self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+            if "fsMotionAndCtf" in self.cbdat.scheme.jobs_in_scheme.values:
+                params_dict = {"param1_value": str(nrFramesToGroup) }
+                self.setParamsDictToJobTap(params_dict,["fsMotionAndCtf"]) 
+        except Exception as e: 
+            pass
+            
+    
+               
     def setTmVolumeTemplateToJobTap(self):
         """
         Sets the path to movies in the importmovies job to the link provided in the line_path_movies field.
@@ -1057,6 +1098,10 @@ class MainUI(QMainWindow):
         
         params_dict = {"mdoc_files": "mdoc/*" + os.path.splitext(self.line_path_mdocs.text())[1] }
         
+        import re
+        
+        
+        
         if "ctffind" in self.cbdat.scheme.jobs_in_scheme.values:
             thoneRingFade = self.cbdat.scheme.getJobOptions("ctffind").loc[
                              self.cbdat.scheme.getJobOptions("ctffind")["rlnJobOptionVariable"] == "exp_factor_dose",
@@ -1068,6 +1113,14 @@ class MainUI(QMainWindow):
         self.setParamsDictToJobTap(params_dict)
         try:
             mdoc=mdocMeta(self.line_path_mdocs.text())
+            nrMdoc=mdoc.param4Processing["NumMdoc"]
+            if nrMdoc>0:
+                self.groupBox_mdoc.setTitle("Mdoc   (" + str(nrMdoc) + " mdoc files found in folder)")
+                self.groupBox_mdoc.setStyleSheet("QGroupBox { color: green; }")
+            else:
+                self.groupBox_mdoc.setTitle("Mdoc   (0 files found)")
+                self.groupBox_mdoc.setStyleSheet("QGroupBox { color: red; }")
+            
             self.textEdit_pixelSize.setText(str(mdoc.param4Processing["PixelSize"]))
             dosePerTilt=mdoc.param4Processing["DosePerTilt"]
             if dosePerTilt<0.1 or dosePerTilt > 9:
@@ -1084,7 +1137,8 @@ class MainUI(QMainWindow):
                 current_value = line_edit.text()
                 line_edit.setText(str(mdoc.param4Processing["PixelSize"]))
         except: 
-            pass
+            self.groupBox_mdoc.setTitle("Mdoc   (0 files found)")
+            self.groupBox_mdoc.setStyleSheet("QGroupBox { color: red; }")
         
         
     #self.textEdit_tomoForDenoiseTrain.textChanged.connect(self.setTomoForDenoiseTrainToJobTap)
@@ -1151,7 +1205,6 @@ class MainUI(QMainWindow):
             nTomo=3
         tomoNamesSub=random.sample(tomoNames, k=nTomo)
         tomoStr=":".join(tomoNamesSub)
-        print("updating...")
         self.textEdit_tomoForDenoiseTrain.setText(tomoStr)
        
     def setPixelSizeToJobTap(self):
@@ -1174,7 +1227,8 @@ class MainUI(QMainWindow):
                 checkDosePerTilt(self.line_path_mdocs.text(),float(self.textEdit_dosePerTilt.toPlainText()),float(thoneRingFade))
         
         self.setParamsDictToJobTap(params_dict,["importmovies"])       
-    
+        self.updateEERFractions()
+        
     def setTiltAxisToJobTap(self):
         params_dict = {"tilt_axis_angle": self.textEdit_nomTiltAxis.toPlainText()} 
         self.setParamsDictToJobTap(params_dict,["importmovies"]) 
@@ -1281,12 +1335,14 @@ class MainUI(QMainWindow):
 
         
     def setEerFractionsToJobTap(self):
-        if "motioncorr" in self.cbdat.scheme.jobs_in_scheme.values: 
-            params_dict = {"eer_grouping": self.textEdit_eerFractions.toPlainText()}
-            self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
-        if "fsMotionAndCtf" in self.cbdat.scheme.jobs_in_scheme.values:
-            params_dict = {"param1_value": self.textEdit_eerFractions.toPlainText()}
-            self.setParamsDictToJobTap(params_dict,["fsMotionAndCtf"]) 
+        
+        self.updateEERFractions()
+        # if "motioncorr" in self.cbdat.scheme.jobs_in_scheme.values: 
+        #     params_dict = {"eer_grouping": self.textEdit_eerFractions.toPlainText()}
+        #     self.setParamsDictToJobTap(params_dict,["motioncorr"]) 
+        # if "fsMotionAndCtf" in self.cbdat.scheme.jobs_in_scheme.values:
+        #     params_dict = {"param1_value": self.textEdit_eerFractions.toPlainText()}
+        #     self.setParamsDictToJobTap(params_dict,["fsMotionAndCtf"]) 
             
     def setAreTomoSampleThickToJobTap(self):
         

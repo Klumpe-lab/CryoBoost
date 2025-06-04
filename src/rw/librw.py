@@ -407,7 +407,7 @@ class mdocMeta:
     self.param4Processing["DosePerTilt"]=round(float(self.all_df.ExposureDose[0])*1.5,2)
     self.param4Processing["PixelSize"]= round(float(self.all_df.mdocHeader[0].split("PixelSpacing = ")[1].split('\n')[0]),2)
     self.param4Processing["ImageSize"]=self.all_df.mdocHeader[0].split("ImageSize = ")[1].split('\n')[0].replace(" ","x")
-  
+    self.param4Processing["NumMdoc"]=len(mdoc_files)
   def addPrefixToFileName(self,prefix):
 
     self.all_df['SubFramePath']=self.all_df['SubFramePath'].apply(lambda x: prefix+os.path.basename(x))
@@ -793,6 +793,7 @@ class dataImport():
        self.__writeLog("error", "no mdocs found check wildcard")
        self.__writeLog("error", self.wkMdoc)
        importOk=False
+   
     if (not glob.glob(self.wkFrames)):
        self.__writeLog("error", "no frames found check wildcard")
        self.__writeLog("error", self.wkFrames)
