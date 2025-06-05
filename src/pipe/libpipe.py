@@ -33,7 +33,7 @@ class pipe:
     self.importPrefix=args.impPrefix
     self.pathProject=args.proj
     self.invMdocTiltAngle=invMdocTiltAngle
-    print("init class pipe:" + str(self.invMdocTiltAngle))
+    print("init class pipe with invert Mdoc tiltangles set to: " + str(self.invMdocTiltAngle))
     headNode=self.conf.confdata['submission'][0]['HeadNode']
     sshStr=self.conf.confdata['submission'][0]['SshCommand']
     envRel=self.conf.confdata['submission'][0]['Environment']
@@ -41,6 +41,7 @@ class pipe:
     schemeName=os.path.basename(schemeName.strip(os.path.sep)) #remove path from schemeName
     schemeLockFile=".relion_lock_scheme_" + schemeName + os.path.sep  + "lock_scheme"
     relSchemeStart="export TERM=xterm;(relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid)' # working
+    relScheduleJob="relion_pipeliner --addJobFromStar XXXJobStarXXX --setJobAlias XXXAliasXXX" #--addJobOptions XXXJobOptionsXXX"
     #relSchemeStart="export TERM=xterm;{relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid}' 
     #relSchemeStart="export TERM=xterm;relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid'
     #relSchemeStart = "export TERM=xterm; { relion_schemer --scheme " + schemeName + " --run --verb 2 & pid=$!; echo $pid > Schemes/" + schemeName + "/scheme.pid; }"
@@ -69,6 +70,9 @@ class pipe:
     self.commandGui=sshStr + " " + headNode + ' "'  + envStr + chFold + relGuiStart  + '"'
     self.commandSchemeUnlock=sshStr + " " + headNode + ' "'  + envStr + chFold + relSchemeUnlock + logStrAdd + '"'
     self.commandGuiUpdate=sshStr + " " + headNode + ' "'  + envStr + chFold + relGuiUpdate + '"' 
+    
+    self.commandScheduleJob=sshStr + " " + headNode + ' "'  + envStr + chFold + relScheduleJob + '"'
+    
       
   def initProject(self):
     #importFolderBySymlink(self.pathFrames, self.pathProject)
@@ -109,7 +113,41 @@ class pipe:
     self.generatCrJobLog("manageWorkflow","  " + self.commandSchemeStart + "\n")
     p=run_command_async(self.commandSchemeStart)
     #p=run_command(self.commandSchemeStart)
-   
+  
+  def scheduleJobs(self): 
+    path_scheme = self.scheme.schemeFolderPath
+    path_schemeRel = "Schemes/" + path_scheme.split("/Schemes/")[1]
+    defPipePath=self.pathProject+os.path.sep+"default_pipeline.star"
+    count=1
+    for job in self.scheme.jobs_in_scheme:
+      
+        #print(self.scheme.getJobOptions(job)["rlnJobOptionVariable"])
+        df=self.scheme.getJobOptions(job)
+        if not any(ind):
+            ind=df.rlnJobOptionVariable=="in_tiltseries" 
+        if not any(ind):
+            ind=df.rlnJobOptionVariable=="in_mic"
+        if not any(ind):
+            ind=df.rlnJobOptionVariable=="in_tomoset"
+        if not any(ind):
+            ind=df.rlnJobOptionVariable=="in_optimisation"
+        if not any(ind):
+            raise Exception("nether input_star_mics nor in_tiltseries found")
+        
+        alias=job+str(count)
+        jobpath=os.path.join(path_schemeRel, job, "job.star")
+        command=self.commandScheduleJob.replace("XXXJobStarXXX",jobpath)
+        command=command.replace("XXXAliasXXX",alias)
+        p=run_command(command)
+        st=starFileMeta(defPipePath)
+        df=st.dict["pipeline_processes"]
+        lf=df[df['rlnPipeLineProcessAlias'].str.contains(alias, na=False)]
+        outpuFold=lf['rlnPipeLineProcessAlias'].values[0]
+        outputName=os.path.basename(self.conf.getJobOutput(job.split("_")[0]))
+        fullOutputName=outpuFold + os.path.sep + outputName
+       
+        count+=1
+        
     
   def runSchemeSync(self):
     p=run_command(self.commandSchemeStart)

@@ -188,7 +188,7 @@ class MainUI(QMainWindow):
         for i in self.cbdat.conf.microscope_presets:
             self.dropDown_config.addItem(self.cbdat.conf.microscope_presets[i])
         self.dropDown_config.setCurrentIndex(0)
-        
+        self.btn_scheduleJobs.clicked.connect(self.scheduleJobs)
         
     def genSchemeTable(self):
         self.table_scheme.setColumnCount(1) #origianlly 4
@@ -364,9 +364,6 @@ class MainUI(QMainWindow):
             widget.line_path_partRecBoxSzUnCropped.textChanged.connect(self.setPartRecBoxSzUnCroppedToJobTap)
             widget.line_path_partRecPixS.textChanged.connect(self.setPartRecPixSToJobTap)
 
-            
-           
-            
                 
         return widget                    
         
@@ -1533,6 +1530,10 @@ class MainUI(QMainWindow):
                 return    
         
         self.cbdat.pipeRunner.runScheme()
+    
+    def scheduleJobs(self):
+        
+        self.cbdat.pipeRunner.scheduleJobs()
         
     def openRelionGui(self):
         
