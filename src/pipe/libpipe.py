@@ -41,7 +41,7 @@ class pipe:
     schemeName=os.path.basename(schemeName.strip(os.path.sep)) #remove path from schemeName
     schemeLockFile=".relion_lock_scheme_" + schemeName + os.path.sep  + "lock_scheme"
     relSchemeStart="export TERM=xterm;(relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid)' # working
-    relScheduleJob="relion_pipeliner --addJobFromStar XXXJobStarXXX --setJobAlias XXXAliasXXX" #--addJobOptions XXXJobOptionsXXX"
+    relScheduleJob="relion_pipeliner --addJobFromStar XXXJobStarXXX --setJobAlias XXXAliasXXX --addJobOptions XXXJobOptionsXXX"
     #relSchemeStart="export TERM=xterm;{relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid}' 
     #relSchemeStart="export TERM=xterm;relion_schemer --scheme " + schemeName  + ' --run --verb 2 & pid=\$!; echo \$pid  > Schemes/'+ schemeName + '/scheme.pid'
     #relSchemeStart = "export TERM=xterm; { relion_schemer --scheme " + schemeName + " --run --verb 2 & pid=$!; echo $pid > Schemes/" + schemeName + "/scheme.pid; }"
@@ -120,24 +120,38 @@ class pipe:
     defPipePath=self.pathProject+os.path.sep+"default_pipeline.star"
     count=1
     for job in self.scheme.jobs_in_scheme:
-      
+
         #print(self.scheme.getJobOptions(job)["rlnJobOptionVariable"])
-        df=self.scheme.getJobOptions(job)
-        if not any(ind):
-            ind=df.rlnJobOptionVariable=="in_tiltseries" 
-        if not any(ind):
-            ind=df.rlnJobOptionVariable=="in_mic"
-        if not any(ind):
-            ind=df.rlnJobOptionVariable=="in_tomoset"
-        if not any(ind):
-            ind=df.rlnJobOptionVariable=="in_optimisation"
-        if not any(ind):
-            raise Exception("nether input_star_mics nor in_tiltseries found")
-        
-        alias=job+str(count)
         jobpath=os.path.join(path_schemeRel, job, "job.star")
         command=self.commandScheduleJob.replace("XXXJobStarXXX",jobpath)
+        if job=="importmovies": #first job for every pipeline
+            command=command.replace("--addJobOptions XXXJobOptionsXXX",'')
+        else:
+            df=self.scheme.getJobOptions(job)
+            ind=[]
+            if not any(ind):
+                ind=df.rlnJobOptionVariable=="in_tiltseries" 
+            if not any(ind):
+                ind=df.rlnJobOptionVariable=="in_mic"
+            if not any(ind):
+                ind=df.rlnJobOptionVariable=="in_tomoset"
+            if not any(ind):
+                ind=df.rlnJobOptionVariable=="in_optimisation"
+            if not any(ind):
+                raise Exception("nether input_star_mics nor in_tiltseries found")
+            row_index = df.index[ind]
+            inputParam=df.loc[row_index, "rlnJobOptionVariable"].item()
+            print("inputParam: " + inputParam)
+            print("job: " + df.loc[row_index])
+            updateField="'" + inputParam + " == " + fullOutputName + "'"
+            command=command.replace("XXXJobOptionsXXX",updateField)
+        alias=job+str(count)
+        
+        
         command=command.replace("XXXAliasXXX",alias)
+        print('**********************')
+        print("command: " + command)
+        print('**********************')
         p=run_command(command)
         st=starFileMeta(defPipePath)
         df=st.dict["pipeline_processes"]
@@ -145,7 +159,9 @@ class pipe:
         outpuFold=lf['rlnPipeLineProcessAlias'].values[0]
         outputName=os.path.basename(self.conf.getJobOutput(job.split("_")[0]))
         fullOutputName=outpuFold + os.path.sep + outputName
-       
+        print("outputName: " + fullOutputName)
+        
+        
         count+=1
         
     
