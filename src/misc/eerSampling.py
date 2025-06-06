@@ -1,8 +1,10 @@
 #%%
 
+import os
 import glob
 import subprocess
 import math
+from src.rw.librw import cbconfig
 
 def get_EERsections_per_frame(eer_file, dosePerTilt=3, dosePerRenderedFrame=0.3,optRange=0.15):
     """
@@ -17,7 +19,15 @@ def get_EERsections_per_frame(eer_file, dosePerTilt=3, dosePerRenderedFrame=0.3,
     Returns:
         int: Optimal sections per frame value
     """
-    result = subprocess.run(['header', eer_file], capture_output=True, text=True)
+    
+    CRYOBOOST_HOME=os.getenv("CRYOBOOST_HOME")
+    confPath=CRYOBOOST_HOME + "/config/conf.yaml"
+    conf=cbconfig(confPath)   
+    envStr = conf.confdata['local']['Environment']
+    call=envStr+';header ' + eer_file 
+    result = subprocess.run(call, shell=True, capture_output=True, text=True)
+    
+    #result = subprocess.run(['header', eer_file], capture_output=True, text=True)
     output_lines = result.stdout.split('\n')
     
     framesPerTilt = None
