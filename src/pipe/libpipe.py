@@ -119,9 +119,9 @@ class pipe:
     path_schemeRel = "Schemes/" + path_scheme.split("/Schemes/")[1]
     defPipePath=self.pathProject+os.path.sep+"default_pipeline.star"
     count=1
+    fullOutputName=[]
     for job in self.scheme.jobs_in_scheme:
 
-        #print(self.scheme.getJobOptions(job)["rlnJobOptionVariable"])
         jobpath=os.path.join(path_schemeRel, job, "job.star")
         command=self.commandScheduleJob.replace("XXXJobStarXXX",jobpath)
         if job=="importmovies": #first job for every pipeline
@@ -143,8 +143,16 @@ class pipe:
             inputParam=df.loc[row_index, "rlnJobOptionVariable"].item()
             print("inputParam: " + inputParam)
             print("job: " + df.loc[row_index])
-            updateField="'" + inputParam + " == " + fullOutputName + "'"
+           
+            
+            if "denoisepredict" in job:# needs additional job options
+                updateField="'" + inputParam + " == " + fullOutputName[-2] 
+                fpModel=os.path.dirname(fullOutputName[-1]) + os.path.sep + "denoising_model.tar.gz"
+                updateField += ";care_denoising_model == " + fpModel + "'"
+            else:
+                updateField="'" + inputParam + " == " + fullOutputName[-1] + "'"
             command=command.replace("XXXJobOptionsXXX",updateField)
+             
         alias=job+str(count)
         
         
@@ -158,8 +166,8 @@ class pipe:
         lf=df[df['rlnPipeLineProcessAlias'].str.contains(alias, na=False)]
         outpuFold=lf['rlnPipeLineProcessAlias'].values[0]
         outputName=os.path.basename(self.conf.getJobOutput(job.split("_")[0]))
-        fullOutputName=outpuFold + os.path.sep + outputName
-        print("outputName: " + fullOutputName)
+        fullOutputName.append(outpuFold + os.path.sep + outputName)
+        print("outputName: " + fullOutputName[-1])
         
         
         count+=1
