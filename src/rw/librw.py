@@ -1009,6 +1009,36 @@ class schemeMeta:
     schemeAdapted=self.filterSchemeByNodes(nodes_df)
     return schemeAdapted
   
+  def getMajorInputParamNameFromJob(self, jobName):
+    """
+    Returns the input type for a given job name.
+    
+    Args:
+        jobName (str): The name of the job.
+        
+    Returns:
+        str: The input type for the job.
+        
+    Raises:
+        Exception: If no input type is found for the job.
+    """
+    df = self.job_star[jobName].dict['joboptions_values']
+    ind=df.rlnJobOptionVariable=="input_star_mics"
+    if not any(ind):
+        ind=df.rlnJobOptionVariable=="in_tiltseries" 
+    if not any(ind):
+        ind=df.rlnJobOptionVariable=="in_mic"
+    if not any(ind):
+        ind=df.rlnJobOptionVariable=="in_tomoset"
+    if not any(ind):
+        ind=df.rlnJobOptionVariable=="in_optimisation"
+    if not any(ind):
+        raise Exception("nether input_star_mics nor in_tiltseries found")
+    row_index = df.index[ind]
+    # inputType=os.path.basename(os.path.dirname(df.loc[row_index, "rlnJobOptionValue"].item()))
+    inputParamName=df.loc[row_index, "rlnJobOptionVariable"].item()
+    
+    return inputParamName
   
   def addParticleJobs(self,tags):
     particleJobs=self.conf.confdata['computing']['JOBTypesApplication']['ParticleJobs']

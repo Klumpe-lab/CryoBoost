@@ -115,6 +115,9 @@ class pipe:
     #p=run_command(self.commandSchemeStart)
   
   def scheduleJobs(self): 
+    #TODO check for alias check for scheduled jobs
+    #TODO check running schedule
+    
     path_scheme = self.scheme.schemeFolderPath
     path_schemeRel = "Schemes/" + path_scheme.split("/Schemes/")[1]
     defPipePath=self.pathProject+os.path.sep+"default_pipeline.star"
@@ -124,51 +127,44 @@ class pipe:
 
         jobpath=os.path.join(path_schemeRel, job, "job.star")
         command=self.commandScheduleJob.replace("XXXJobStarXXX",jobpath)
-        if job=="importmovies": #first job for every pipeline
+        if job != "importmovies" and count==1:
+            #TODO: Ask user for input check if  jobs already exist
+            print("Ask user for job input")
+        if job=="importmovies" and count==1: #first job for every pipeline
             command=command.replace("--addJobOptions XXXJobOptionsXXX",'')
-        else:
-            df=self.scheme.getJobOptions(job)
-            ind=[]
-            if not any(ind):
-                ind=df.rlnJobOptionVariable=="in_tiltseries" 
-            if not any(ind):
-                ind=df.rlnJobOptionVariable=="in_mic"
-            if not any(ind):
-                ind=df.rlnJobOptionVariable=="in_tomoset"
-            if not any(ind):
-                ind=df.rlnJobOptionVariable=="in_optimisation"
-            if not any(ind):
-                raise Exception("nether input_star_mics nor in_tiltseries found")
-            row_index = df.index[ind]
-            inputParam=df.loc[row_index, "rlnJobOptionVariable"].item()
-            print("inputParam: " + inputParam)
-            print("job: " + df.loc[row_index])
-           
-            
+        if count > 1: #output of previous job is input for next job
+            inputParamName=self.scheme.getMajorInputParamNameFromJob(job)
             if "denoisepredict" in job:# needs additional job options
-                updateField="'" + inputParam + " == " + fullOutputName[-2] 
+                updateField="'" + inputParamName + " == " + fullOutputName[-2] 
                 fpModel=os.path.dirname(fullOutputName[-1]) + os.path.sep + "denoising_model.tar.gz"
                 updateField += ";care_denoising_model == " + fpModel + "'"
             else:
-                updateField="'" + inputParam + " == " + fullOutputName[-1] + "'"
+                updateField="'" + inputParamName + " == " + fullOutputName[-1] + "'"
             command=command.replace("XXXJobOptionsXXX",updateField)
              
         alias=job+str(count)
-        
-        
         command=command.replace("XXXAliasXXX",alias)
-        print('**********************')
-        print("command: " + command)
-        print('**********************')
         p=run_command(command)
+        if p[0] is None:
+            print("Error scheduling job: " + job ) 
+            print("with command: " + command)
+            print("Error message: " + str(p[1]))
+            print("Exit code: " + str(p[2]))
+            print("Stopping scheduling jobs")
+            break
+        
         st=starFileMeta(defPipePath)
         df=st.dict["pipeline_processes"]
         lf=df[df['rlnPipeLineProcessAlias'].str.contains(alias, na=False)]
+        if lf.empty:
+            print("Error: no job found with alias: " + alias)
+            break
+        else:
+            print("Scheduled job: " + job + " with alias: " + alias)  
+          
         outpuFold=lf['rlnPipeLineProcessAlias'].values[0]
         outputName=os.path.basename(self.conf.getJobOutput(job.split("_")[0]))
         fullOutputName.append(outpuFold + os.path.sep + outputName)
-        print("outputName: " + fullOutputName[-1])
-        
         
         count+=1
         
