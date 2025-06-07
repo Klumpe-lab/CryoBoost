@@ -78,7 +78,7 @@ star_file:
   reconstructionsplit: reconstructionsplit/tomograms.star
   reconstructionfull: reconstructionfull/tomograms.star
   denoisetrain:   reconstruction/tomograms.star   #is not the result but the reconstruction is used as result   
-  denoisepredict: denoise/denoised_tilt_series.star #maybe switch to reconstruction
+  denoisepredict: denoise/tomograms.star #maybe switch to reconstruction
   fsMotionAndCtf: fsMotionAndCtf/fs_motion_and_ctf.star
   aligntiltsWarp: aligntiltsWarp/aligned_tilt_series.star
   tsCtf: tsCtf/ts_ctf_tilt_series.star
