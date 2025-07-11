@@ -29,11 +29,11 @@ class particleListMeta:
     def addItem(self,coord,angle,score,tomoName,format):
         pass
     
-    def centerCoords(self,tomoCoordPixs=None):
+    def centerCoords(self,tomoCoordPixs=None,tomoSize=None):
         offsets=self.getOffsets()
         if offsets is None:
             return
-        coords=self.getAngstCoords(tomoCoordPixs=tomoCoordPixs)
+        coords=self.getAngstCoords(tomoCoordPixs=tomoCoordPixs,tomoSize=tomoSize)
         coordsCent=coords.copy()
         
         for i, (offset, coord) in enumerate(zip(offsets, coords)):
@@ -62,7 +62,7 @@ class particleListMeta:
         for file in glob.glob(partLilstStarFile):
             fname=os.path.basename(file)
             self.st[fname]=starFileMeta(file)
-            if self.st[fname].dict.get("general") == {"rlnTomoSubTomosAre2DStacks": 1}:
+            if self.st[fname].dict.get("general") == {"rlnTomoSubTomosAre2DStacks": 1} or ("optics" in self.st[fname].dict and "particles" in self.st[fname].dict):
                 self.inputType[fname]="Relion52DParticleList"
                 self.pixelSize[fname]=self.st[fname].dict['optics']['rlnImagePixelSize'][0]
                 self.particle_df[fname]=self.st[fname].dict['particles']
@@ -197,8 +197,8 @@ class particleListMeta:
         
         offsetsInPix = ['rlnOriginX', 'rlnOriginY', 'rlnOriginZ']
         if all(col in temp_df.columns for col in offsetsInPix):
-            offsets = temp_df[['rlnOriginX', 'rlnOrigiY', 'rlnOriginZ']].values
-            offsets *= next(iter(self.pixelSize.values()))
+            offsets = temp_df[['rlnOriginX', 'rlnOriginY', 'rlnOriginZ']].values
+            offsets *= self.pixelSize['run_data.star'].iloc[0]
             
         
         return offsets
@@ -253,11 +253,13 @@ class particleListMeta:
 
         relativeCols = ['rlnCenteredCoordinateXAngst', 'rlnCenteredCoordinateYAngst', 'rlnCenteredCoordinateZAngst']
         if all(col in temp_df.columns for col in relativeCols):
+    
+            tomoSize = np.array([tomoSize[0],tomoSize[1],tomoSize[2]], dtype=float)
             if tomoSize is None or tomoCoordPixs is None:
                 print("rlnCoordinateX(Y,Z) found in particle list you need to specify tomopixs and tomoCoordPixs for coordinates in Angst.")
                 raise Exception("tomoCoordPixs are required for getCenteredAngstCoords")
             coords = temp_df[['rlnCenteredCoordinateXAngst', 'rlnCenteredCoordinateYAngst', 'rlnCenteredCoordinateZAngst']].values
-            coords =  coords +  ((tomoSize/2)*tomoCoordPixs) 
+            coords =  coords +  ((tomoSize/2)*float(tomoCoordPixs)) 
         
         absCols = ['rlnCoordinateX', 'rlnCoordinateY', 'rlnCoordinateZ']
         if all(col in temp_df.columns for col in absCols):

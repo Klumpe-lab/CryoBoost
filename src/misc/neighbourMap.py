@@ -12,7 +12,7 @@ class neighbourMap:
       
     """
 
-    def __init__(self,particleListName=None, outputMapName=None,tomoCoordPixs=None,boxsize=96, pixs=3.0,calc=True,recenterCoords=True,particleListName2=None):
+    def __init__(self,particleListName=None, outputMapName=None,tomoCoordPixs=None,boxsize=96, pixs=3.0,calc=True,recenterCoords=True,particleListName2=None,tomoSize="4096,4096,2048"):
         """
         Initializes the tiltSeriesMeta class.
         """
@@ -28,6 +28,7 @@ class neighbourMap:
         self.boxsize = int(boxsize)
         self.pixs = pixs
         self.recenterCoords = recenterCoords
+        self.tomoSize = np.array([int(x) for x in tomoSize.split(',')], dtype=float);
         
         if calc:
             self.calc()
@@ -78,7 +79,7 @@ class neighbourMap:
         for tomo in tomos:
          
             # Get coordinates and angles for this tomogram
-            coords = partList.getImodCoords(tomo)
+            coords = partList.getImodCoords(tomo,self.tomoSize)
             angles = partList.getAngles(tomo)
             pos = coords.T * float(scaling)
             
@@ -119,9 +120,11 @@ class neighbourMap:
         print(f'Writing output to {self.outputMapName}')
         with mrcfile.new(self.outputMapName, overwrite=True) as mrc:
             mrc.set_data(nplot.astype(np.float32))
+            mrc.voxel_size = self.pixs
         if partList2 is not None:
             root, ext = os.path.splitext(self.outputMapName)
             outputmap2Name = root+ '_2' + ext 
             print(f'Writing output to {outputmap2Name}')
             with mrcfile.new(outputmap2Name, overwrite=True) as mrc2:
-                mrc2.set_data(nplot2.astype(np.float32))    
+                mrc2.set_data(nplot2.astype(np.float32))
+                mrc2.voxel_size = self.pixs    
