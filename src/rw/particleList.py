@@ -189,16 +189,17 @@ class particleListMeta:
             temp_df = self.all_particle_df 
         else:
             temp_df = self.all_particle_df[self.all_particle_df['rlnTomoName'] == tomoName]
-      
+        
         offsets=None
         offsetsInAng = ['rlnOriginXAngst', 'rlnOriginYAngst', 'rlnOriginZAngst']
         if all(col in temp_df.columns for col in offsetsInAng):
             offsets = temp_df[['rlnOriginXAngst', 'rlnOriginYAngst', 'rlnOriginZAngst']].values
         
+        pixs=next(iter(self.pixelSize.values()))[0]
         offsetsInPix = ['rlnOriginX', 'rlnOriginY', 'rlnOriginZ']
         if all(col in temp_df.columns for col in offsetsInPix):
             offsets = temp_df[['rlnOriginX', 'rlnOriginY', 'rlnOriginZ']].values
-            offsets *= self.pixelSize['run_data.star'].iloc[0]
+            offsets *= pixs
             
         
         return offsets
