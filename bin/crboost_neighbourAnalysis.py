@@ -14,6 +14,7 @@ def parse_arguments():
     parser.add_argument("--o", dest="output",required=False,default="default", help="Output name")
     parser.add_argument("--i", dest="particleList",required=True, help="Input particle list ")
     parser.add_argument("--i2", dest="particleList2",required=False,default=None,help="Input second particle list ")
+    parser.add_argument("--i3", dest="particleList3",required=False,default=None,help="Input second particle list ")
     parser.add_argument("--tomoCoordPixs", "-tcp", required=False,default=None, help="If absolute coordinates are used, provide the tomogram coordinate pixelsize")
     parser.add_argument("--tomoSize", "-ts", required=False,default="4096,4096,2048", help="If relative coordinates are used, provide the tomogram size in pixels (default: 4096,4096,2048)")
     parser.add_argument("--boxsize", "-b", required=False,default=96, help="Box size")
@@ -29,7 +30,7 @@ def main():
     
     args,addArg = parse_arguments()
     nM=neighbourMap(particleListName=args.particleList, outputMapName=args.output,tomoCoordPixs=args.tomoCoordPixs,boxsize=args.boxsize, pixs=args.pixs,calc=True,recenterCoords=args.recenterCoords,particleListName2=args.particleList2,
-                    tomoSize=args.tomoSize)
+                    particleListName3=args.particleList3,tomoSize=args.tomoSize)
     
     
 if __name__ == '__main__':
