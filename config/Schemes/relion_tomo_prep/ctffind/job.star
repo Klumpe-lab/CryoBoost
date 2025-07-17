@@ -21,7 +21,7 @@ phase_min          0
 phase_max        180 
 phase_step         10 
 dast        100 
-fn_ctffind_exe /fs/pool/pool-bmapps/hpcl8/app/soft/CTFFIND/4.1.14/bin/ctffind 
+fn_ctffind_exe /programs/x86_64-linux/system/sbgrid_bin/ctffind4 
 use_given_ps        Yes 
 slow_search         No 
 ctf_win         -1 
@@ -33,16 +33,16 @@ resmax          5
 dfstep        500 
 localsearch_nominal_defocus      10000 
 exp_factor_dose        185 
-nr_mpi         72 
+nr_mpi         16 
 do_queue        Yes 
-queuename    openmpi 
+queuename      auto 
 qsub     sbatch 
-qsubscript qsub/qsub_relion_hpcl89.sh 
+qsubscript qsub/qsub_relion_cbe.sh 
 min_dedicated          1 
 other_args         "" 
-qsub_extra1          3 
-qsub_extra2         24 
-qsub_extra3    p.hpcl8 
-qsub_extra4          2 
-qsub_extra5      370G
+qsub_extra1       auto 
+qsub_extra2       auto 
+qsub_extra3       auto 
+qsub_extra4       auto 
+qsub_extra5          
  

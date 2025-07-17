@@ -27,17 +27,17 @@ tomo_name         ""
 do_proj        Yes 
 centre_proj          0
 thickness_proj         10 
-nr_mpi          3 
-nr_threads          24 
+nr_mpi          2 
+nr_threads          12 
 do_queue        Yes 
-queuename    openmpi 
+queuename    auto 
 qsub     sbatch 
-qsubscript     qsub/qsub_relion_hpcl89.sh 
+qsubscript     qsub/qsub_relion_cbe.sh 
 min_dedicated          1 
 other_args         "" 
-qsub_extra1          3 
-qsub_extra2          1 
-qsub_extra3    p.hpcl8 
-qsub_extra4          2 
-qsub_extra5      370G
+qsub_extra1       auto
+qsub_extra2       120 
+qsub_extra3       auto 
+qsub_extra4       auto 
+qsub_extra5        
  

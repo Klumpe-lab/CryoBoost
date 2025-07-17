@@ -31,20 +31,20 @@ gain_flip "No flipping (0)"
 gain_rot "No rotation (0)" 
 fn_defect         "" 
 do_own_motioncor        Yes 
-fn_motioncor2_exe /fs/pool/pool-bmapps/hpcl8/app/soft/MOTIONCOR2/1.4.0/bin/motioncor2 
+fn_motioncor2_exe /programs/x86_64-linux/system/sbgrid_bin/MotionCor2_1.6.4_Cuda118_Mar312023 
 gpu_ids          0 
 other_motioncor2_args         "" 
-nr_mpi          72 
-nr_threads          1 
+nr_mpi          3 
+nr_threads          3 
 do_queue        Yes 
-queuename    openmpi 
+queuename    auto 
 qsub     sbatch 
-qsubscript    qsub/qsub_relion_hpcl89.sh 
+qsubscript    qsub/qsub_relion_cbe.sh 
 min_dedicated          1 
 other_args         "" 
-qsub_extra1          3 
-qsub_extra2          24 
-qsub_extra3    p.hpcl8 
-qsub_extra4      2 
-qsub_extra5      370G
+qsub_extra1        auto  # qos name
+qsub_extra2        auto  # required memory
+qsub_extra3        auto 
+qsub_extra4        auto 
+qsub_extra5        
  

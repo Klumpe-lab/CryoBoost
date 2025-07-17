@@ -27,18 +27,18 @@ do_aretomo_tiltcorrect         Yes
 aretomo_tiltcorrect_angle        999 
 tomogram_thickness        250 
 other_aretomo_args         "" 
-fn_aretomo_exe    /fs/pool/pool-bmapps/hpcl8/app/soft/ARETOMO2/1.1.2/AreTomo2
-fn_batchtomo_exe /fs/pool/pool-bmapps/hpcl8/app/soft/IMOD/4.12.17/bin/batchruntomo
+fn_aretomo_exe    /programs/x86_64-linux/system/sbgrid_bin/AreTomo_1.3.4_Cuda118_Feb22_2023
+fn_batchtomo_exe /programs/x86_64-linux/system/sbgrid_bin/batchruntomo
 min_dedicated          1 
-gpu_ids    0:1:0:1:0:1 
+gpu_ids     
 do_queue        Yes 
 other_args         "" 
-queuename    openmpi 
+queuename    auto 
 qsub        sbatch 
-qsubscript qsub/qsub_relion_hpcl89.sh 
+qsubscript qsub/qsub_relion_cbe.sh 
 nr_mpi          6 
-qsub_extra1          3 
-qsub_extra2          2 
-qsub_extra3   p.hpcl8 
-qsub_extra4          2 
-qsub_extra5       370G 
+qsub_extra1       auto 
+qsub_extra2       auto 
+qsub_extra3       auto
+qsub_extra4       auto 
+qsub_extra5        

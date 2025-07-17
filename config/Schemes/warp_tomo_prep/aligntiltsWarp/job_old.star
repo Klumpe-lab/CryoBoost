@@ -46,11 +46,11 @@ nr_threads        1
 do_queue         Yes 
 queuename    openmpi 
 qsub     sbatch 
-qsubscript    qsub/qsub_warp_cbe.sh 
+qsubscript    qsub/qsub_warp_hpcl89.sh 
 min_dedicated          1 
-qsub_extra1       auto 
-qsub_extra2       170G 
-qsub_extra3       auto 
-qsub_extra4       auto
-qsub_extra5      
+qsub_extra1          1 
+qsub_extra2          1 
+qsub_extra3    p.hpcl8 
+qsub_extra4      1 
+qsub_extra5      370G
  

@@ -2,7 +2,7 @@ import sys,os,subprocess
 from distutils.util import strtobool
 from src.misc.system import run_wrapperCommand
 from src.templateMatching.libTemplateMatching import templateMatchingWrapperBase
-
+import shlex
 
 class pytomTm(templateMatchingWrapperBase):
     def __init__(self,args,runFlag=None):
@@ -48,7 +48,7 @@ class pytomTm(templateMatchingWrapperBase):
                      "--voltage",str(self.st.tsInfo.volt),
                      "--spherical-aberration",str(self.st.tsInfo.cs),
                      "--amplitude-contrast",str(self.st.tsInfo.cAmp),
-                     "--tomogram-ctf-model",str('phase-flip'),
+                     #"--tomogram-ctf-model",str('phase-flip'),
                      "--per-tilt-weighting",
                      "--log","debug"]
         constParams.extend(["-g"] + gpuId)
@@ -80,17 +80,19 @@ class pytomTm(templateMatchingWrapperBase):
             volumeName=row[1]
             tomoName=row[2]
             print("  --> processing " + tomoName + ": " + str(z) + " of " + str(len(volumes)) + " tomograms", flush=True)
-            command=["pytom_match_template.py", 
-                    "-v", volumeName, 
-                    "--tilt-angles",self.args.out_dir+"/tiltAngleFiles/"+tomoName+".tlt",
-                    ]
+            #command=["apptainer", "run", "--nv", "/resources/containers/pytom_tm.sif", "'pytom_match_template.py", 
+            command=["pytom_match_template.py", "-v", volumeName, "--tilt-angles",self.args.out_dir+"/tiltAngleFiles/"+tomoName+".tlt"]
+            #command=["pytom_match_template.py", "-v", volumeName, "--tilt-angles",self.args.out_dir+"/tiltAngleFiles/"+tomoName+".tlt"]
+            #command=["/usr/bin/apptainer run --nv /resources/containers/pytom_tm.sif 'pytom_match_template.py "
             if bool(strtobool(self.args.ctfWeight)):            
                     command.extend(["--defocus",self.args.out_dir+"/defocusFiles/"+tomoName+".txt"])
             if bool(strtobool(self.args.doseWeight)):            
                     command.extend(["--dose-accumulation",self.args.out_dir+"/doseFiles/"+tomoName+".txt",])
-           
             command.extend(constParams)
-            self.result=run_wrapperCommand(command,tag="run_template_matching",relionProj=self.relProj)
+            command_pre = " ".join(shlex.quote(p) for p in command)
+            command_post="'" + command_pre + "'"
+            full_command = ["apptainer", "run", "--nv", "/groups/klumpe/software/PyTom_tm/PyTom_tm.sif",command_pre]
+            self.result=run_wrapperCommand(full_command,tag="run_template_matching",relionProj=self.relProj)
     
     def get_gpu_info(self):
         try:

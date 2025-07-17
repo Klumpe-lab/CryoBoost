@@ -1,9 +1,9 @@
 # A Dialog box to edit the scheme
 import os
 import sys
-from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QApplication, QDialog, QTableWidget, QTableWidgetItem, QPushButton
-from PyQt6.QtCore import Qt
+from PyQt5.uic import loadUi
+from PyQt5.QtWidgets import QApplication, QDialog, QTableWidget, QTableWidgetItem, QPushButton
+from PyQt5.QtCore import Qt
 import pandas as pd
 from collections import namedtuple
 

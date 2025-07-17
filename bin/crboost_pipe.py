@@ -3,7 +3,7 @@ import argparse
 import os
 import sys
 
-from PyQt6.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication
 from src.gui.schemeGui import MainUI 
 from src.pipe.libpipe import pipe
 from src.misc.system import test_crboostSetup

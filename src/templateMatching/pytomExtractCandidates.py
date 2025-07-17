@@ -5,6 +5,7 @@ from src.templateMatching.libTemplateMatching import templateMatchingWrapperBase
 from src.rw.particleList import particleListMeta
 from src.rw.librw import starFileMeta
 import pandas as pd
+import shlex
 
 class pytomExtractCandidates(templateMatchingWrapperBase):
     def __init__(self,args,runFlag=None):
@@ -32,7 +33,7 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
         self.pixs=pixs
         self.radiusInPix=int(float(self.args.particleDiameterInAng)/2.0/pixs)
         constParams=["-n",str(self.args.maxNumParticles),
-                     "-r",str(self.radiusInPix), #pytom radius in pixel
+                     "--particle-diameter",str(self.radiusInPix*pixs),#"-r", str(self.radiusInPix),#"--particle-diameter",str(self.radiusInPix), #pytom radius in pixels
                      "--relion5-compat",
                      "--log","debug"]
       
@@ -53,11 +54,13 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
         z=1
         for job in jobFiles:    
             print("  --> processing " + job + ": " + str(z) + " of " + str(len(jobFiles)) + " scores", flush=True)
-            command=["pytom_extract_candidates.py", 
-                     "-j", job] 
+            command=["pytom_extract_candidates.py", "-j", job] 
             command.extend(constParams)
-            self.result=run_wrapperCommand(command,tag="run_candidate_extraction",relionProj=self.relProj)
-            z+=1
+        command_pre = " ".join(shlex.quote(p) for p in command)
+        #command_post="'" + command_pre + "'"
+        full_command = ["apptainer", "run", "--nv", "/groups/klumpe/software/PyTom_tm/PyTom_tm.sif",command_pre]
+        self.result=run_wrapperCommand(full_command,tag="run_candidate_extraction",relionProj=self.relProj)
+        z+=1
             
     def updateMetaData(self):
         self.st.writeTiltSeries(self.args.out_dir+"/tomograms.star")
@@ -66,7 +69,10 @@ class pytomExtractCandidates(templateMatchingWrapperBase):
         command=["pytom_merge_stars.py", 
                     "-i", tmOutFold,
                     "-o",self.args.out_dir + "/candidates.star"] 
-        self.result=run_wrapperCommand(command,tag="run_combineFiles",relionProj=self.relProj)
+        command_pre = " ".join(shlex.quote(p) for p in command)
+        #command_post="'" + command_pre + "'"
+        full_command = ["apptainer", "run", "--nv", "/groups/klumpe/software/PyTom_tm/PyTom_tm.sif",command_pre]
+        self.result=run_wrapperCommand(full_command,tag="run_combineFiles",relionProj=self.relProj)
         stCand=starFileMeta(self.args.out_dir + "/candidates.star")
         rmStr=float(stCand.df.rlnTomoTiltSeriesPixelSize[0])
         rmStr= f"_{round(rmStr, 2):.2f}Apx" 

@@ -32,12 +32,12 @@ flip_tiltseries_hand         No
 do_queue         No 
 queuename    openmpi 
 qsub     sbatch 
-qsubscript qsub/qsub_relion_hpcl89.sh
+qsubscript qsub/qsub_relion_cbe.sh
 min_dedicated          1 
 other_args         "" 
 qsub_extra1          3 
 qsub_extra2          3 
-qsub_extra3    p.hpcl8 
-qsub_extra4          2 
-qsub_extra5      370G
+qsub_extra3       auto 
+qsub_extra4       auto 
+qsub_extra5       auto
  

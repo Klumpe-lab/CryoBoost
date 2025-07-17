@@ -1,12 +1,12 @@
 # library for the functions required for the basic functions of the application
 import sys, subprocess
 import os
-from PyQt6.QtGui import QColor
-from PyQt6.QtWidgets import QTableWidgetItem, QTabWidget, QFileDialog,QPushButton
-from PyQt6.QtWidgets import QMessageBox,QDialog,QListWidget
-from PyQt6.QtWidgets import QMainWindow,QApplication, QWidget, QVBoxLayout, QTextEdit, QScrollBar
-from PyQt6.QtWidgets import QDialog, QFormLayout, QLineEdit, QDialogButtonBox
-from PyQt6.QtCore import Qt
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QTableWidgetItem, QTabWidget, QFileDialog,QPushButton
+from PyQt5.QtWidgets import QMessageBox,QDialog,QListWidget
+from PyQt5.QtWidgets import QMainWindow,QApplication, QWidget, QVBoxLayout, QTextEdit, QScrollBar
+from PyQt5.QtWidgets import QDialog, QFormLayout, QLineEdit, QDialogButtonBox
+from PyQt5.QtCore import Qt
 import glob
 import mrcfile
 import pandas as pd

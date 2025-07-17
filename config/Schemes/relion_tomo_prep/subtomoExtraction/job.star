@@ -33,11 +33,11 @@ other_args         ""
   do_queue        Yes 
       qsub     sbatch 
 nr_threads          12 
-qsub_extra1          1 
-qsub_extra2          2 
-qsub_extra3   p.hpcl8 
-qsub_extra4          2 
-qsub_extra5       370G 
-qsubscript    qsub/qsub_relion_hpcl89.sh  
- queuename    openmpi 
+qsub_extra1       auto 
+qsub_extra2       auto 
+qsub_extra3       auto
+qsub_extra4       auto 
+qsub_extra5        
+qsubscript    qsub/qsub_relion_cbe.sh  
+ queuename        auto
  

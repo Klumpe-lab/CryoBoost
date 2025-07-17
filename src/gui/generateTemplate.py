@@ -11,7 +11,7 @@ from src.gui.libGui import statusMessageBox,messageBox
 from src.rw.librw import cbconfig
 import pymol2
 import subprocess
-from PyQt6.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, 
+from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, 
                             QPushButton, QDialog, QHBoxLayout, 
                             QFileDialog, QGridLayout,QInputDialog,QMessageBox)
 

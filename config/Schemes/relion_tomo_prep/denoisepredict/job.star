@@ -17,8 +17,8 @@ _rlnJobOptionVariable #1
 _rlnJobOptionValue #2 
 in_tomoset  Schemes/relion_tomo_prep/reconstructionsplit/tomograms.star 
 care_denoising_model  Schemes/relion_tomo_prep/denoisetrain/denoising_model.tar.gz 
-cryocare_path /fs/pool/pool-bmapps/hpcl8/app/soft/CRYO-CARE/0.3/conda3/envs/cryocare_11/bin/ 
-gpu_ids          0 
+cryocare_path /programs/x86_64-linux/system/sbgrid_bin/ 
+gpu_ids          "0" 
 do_cryocare_train         No 
 tomograms_for_training Position_1 
 number_training_subvolumes        600 
@@ -29,14 +29,14 @@ ntiles_y          4
 ntiles_z          4 
 denoising_tomo_name         "" 
 do_queue        Yes 
-queuename    openmpi 
+queuename      auto 
 qsub     sbatch 
-qsubscript qsub/qsub_relion_hpcl89.sh 
+qsubscript qsub/qsub_relion_cbe.sh 
 min_dedicated          1 
 other_args         "" 
-qsub_extra1          1 
-qsub_extra2          1 
-qsub_extra3   p.hpcl93 
-qsub_extra4          1 
-qsub_extra5       700G 
+qsub_extra1       auto 
+qsub_extra2       auto 
+qsub_extra3       auto 
+qsub_extra4       auto 
+qsub_extra5           
  

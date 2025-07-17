@@ -6,12 +6,12 @@
 submission:
   - HeadNode: cbe.vbc.ac.at 
     SshCommand: "ssh -Y"
-    Environment: "source /programs/sbgrid.shrc; source /users/sven.klumpe/99_Testing/relion_5_LG.sh; source /users/sven.klumpe/software/CryoBoost/.cbenv"
+    Environment: "module purge;module load intel/18.0.5;module load impi/2018.4;module load IMOD/4.12.17;module load RELION/5.0.0NC;module load WARP/2.0.0dev29; source /fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost/.cbenv"
     CalusterStatus: sinfo
     Helpssh: c-wing-wiki.biochem.mpg.de/wiki/index.php/Ssh-keygen
-    HelpConflict: "Testing VBC installation"
+    HelpConflict: "rmove relion/python from your .bashrc hpcl8 or global section"
 local:
-    Environment: "source /programs/sbgrid.shrc; source /users/sven.klumpe/99_Testing/relion_5_LG.sh; source /users/sven.klumpe/software/CryoBoost/.cbenv"
+    Environment: "module purge;module load RELION/5.0-beta-3; module load WARP/2.0.0dev29; module load IMOD; module load CHIMERA; module load PYMOL; module load CISTEM"
 
 aliases:
   - Job: all
@@ -116,12 +116,7 @@ computing:
       NrCPU: 32
       RAM: 300G
       VRAM: 48G
-  
-  vbc:
-      NrGPU: 1
-      NrCPU: 1
-      RAM: 10G
-      VRAM: 16
+
 
   NODE-Sharing:
     CPU-PerGPU: 6
@@ -170,24 +165,20 @@ computing:
            p.hpcl93: 4
            p.hpcl8: 2
            local.hpcl58*: 4
-           vbc: 4
         aligntiltsWarp:
            p.hpcl9: 1
            p.hpcl93: 1
            p.hpcl8: 1
            local.hpcl58*: 4
-           vbc: 1
         tsCtf:
            p.hpcl9: 4
            p.hpcl93: 4
            p.hpcl8: 2
            local.hpcl58*: 4 
-           vbc: 1
         tsReconstruct:
            p.hpcl9: 4
            p.hpcl93: 4
            p.hpcl8: 2
            local.hpcl58*: 4
-           vbc: 1
 filepath: 
    removePatternFromPath: 'gpfs\\d{2}/lv\\d{2}/fileset\\d{2}' 

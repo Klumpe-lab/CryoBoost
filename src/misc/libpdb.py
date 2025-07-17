@@ -4,7 +4,7 @@ import numpy as np
 import subprocess
 import tempfile
 from Bio.PDB import MMCIFParser, MMCIFIO
-from PyQt6.QtWidgets import QMessageBox,QApplication
+from PyQt5.QtWidgets import QMessageBox,QApplication
 from src.rw.librw import cbconfig
 
 class pdb:

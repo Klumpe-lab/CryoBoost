@@ -35,9 +35,9 @@ qsub     sbatch
 qsubscript qsub/qsub_hpcl89.sh 
 min_dedicated          1 
 other_args         "" 
-qsub_extra1          3 
-qsub_extra2          3 
-qsub_extra3    p.hpcl8 
-qsub_extra4          2 
-qsub_extra5      370G
+qsub_extra1       auto 
+qsub_extra2       170G 
+qsub_extra3       auto 
+qsub_extra4       auto 
+qsub_extra5      
  

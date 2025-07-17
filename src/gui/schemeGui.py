@@ -2,11 +2,11 @@ import sys
 import os
 import pandas as pd
 import glob,random  
-from PyQt6 import QtWidgets
-from PyQt6.QtGui import QTextCursor
-from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QDialog,QTableWidget,QScrollArea,QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QWidget,QLineEdit,QComboBox,QRadioButton,QCheckBox,QSizePolicy 
-from PyQt6.QtCore import Qt,QSignalBlocker
+from PyQt5 import QtWidgets
+from PyQt5.QtGui import QTextCursor
+from PyQt5.uic import loadUi
+from PyQt5.QtWidgets import QDialog,QTableWidget,QScrollArea,QTableWidgetItem, QVBoxLayout, QApplication, QMainWindow,QMessageBox,QWidget,QLineEdit,QComboBox,QRadioButton,QCheckBox,QSizePolicy 
+from PyQt5.QtCore import Qt,QSignalBlocker
 from src.pipe.libpipe import pipe
 from src.rw.librw import starFileMeta,mdocMeta
 from src.misc.system import run_command_async
@@ -19,7 +19,7 @@ from src.gui.generateTemplate import TemplateGen
 from src.misc.libimVol import processVolume
 from src.misc.eerSampling import get_EERsections_per_frame
 import subprocess, shutil
-from PyQt6.QtCore import QTimer 
+from PyQt5.QtCore import QTimer 
 import mrcfile
 import datetime
 
@@ -546,7 +546,7 @@ class MainUI(QMainWindow):
         Find parent QTabWidget and the tab name containing the widget
         Returns: tuple (QTabWidget, tab_name) or (None, None) if not found
         """
-        from PyQt6.QtWidgets import QTabWidget
+        from PyQt5.QtWidgets import QTabWidget
         jobTag=""
         current = widget
         while current:
