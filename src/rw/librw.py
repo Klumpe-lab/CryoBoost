@@ -1270,6 +1270,8 @@ class tiltSeriesMeta:
             i += 1
 
         #all_tilts_df = pd.concat([all_tilts_df, tilt_series_tmp], axis=1)
+        if "rlnTomoZRot" in tilt_series_tmp.columns:
+           tilt_series_tmp = tilt_series_tmp.rename(columns={"rlnTomoZRot": "rlnTomoZRotTs"})
         all_tilts_df = pd.concat([tilt_series_tmp,all_tilts_df], axis=1)
 
         columns_to_check = [col for col in all_tilts_df.columns if col not in ['rlnCtfScalefactor']]
@@ -1285,6 +1287,10 @@ class tiltSeriesMeta:
         else:
           raise Exception("rlnMicrographName is not unique !!")        
 
+        # duplicate_cols = all_tilts_df.columns[all_tilts_df.columns.duplicated()]
+        # if not duplicate_cols.empty:
+        #   all_tilts_df= all_tilts_df.loc[:, ~all_tilts_df.columns.duplicated()]
+        
         self.all_tilts_df = all_tilts_df
         self.tilt_series_df = tilt_series.df
         self.__extractInformation()
@@ -1320,7 +1326,10 @@ class tiltSeriesMeta:
         ts_df['rlnTomoTiltSeriesStarFile'] = ts_df['rlnTomoTiltSeriesStarFile'].apply(lambda x: os.path.join(tsFold, os.path.basename(x)))
         os.makedirs(tsFold,exist_ok=True)
         ts_dict={}
+        if "rlnTomoZRotTs" in ts_df.columns:
+           ts_df = ts_df.rename(columns={"rlnTomoZRotTs": "rlnTomoZRot"})
         ts_dict['global']=ts_df
+        
         stTs=starFileMeta(ts_dict)
         stTs.writeStar(tiltseriesStarFile)
        
