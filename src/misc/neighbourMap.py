@@ -12,12 +12,14 @@ class neighbourMap:
       
     """
 
-    def __init__(self,particleListName=None, outputMapName=None,tomoCoordPixs=None,boxsize=96, pixs=3.0,calc=True,recenterCoords=True,particleListName2=None,tomoSize="4096,4096,2048"):
+    def __init__(self,particleListName=None, outputMapName=None,tomoCoordPixs=None,boxsize=96, pixs=3.0,calc=True,recenterCoords=True,particleListName2=None,particleListName3=None,tomoSize="4096,4096,2048"):
         """
         Initializes the tiltSeriesMeta class.
         """
         self.particleListName = particleListName
         self.particleListName2 = particleListName2
+        self.particleListName3 = particleListName3
+        
         
         if outputMapName is None or outputMapName == 'default':
             print('No output map name provided, using default ' + particleListName.replace('.star', '_neighborMap.mrc') )
@@ -59,6 +61,12 @@ class neighbourMap:
             partList2 = particleListMeta(self.particleListName2)
         else:
             partList2 = None
+        
+        if self.particleListName3 is not None:
+            partList3 = particleListMeta(self.particleListName3)
+        else:
+            partList3 = None
+        
            
         tomos = partList.all_particle_df['rlnTomoName'].unique()
         if self.recenterCoords:
@@ -66,11 +74,17 @@ class neighbourMap:
             partList.centerCoords(self.tomoCoordPixs)    
             if partList2 is not None:
                 partList2.centerCoords(self.tomoCoordPixs)
+            if partList3 is not None:
+                partList3.centerCoords(self.tomoCoordPixs)
+                
         cen = self.boxsize // 2
         d_cut = (self.boxsize - 1) // 2
         nplot = np.zeros((self.boxsize, self.boxsize, self.boxsize))
         if partList2 is not None:
             nplot2 = np.zeros((self.boxsize, self.boxsize, self.boxsize))
+        if partList3 is not None:
+            nplot3 = np.zeros((self.boxsize, self.boxsize, self.boxsize))
+        
         
         scaling =float(self.tomoCoordPixs) / float(self.pixs)
         print(f'Scaling factor for coordinates: {scaling}')
@@ -87,6 +101,10 @@ class neighbourMap:
                 coords2 = partList2.getImodCoords(tomo)
                 angles2 = partList2.getAngles(tomo)
                 pos2 = coords2.T * float(scaling)
+            if partList3 is not None:
+                coords3 = partList3.getImodCoords(tomo)
+                angles3 = partList3.getAngles(tomo)
+                pos3 = coords3.T * float(scaling)
             
             # Process each position
             for j in range(pos.shape[1]):
@@ -105,7 +123,14 @@ class neighbourMap:
                     rpos2 = np.round(rmat2 @ temp_pos2).astype(int) + cen
                     valid_idx2 = np.all((rpos2 >= 0) & (rpos2 < self.boxsize), axis=0)
                     nplot2[rpos2[2,valid_idx2], rpos2[1,valid_idx2], rpos2[0,valid_idx2]] += 1
-                
+                if partList3 is not None:
+                    dist3 = self.pairwise_dist(pos[:,j], pos3)
+                    d_idx3 = dist3 <= d_cut
+                    temp_pos3 = pos3[:,d_idx3] - pos[:,j:j+1]
+                    rmat3 = self.euler2matrix(angles[j,0], angles[j,1], angles[j,2])
+                    rpos3 = np.round(rmat3 @ temp_pos3).astype(int) + cen
+                    valid_idx3 = np.all((rpos3 >= 0) & (rpos3 < self.boxsize), axis=0)
+                    nplot3[rpos3[2,valid_idx3], rpos3[1,valid_idx3], rpos3[0,valid_idx3]] += 1
         
                 
         # Normalize central peak
@@ -114,7 +139,8 @@ class neighbourMap:
         nplot[cen,cen,cen] = np.max(nplot)
         if partList2 is not None:
             nplot2 = nplot2 / nplot[cen,cen,cen]
-               
+        if partList3 is not None:
+            nplot3 = nplot3 / nplot[cen,cen,cen]       
         
         # Write output
         print(f'Writing output to {self.outputMapName}')
@@ -127,4 +153,11 @@ class neighbourMap:
             print(f'Writing output to {outputmap2Name}')
             with mrcfile.new(outputmap2Name, overwrite=True) as mrc2:
                 mrc2.set_data(nplot2.astype(np.float32))
-                mrc2.voxel_size = self.pixs    
+                mrc2.voxel_size = self.pixs
+        if partList3 is not None:
+            root, ext = os.path.splitext(self.outputMapName)
+            outputmap3Name = root+ '_3' + ext 
+            print(f'Writing output to {outputmap3Name}')
+            with mrcfile.new(outputmap3Name, overwrite=True) as mrc3:
+                mrc3.set_data(nplot3.astype(np.float32))
+                mrc3.voxel_size = self.pixs              
