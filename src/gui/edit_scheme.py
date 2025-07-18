@@ -29,9 +29,9 @@ class EditScheme(QDialog):
         warnings.filterwarnings("ignore", message=".*sipPyTypeDict.*")
         super().__init__()  
         loadUi(os.path.abspath(__file__).replace('.py','.ui'), self)
-        self.table_scheme_options.setColumnCount(3)
+        self.table_scheme_options.setColumnCount(5)
         self.table_scheme_current.setColumnCount(5)
-        self.labels_options = ["Add Job", "Job Type","Input Job Type"] #, "Fork", "Output if True", "Boolean Variable"]
+        self.labels_options = ["Add Job", "Job Type","Job Tag","Input Job Type","Input Job Tag"] #, "Fork", "Output if True", "Boolean Variable"]
         self.table_scheme_options.setHorizontalHeaderLabels(self.labels_options) 
         self.labels_current = ["Remove Job", "Job Type","Job Tag","Input Job Type","Input Job Tag"]#, "Fork", "Output if True", "Boolean Variable"]
         self.table_scheme_current.setHorizontalHeaderLabels(self.labels_current) 
@@ -54,10 +54,18 @@ class EditScheme(QDialog):
 
         for i, job in enumerate(scheme.jobs_in_scheme):
 
+            jobNameSp=job.split("_")
+            jobName=jobNameSp[0]
+            jobTag=''
+            if len(jobNameSp)>1:
+                jobTag=jobNameSp[1]    
+            
             self.table_scheme_options.setItem(i, 0, QTableWidgetItem())
             self.table_scheme_options.item(i, 0).setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
             self.table_scheme_options.item(i, 0).setCheckState(Qt.CheckState.Unchecked)
-            self.table_scheme_options.setItem(i, 1, QTableWidgetItem(str(job))) # make the field uneditable
+            self.table_scheme_options.setItem(i, 1, QTableWidgetItem(str(jobName))) # make the field uneditable
+            self.table_scheme_options.setItem(i, 2, QTableWidgetItem(str(jobTag))) # make the field uneditable
+            
             if i>0:
                 df = scheme.job_star[job].dict['joboptions_values']
                 ind=df.rlnJobOptionVariable=="input_star_mics"
@@ -72,9 +80,15 @@ class EditScheme(QDialog):
                 if not any(ind):
                     raise Exception("nether input_star_mics nor in_tiltseries found")
                 row_index = df.index[ind]
-                value=os.path.basename(os.path.dirname(df.loc[row_index, "rlnJobOptionValue"].item()))
-                self.table_scheme_options.setItem(i, 2, QTableWidgetItem(str(value)))
-                
+                inputJob=os.path.basename(os.path.dirname(df.loc[row_index, "rlnJobOptionValue"].item()))
+                inputJobSp=inputJob.split("_")
+                inputJobName=inputJobSp[0]
+                inputJobTag=''
+                if len(inputJobSp)>1:
+                    inputJobTag=inputJobSp[1]  
+                self.table_scheme_options.setItem(i, 3, QTableWidgetItem(str(inputJobName)))
+                self.table_scheme_options.setItem(i, 4, QTableWidgetItem(str(inputJobTag)))
+               
             #self.table_scheme_options.setItem(i, 2, QTableWidgetItem())
             #self.table_scheme_options.item(i, 2).setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
             #self.table_scheme_options.item(i, 2).setCheckState(Qt.CheckState.Unchecked)
@@ -93,22 +107,31 @@ class EditScheme(QDialog):
         current_row = self.table_scheme_current.rowCount()
         self.table_scheme_current.setRowCount(current_row+self.table_scheme_options.rowCount())
         nrSelected=0
+        jobTagOld= ''
         for row in range(self.table_scheme_options.rowCount()):
             jobName=self.table_scheme_options.item(row, 1).text()
+            jobTag=self.table_scheme_options.item(row, 2).text()
+               
             if self.table_scheme_options.item(row, 0).checkState() == Qt.CheckState.Checked:
                 new_checkbox = QTableWidgetItem()
                 new_checkbox.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
                 new_checkbox.setCheckState(Qt.CheckState.Unchecked)
                 self.table_scheme_current.setItem(current_row,0, new_checkbox)
                 self.table_scheme_current.setItem(current_row,1, QTableWidgetItem(jobName))
-                self.table_scheme_current.setItem(current_row, 2, QTableWidgetItem(str(tag)))
-                if self.table_scheme_options.item(row, 2) is not None:
-                    inputType=self.table_scheme_options.item(row, 2).text()
+                if len(tag)> 0:
+                    self.table_scheme_current.setItem(current_row, 2, QTableWidgetItem(str(tag)))
+                else:
+                    self.table_scheme_current.setItem(current_row, 2, QTableWidgetItem(str(jobTag)))
+                if self.table_scheme_options.item(row, 3) is not None:
+                    inputType=self.table_scheme_options.item(row, 3).text()
                     self.table_scheme_current.setItem(current_row, 3,QTableWidgetItem(str(inputType))) 
                     if nrSelected>0:
-                        self.table_scheme_current.setItem(current_row, 4,QTableWidgetItem(str(tag)))
+                        #self.table_scheme_current.setItem(current_row, 4,QTableWidgetItem(str(jobTagOld)))
+                        inputTag=self.table_scheme_options.item(row, 4).text()
+                        self.table_scheme_current.setItem(current_row, 4,QTableWidgetItem(str(inputTag)))
                 current_row += 1
                 nrSelected += 1
+                jobTagOld=jobTag
         self.table_scheme_current.setRowCount(current_row)
         self.table_scheme_current.viewport().update()
         
@@ -119,7 +142,7 @@ class EditScheme(QDialog):
         
         for row in range(self.table_scheme_current.rowCount()):
             input=self.table_scheme_current.item(row, 3)
-            if (input is not None) and (input.text() not in jobTypesInCurrent):
+            if (input is not None) and (input.text() not in jobTypesInCurrent) and (input.text() != ""):
                 print(input.text())
                 jobTypeMinusOne=self.table_scheme_current.item(row-1,1).text()
                 self.table_scheme_current.setItem(row, 3,QTableWidgetItem(jobTypeMinusOne))
@@ -152,7 +175,7 @@ class EditScheme(QDialog):
             nodes.append(oneNode)
         nodes_dict = {i: node for i, node in enumerate(nodes)}   
         nodes_df = pd.DataFrame.from_dict(nodes_dict, orient='index')
-        schemeAdapted=self.scheme.filterSchemeByNodes(nodes_df)
+        schemeAdapted=self.scheme.filterSchemeByNodes(nodes_df, filterMode="Tag")
         self.schemeAdapted=schemeAdapted
         
         return schemeAdapted
