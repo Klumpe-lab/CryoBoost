@@ -1076,12 +1076,12 @@ class schemeMeta:
     
     return inputType
     
-  def filterSchemeByNodes(self, nodes_df):
+  def filterSchemeByNodes(self, nodes_df,filterMode="TypeOnly"):
     
    
     filtEdges_df=self.filterEdgesByNodes(self.scheme_star.dict["scheme_edges"], nodes_df)
     jobStar_dict=self.job_star
-    jobStar_dictFilt=self.filterjobStarByNodes(jobStar_dict,nodes_df)
+    jobStar_dictFilt=self.filterjobStarByNodes(jobStar_dict,nodes_df,filterMode)
     schemeJobs_dfFilt=self._filterSchemeJobsByNodes(self.scheme_star.dict["scheme_jobs"],nodes_df)
     
     scFilt=copy.deepcopy(self)
@@ -1104,14 +1104,19 @@ class schemeMeta:
         schemeJobs_dfFilt=pd.concat([schemeJobs_dfFilt,new_row])
     return schemeJobs_dfFilt
     
-  def filterjobStarByNodes(self,jobStarDict,nodes_df): 
+  def filterjobStarByNodes(self,jobStarDict,nodes_df, filterMode="TypeOnly"): 
     
     schemeJobs_dfFilt={}
     schemeName=self.scheme_star.dict["scheme_general"]["rlnSchemeName"]
     #for nodeid, node in nodes.items():
     for index, row in nodes_df.iterrows():
       jobNameWithTag=jobNameWithTag = row['type'] + ('_' + row['tag'] if row['tag'] != None else '')
-      schemeJobs_dfFilt[jobNameWithTag]=copy.deepcopy(jobStarDict[row['type']])
+      jobName=row['type']
+      if filterMode=="TypeOnly":
+        key= jobName
+      else:
+        key=jobNameWithTag
+      schemeJobs_dfFilt[jobNameWithTag]=copy.deepcopy(jobStarDict[key])
       df=schemeJobs_dfFilt[jobNameWithTag].dict["joboptions_values"]
       ## adapt input
       if row['inputType'] is not None:

@@ -108,6 +108,7 @@ class MainUI(QMainWindow):
             cbdat.filtScheme=0
         else:    
             cbdat.scheme=schemeMeta(cbdat.defaultSchemePath)
+            
             if args.Noise2Noise == "False":
                 cbdat.scheme=cbdat.scheme.removeNoiseToNoiseFilter()
             if args.species != "noTag":
