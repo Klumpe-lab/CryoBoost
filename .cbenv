@@ -1,6 +1,10 @@
-export CRYOBOOST_HOME=/fs/pool/pool-fbeck/projects/4TomoPipe/rel5Pipe/src/CryoBoost
-export CRYOBOOST_PYTHON_PATH=/fs/pool/pool-fbeck/projects/4TomoPipe/trainClassifyer/softFastAI/conda3/envs/cryoboost/bin/python
+export CRYOBOOST_HOME=/groups/klumpe/software/Setup/CryoBoost/
+export CRYOBOOST_PYTHON_PATH=/users/sven.klumpe/software/python/conda3/envs/cryoboost/bin/python
 export PYTHONPATH=$CRYOBOOST_HOME
 export PATH=$CRYOBOOST_HOME/bin:$PATH
+source /programs/sbgrid.shrc
+source /groups/klumpe/software/Setup/CryoBoost/config/relion_5_LG.sh
+export PATH=/groups/klumpe/software/Setup/CryoBoost/config/binAdapters:$PATH
 
-
+#source /groups/klumpe/software/Setup/CryoBoost/config/pytom_bash_wrapper.sh
+#source /groups/klumpe/software/Setup/CryoBoost/config/linuxwarp_bash_wrapper.sh  

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Collect arguments into an array: 'WarpTools' is the first element
+cmd="WarpTools $*"
+#echo $@
+#echo $cmd
+# Debug print (optional)
+# printf 'DEBUG: apptainer run ... %q ' "${cmd[@]}"
+# echo
+
+# Run in the container using apptainer run and the full command
+apptainer run --nv /groups/klumpe/software/linux_warp/linux_warp.sif "${cmd}"
+
